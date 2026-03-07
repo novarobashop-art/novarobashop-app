@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v20260307-1613 -->
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
@@ -55,7 +54,7 @@
       // Haupt ne moze da se prijavi ovde
       if (user.uid === HAUPT_UID) {
         await signOut(auth);
-        showLoginScreen();
+        window.showLoginScreen();
         setTimeout(() => {
           const err = document.getElementById('login-error');
           err.textContent = '🔒 Haupt nalog nije dostupan ovde.';
@@ -73,7 +72,7 @@
         // Blokirani nalog
         if (userData.blocked) {
           await signOut(auth);
-          showLoginScreen();
+          window.showLoginScreen();
           setTimeout(() => {
             const err = document.getElementById('login-error');
             err.textContent = '🔒 Vaš nalog je blokiran. Kontaktirajte podršku.';
@@ -87,7 +86,7 @@
           const today = new Date().toISOString().slice(0,10);
           if (userData.licencaDo && userData.licencaDo < today) {
             await signOut(auth);
-            showLoginScreen();
+            window.showLoginScreen();
             setTimeout(() => {
               const err = document.getElementById('login-error');
               err.textContent = '🔒 Vaša licenca je istekla. Kontaktirajte Haupt.';
@@ -98,17 +97,18 @@
         }
 
         window._currentUser = { uid: user.uid, email: user.email, ...userData };
-        showPortalByRole(userData.role);
+        window.showPortalByRole(userData.role);
       } else {
         // Novi Google korisnik → registracija
         window._pendingUser = { uid: user.uid, email: user.email, photoURL: user.photoURL, displayName: user.displayName };
-        showRegistrationScreen();
+        window.showRegistrationScreen();
       }
     } else {
       window._currentUser = null;
-      showLoginScreen();
+      window.showLoginScreen();
     }
   });
+
 </script>
 
 <style>
@@ -2238,6 +2238,7 @@ const NOTIF_ICONS = {
   nova_uplata: '💰',
   poruka_od_admina: '📩',
   poruka_od_haupta: '👑',
+};
 
 // ===== FOTO HELPER FÜR NACHRICHTEN =====
 let _fotoCache = {}; // safeId -> base64
@@ -2268,19 +2269,18 @@ function clearMsgFoto(previewId) {
 }
 
 function fotoButtonsHtml(previewId, light) {
-  const bg = light ? '#F4F6FA' : 'rgba(255,255,255,0.07)';
-  const border = light ? '#e0e8ff' : 'rgba(255,255,255,0.15)';
-  const color = light ? '#555' : '#aaa';
-  return '<input type="file" id="foto-inp-' + previewId + '" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'' + previewId + '')" />'
-    + '<input type="file" id="foto-cam-' + previewId + '" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'' + previewId + '')" />'
-    + '<div style="display:flex;gap:6px;margin-top:6px;">'
-    + '<button type="button" onclick="document.getElementById('foto-cam-' + previewId + '').click()" style="flex:1;background:' + bg + ';border:1.5px solid ' + border + ';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:' + color + ';">📷 Kamera</button>'
-    + '<button type="button" onclick="document.getElementById('foto-inp-' + previewId + '').click()" style="flex:1;background:' + bg + ';border:1.5px solid ' + border + ';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:' + color + ';">🖼️ Galerija</button>'
-    + '</div>'
-    + '<div id="foto-prev-' + previewId + '"></div>';
+  var bg = light ? "#F4F6FA" : "rgba(255,255,255,0.07)";
+  var border = light ? "#e0e8ff" : "rgba(255,255,255,0.15)";
+  var color = light ? "#555" : "#aaa";
+  var btnStyle = "flex:1;background:" + bg + ";border:1.5px solid " + border + ";border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:sans-serif;color:" + color + ";";
+  return "<input type=\"file\" id=\"foto-inp-" + previewId + "\" accept=\"image/*\" style=\"display:none;\" onchange=\"msgFotoPreview(this,'" + previewId + "')\" />"
+    + "<input type=\"file\" id=\"foto-cam-" + previewId + "\" accept=\"image/*\" capture=\"environment\" style=\"display:none;\" onchange=\"msgFotoPreview(this,'" + previewId + "')\" />"
+    + "<div style=\"display:flex;gap:6px;margin-top:6px;\">"
+    + "<button type=\"button\" onclick=\"document.getElementById('foto-cam-" + previewId + "').click()\" style=\"" + btnStyle + "\">📷 Kamera</button>"
+    + "<button type=\"button\" onclick=\"document.getElementById('foto-inp-" + previewId + "').click()\" style=\"" + btnStyle + "\">🖼️ Galerija</button>"
+    + "</div>"
+    + "<div id=\"foto-prev-" + previewId + "\"></div>";
 }
-  default: '🔔'
-};
 
 function renderKNotif(notifs) {
   const el = document.getElementById('k-notif-list');
@@ -2444,6 +2444,12 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
 });
+
+
+// Expose to Firebase module
+window.showLoginScreen = showLoginScreen;
+window.showPortalByRole = showPortalByRole;
+window.showRegistrationScreen = showRegistrationScreen;
 </script>
 </body>
 </html>
