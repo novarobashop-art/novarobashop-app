@@ -1902,6 +1902,7 @@ async function posaljiPoruku(tip) {
     await addDoc(collection(db, 'haupt_poruke'), {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
+      odTiktok: window._currentUser.tiktokIme || '',
       tip: 'kupac',
       tekst,
       vreme: new Date().toISOString(),
