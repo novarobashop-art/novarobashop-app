@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v20260307-1613 -->
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
@@ -709,6 +710,15 @@ function showToast(msg, dur=3000) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), dur);
 }
+
+// Safety: if loading hangs, show login after 8s
+setTimeout(() => {
+  const loading = document.getElementById('loading');
+  if (loading && loading.style.display !== 'none') {
+    console.warn('Loading timeout - forcing login screen');
+    showLoginScreen();
+  }
+}, 8000);
 
 function showLoginScreen() {
   document.getElementById('loading').style.display = 'none';
