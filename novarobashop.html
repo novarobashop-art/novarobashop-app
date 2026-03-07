@@ -2261,14 +2261,13 @@ function fotoButtonsHtml(previewId, light) {
   const bg = light ? '#F4F6FA' : 'rgba(255,255,255,0.07)';
   const border = light ? '#e0e8ff' : 'rgba(255,255,255,0.15)';
   const color = light ? '#555' : '#aaa';
-  return `
-    <input type="file" id="foto-inp-${previewId}" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'${previewId}')" />
-    <input type="file" id="foto-cam-${previewId}" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'${previewId}')" />
-    <div style="display:flex;gap:6px;margin-top:6px;">
-      <button type="button" onclick="document.getElementById('foto-cam-${previewId}').click()" style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:${color};">📷 Kamera</button>
-      <button type="button" onclick="document.getElementById('foto-inp-${previewId}').click()" style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:${color};">🖼️ Galerija</button>
-    </div>
-    <div id="foto-prev-${previewId}"></div>`;
+  return '<input type="file" id="foto-inp-' + previewId + '" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'' + previewId + '')" />'
+    + '<input type="file" id="foto-cam-' + previewId + '" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'' + previewId + '')" />'
+    + '<div style="display:flex;gap:6px;margin-top:6px;">'
+    + '<button type="button" onclick="document.getElementById('foto-cam-' + previewId + '').click()" style="flex:1;background:' + bg + ';border:1.5px solid ' + border + ';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:' + color + ';">📷 Kamera</button>'
+    + '<button type="button" onclick="document.getElementById('foto-inp-' + previewId + '').click()" style="flex:1;background:' + bg + ';border:1.5px solid ' + border + ';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:' + color + ';">🖼️ Galerija</button>'
+    + '</div>'
+    + '<div id="foto-prev-' + previewId + '"></div>';
 }
   default: '🔔'
 };
