@@ -1756,12 +1756,19 @@ async function loadKupacData() {
     renderKNotif(notifs);
   });
 
-  // Realtime poruke od admina za kupca
-  onSnapshot(query(collection(db,'admin_poruke'), where('doKupacId','==',u.uid)), snap => {
-    const poruke = [];
-    snap.forEach(d => poruke.push({id:d.id,...d.data()}));
-    renderKPoruke(poruke);
-  });
+  // Realtime poruke od admina i haupta za kupca
+  try {
+    onSnapshot(query(collection(db,'admin_poruke'), where('doKupacId','==',u.uid)), snap => {
+      const poruke = [];
+      snap.forEach(d => poruke.push({id:d.id,...d.data()}));
+      renderKPoruke(poruke);
+    }, err => {
+      console.error('admin_poruke listener error:', err);
+      showToast('⚠️ Greška pri učitavanju poruka: ' + err.code);
+    });
+  } catch(e) {
+    console.error('admin_poruke setup error:', e);
+  }
 
   // Učitaj listu admina
   const adminSnap = await getDocs(query(collection(db, 'users'), where('role','==','admin')));
