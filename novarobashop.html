@@ -584,6 +584,13 @@ select.inp-dark option{background:#0d1c2e;}
         <option value="">Izaberite admina...</option>
       </select>
       <textarea id="k-poruka" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:12px;font-size:14px;font-family:'DM Sans';outline:none;resize:none;color:var(--dark);" rows="3" placeholder="Vaša poruka..."></textarea>
+      <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:#555;">📷 Kamera</button>
+        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:#555;">🖼️ Galerija</button>
+      </div>
+      <div id="foto-prev-kporuka"></div>
       <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';margin-top:8px;">Pošalji Adminu</button>
     </div>
     <!-- Eskalacija - Haupt -->
@@ -1166,6 +1173,7 @@ function renderAdminPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${p.tekst}</div>
+      ${p.foto ? `<img src="${p.foto}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);" />` : ''}
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
           <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
@@ -1173,7 +1181,8 @@ function renderAdminPoruke(poruke) {
           <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(45,190,108,0.15);color:#2DBE6C;border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
         </div>
         <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'DM Sans';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
-        <div style="display:flex;gap:8px;margin-top:6px;">
+        ${fotoButtonsHtml('a'+safeId, false)}
+        <div style="display:flex;gap:8px;margin-top:8px;">
           <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
           <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;">🗑️</button>
         </div>
@@ -1306,11 +1315,14 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
     const u = window._currentUser;
     
     // 1. Save message
+    const fotoData = _fotoCache['a'+safeId] || null;
     await addDoc(collection(db, 'admin_poruke'), {
       od: u.uid, odIme: u.name,
       doKupacId: kupacId, doKupacIme: kupacName,
-      tekst, vreme: new Date().toISOString(), procitano: false
+      tekst, foto: fotoData || null,
+      vreme: new Date().toISOString(), procitano: false
     });
+    clearMsgFoto('a'+safeId);
     
     // 2. Notifikacija - kupac sees it in Obaveštenja
     await addDoc(collection(db, 'notifikacije'), {
@@ -2053,16 +2065,17 @@ async function posaljiPoruku(tip) {
     const adminId = adminSel.value;
     const adminName = adminSel.options[adminSel.selectedIndex]?.text || '';
     if (!adminId) { showToast('⚠️ Izaberite admina!'); return; }
+    const fotoAdm = _fotoCache['kporuka'] || null;
     await addDoc(collection(db, 'poruke'), {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
       odTiktok: window._currentUser.tiktokIme || '',
-      adminId,
-      adminName,
-      tekst,
+      adminId, adminName,
+      tekst, foto: fotoAdm || null,
       vreme: new Date().toISOString(),
       procitano: false
     });
+    clearMsgFoto('kporuka');
     showToast('✅ Poruka poslata Adminu!');
   }
   document.getElementById(fieldId).value = '';
@@ -2094,15 +2107,17 @@ async function kupacReplyToAdmin(adminId, safeId) {
   if (!adminId || adminId === 'haupt') { showToast('⚠️ Ne možeš odgovoriti Hauptu ovde'); return; }
   const { db, collection, addDoc } = window._fb;
   const u = window._currentUser;
+  const fotoData = _fotoCache['k'+safeId] || null;
   await addDoc(collection(db, 'poruke'), {
     od: u.uid,
     odIme: u.name,
     odTiktok: u.tiktokIme || '',
     adminId: adminId,
-    tekst,
+    tekst, foto: fotoData || null,
     vreme: new Date().toISOString(),
     procitano: false
   });
+  clearMsgFoto('k'+safeId);
   if (ta) ta.value = '';
   const box = document.getElementById('kreply-box-' + safeId);
   if (box) box.style.display = 'none';
@@ -2127,8 +2142,10 @@ function renderKPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:14px;color:var(--dark);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
+      ${p.foto ? `<img src="${p.foto}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);" />` : ''}
       ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <textarea id="kreply-text-${safeId}" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:10px;font-size:13px;font-family:'DM Sans';outline:none;resize:none;color:var(--dark);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
+        ${fotoButtonsHtml('k'+safeId, true)}
         <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
       </div>` : ''}
     </div>`;
@@ -2211,6 +2228,48 @@ const NOTIF_ICONS = {
   nova_uplata: '💰',
   poruka_od_admina: '📩',
   poruka_od_haupta: '👑',
+
+// ===== FOTO HELPER FÜR NACHRICHTEN =====
+let _fotoCache = {}; // safeId -> base64
+
+function msgFotoPreview(inputEl, previewId) {
+  const file = inputEl.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _fotoCache[previewId] = e.target.result;
+    const prev = document.getElementById('foto-prev-' + previewId);
+    if (prev) {
+      prev.innerHTML = `<div style="position:relative;margin-top:6px;">
+        <img src="${e.target.result}" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);" />
+        <button onclick="clearMsgFoto('${previewId}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;">✕</button>
+      </div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearMsgFoto(previewId) {
+  delete _fotoCache[previewId];
+  const prev = document.getElementById('foto-prev-' + previewId);
+  if (prev) prev.innerHTML = '';
+  const inp = document.getElementById('foto-inp-' + previewId);
+  if (inp) inp.value = '';
+}
+
+function fotoButtonsHtml(previewId, light) {
+  const bg = light ? '#F4F6FA' : 'rgba(255,255,255,0.07)';
+  const border = light ? '#e0e8ff' : 'rgba(255,255,255,0.15)';
+  const color = light ? '#555' : '#aaa';
+  return `
+    <input type="file" id="foto-inp-${previewId}" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'${previewId}')" />
+    <input type="file" id="foto-cam-${previewId}" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'${previewId}')" />
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button type="button" onclick="document.getElementById('foto-cam-${previewId}').click()" style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:${color};">📷 Kamera</button>
+      <button type="button" onclick="document.getElementById('foto-inp-${previewId}').click()" style="flex:1;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';color:${color};">🖼️ Galerija</button>
+    </div>
+    <div id="foto-prev-${previewId}"></div>`;
+}
   default: '🔔'
 };
 
