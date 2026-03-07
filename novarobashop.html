@@ -1953,7 +1953,7 @@ function checkKupacOverdue(racuni) {
 function renderKAllRacuni(racuni) {
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno'));
+  renderKArhiva(racuni.filter(r => r.status === 'placeno' || r.paketStatus === 'ship' || r.status === 'storno'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
 }
