@@ -1185,7 +1185,7 @@ function renderAdminPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);" />` : ''}
+      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;" />` : ''}
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
           <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
@@ -2183,7 +2183,7 @@ function renderKPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:14px;color:var(--dark);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);" />` : ''}
+      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;" />` : ''}
       ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <textarea id="kreply-text-${safeId}" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:10px;font-size:13px;font-family:'DM Sans';outline:none;resize:none;color:var(--dark);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
         ${fotoButtonsHtml('k'+safeId, true)}
@@ -2274,6 +2274,42 @@ const NOTIF_ICONS = {
 // ===== FOTO HELPER FÜR NACHRICHTEN =====
 let _fotoCache = {}; // safeId -> base64
 
+// Compress image before upload (max 800px, quality 0.75)
+function compressImage(base64, maxSize=800, quality=0.75) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = base64;
+  });
+}
+
+// Fullscreen image viewer
+function openImgViewer(src) {
+  let overlay = document.getElementById('img-viewer-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'img-viewer-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = '<div style="position:relative;max-width:95vw;max-height:95vh;">'
+    + '<img src="' + src + '" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:10px;display:block;" />'
+    + '<button onclick="document.getElementById('img-viewer-overlay').remove()" style="position:absolute;top:-12px;right:-12px;background:#E63946;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:900;cursor:pointer;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,0.5);">✕</button>'
+    + '</div>';
+  overlay.style.display = 'flex';
+}
+
 async function uploadFotoToStorage(base64Data, path) {
   try {
     const { storage, ref, uploadString, getDownloadURL } = window._fb;
@@ -2291,14 +2327,15 @@ function msgFotoPreview(inputEl, previewId) {
   const file = inputEl.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    _fotoCache[previewId] = e.target.result;
+  reader.onload = async e => {
+    const compressed = await compressImage(e.target.result);
+    _fotoCache[previewId] = compressed;
     const prev = document.getElementById('foto-prev-' + previewId);
     if (prev) {
-      prev.innerHTML = `<div style="position:relative;margin-top:6px;">
-        <img src="${e.target.result}" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);" />
-        <button onclick="clearMsgFoto('${previewId}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;">✕</button>
-      </div>`;
+      prev.innerHTML = '<div style="position:relative;margin-top:6px;">'
+        + '<img src="' + compressed + '" onclick="openImgViewer(this.src)" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;" />'
+        + '<button onclick="clearMsgFoto('' + previewId + '')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:900;cursor:pointer;line-height:1;">✕</button>'
+        + '</div>';
     }
   };
   reader.readAsDataURL(file);
