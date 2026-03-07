@@ -744,18 +744,18 @@ setTimeout(() => {
   const loading = document.getElementById('loading');
   if (loading && loading.style.display !== 'none' && !window._currentUser) {
     console.warn('Loading timeout - forcing login screen');
-    showLoginScreen();
+    _showLoginScreen();
   }
 }, 15000);
 
-function showLoginScreen() {
+function _showLoginScreen() {
   document.getElementById('loading').style.display = 'none';
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   document.getElementById('reg-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 }
 
-function showPortalByRole(role) {
+function _showPortalByRole(role) {
   document.getElementById('loading').style.display = 'none';
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   document.getElementById('reg-screen').style.display = 'none';
@@ -770,7 +770,7 @@ function showPortalByRole(role) {
   setTimeout(initPushNotifications, 2000);
 }
 
-function showRegistrationScreen() {
+function _showRegistrationScreen() {
   document.getElementById('loading').style.display = 'none';
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   document.getElementById('reg-screen').style.display = 'block';
@@ -848,7 +848,7 @@ async function completeRegistration() {
     });
 
     window._currentUser = { uid: u.uid, email: u.email, role: 'kupac', name: ime, tiktokIme: tiktokClean };
-    showPortalByRole('kupac');
+    _showPortalByRole('kupac');
     showToast('✅ Dobrodošli, ' + ime + '!');
   } catch(e) {
     err.textContent = '❌ Greška: ' + e.message;
@@ -2569,9 +2569,9 @@ document.addEventListener('keydown', e => {
 
 
 // Expose to Firebase module
-window.showLoginScreen = function(){ showLoginScreen(); };
-window.showPortalByRole = function(r){ showPortalByRole(r); };
-window.showRegistrationScreen = function(){ showRegistrationScreen(); };
+window.showLoginScreen = function(){ _showLoginScreen(); };
+window.showPortalByRole = function(r){ _showPortalByRole(r); };
+window.showRegistrationScreen = function(){ _showRegistrationScreen(); };
 </script>
 </body>
 </html>
