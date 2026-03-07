@@ -1019,15 +1019,28 @@ function renderAKupci(kupci) {
       : status === 'kasni'
         ? '<span class="badge-kasni">Kasni</span>'
         : '<span class="badge-aktivan">Aktivan</span>';
+    const safeKid = k.id.replace(/[^a-zA-Z0-9]/g,'_');
     return `<div class="kupac-card">
-      <div class="kupac-top">
+      <div class="kupac-top" onclick="toggleAKupacDetail('${safeKid}')" style="cursor:pointer;">
         <div>
-          <div style="font-size:11px;color:var(--teal);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">@${k.tiktokIme||'—'}</div>
-          <div class="kupac-name">${k.name||'Kupac'}</div>
-          <div class="kupac-email">${k.email}</div>
-          ${k.tiktokNick ? `<div class="kupac-tiktok">Nick: ${k.tiktokNick}</div>` : ''}
+          <div style="font-size:14px;color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;">${k.tiktokNick||'—'}</div>
         </div>
-        ${badgeHtml}
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          ${badgeHtml}
+          <span style="font-size:11px;color:#555;">▼ detalji</span>
+        </div>
+      </div>
+      <div id="akupac-detail-${safeKid}" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin:8px 0;font-size:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${k.name||'—'}</b></div>
+          <div><span style="color:#888;">Email:</span><br><b style="color:white;">${k.email||'—'}</b></div>
+          <div><span style="color:#888;">Ulica i br.:</span><br><b style="color:white;">${k.ulica||'—'}</b></div>
+          <div><span style="color:#888;">PTT:</span><br><b style="color:white;">${k.ptt||'—'}</b></div>
+          <div><span style="color:#888;">Grad:</span><br><b style="color:white;">${k.grad||'—'}</b></div>
+          <div><span style="color:#888;">Selo:</span><br><b style="color:white;">${k.selo||'—'}</b></div>
+          <div><span style="color:#888;">Telefon:</span><br><b style="color:white;">${k.telefon||'—'}</b></div>
+        </div>
       </div>
       <div class="kupac-actions">
         <button class="btn-sm btn-detail" onclick="showKupacDetails('${k.id}')">👁️ Detalji</button>
@@ -1055,16 +1068,32 @@ function filterKupci(val) {
 
 function adminRacunCard(r) {
   const kupac = (_allKupci||[]).find(k => k.id === r.kupacId);
-  const tiktok = kupac ? '@'+(kupac.tiktokIme||'—') : '';
+  const tiktok = kupac ? '@'+(kupac.tiktokIme||'—') : (r.kupacName||'Kupac');
+  const tiktokNick = kupac ? (kupac.tiktokNick||'') : '';
+  const safeRid = r.id.replace(/[^a-zA-Z0-9]/g,'_');
   return `<div class="racun-card">
-      <div class="racun-top">
+      <div class="racun-top" onclick="toggleARacunDetail('${safeRid}')" style="cursor:pointer;">
         <div>
           <div class="racun-id">Račun #${r.broj||r.id.slice(-4)}</div>
-          ${tiktok ? `<div style="font-size:11px;color:var(--teal);font-weight:800;">${tiktok}</div>` : ''}
+          <div style="font-size:13px;color:var(--teal);font-weight:800;">${tiktok}</div>
+          ${tiktokNick ? `<div style="font-size:11px;color:rgba(255,255,255,0.5);">${tiktokNick}</div>` : ''}
         </div>
-        <div class="racun-date">${r.datum||''}</div>
+        <div style="text-align:right;">
+          <div class="racun-date">${r.datum||''}</div>
+          <div style="font-size:10px;color:#555;margin-top:4px;">▼ detalji</div>
+        </div>
       </div>
-      <div class="racun-kupac">👤 ${r.kupacName||'Kupac'} · ${r.opis||''}</div>
+      <div id="aracun-detail-${safeRid}" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin:8px 0;font-size:12px;">
+        ${kupac ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${kupac.name||'—'}</b></div>
+          <div><span style="color:#888;">Telefon:</span><br><b style="color:white;">${kupac.telefon||'—'}</b></div>
+          <div><span style="color:#888;">Ulica i br.:</span><br><b style="color:white;">${kupac.ulica||'—'}</b></div>
+          <div><span style="color:#888;">PTT:</span><br><b style="color:white;">${kupac.ptt||'—'}</b></div>
+          <div><span style="color:#888;">Grad:</span><br><b style="color:white;">${kupac.grad||'—'}</b></div>
+          <div><span style="color:#888;">Selo:</span><br><b style="color:white;">${kupac.selo||'—'}</b></div>
+        </div>` : '<span style="color:#888;">Nema podataka</span>'}
+        <div style="margin-top:6px;font-size:11px;color:#aaa;">📦 ${r.opis||'—'}</div>
+      </div>
       <div class="racun-bottom">
         <div class="racun-amt">${(r.iznos||0).toLocaleString()} RSD</div>
         <span class="racun-badge ${r.status==='placeno'?'rb-placeno':r.status==='ceka'?'rb-ceka':r.status==='storno'?'rb-storno':'rb-novo'}">
@@ -1124,9 +1153,27 @@ function renderAPlacanja(racuni) {
   if (!racuni.length) { el.innerHTML = '<div class="section-empty">Nema čekajućih plaćanja.</div>'; return; }
   let html = `<div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:10px;">Čeka proveru (${racuni.length})</div>`;
   racuni.forEach(r => {
+    const kp = (_allKupci||[]).find(k => k.id === r.kupacId);
+    const safePid = r.id.replace(/[^a-zA-Z0-9]/g,'_');
     html += `<div class="racun-card">
-      <div class="racun-top"><div class="racun-id">Račun #${r.broj||r.id.slice(-4)}</div><div class="racun-date">${r.datum||''}</div></div>
-      <div class="racun-kupac">👤 ${r.kupacName||''}</div>
+      <div class="racun-top" onclick="toggleARacunDetail('pl${safePid}')" style="cursor:pointer;">
+        <div>
+          <div class="racun-id">Račun #${r.broj||r.id.slice(-4)}</div>
+          <div style="font-size:13px;color:var(--teal);font-weight:800;">${kp ? '@'+(kp.tiktokIme||'—') : r.kupacName||'—'}</div>
+          ${kp && kp.tiktokNick ? `<div style="font-size:11px;color:rgba(255,255,255,0.5);">${kp.tiktokNick}</div>` : ''}
+        </div>
+        <div style="text-align:right;"><div class="racun-date">${r.datum||''}</div><div style="font-size:10px;color:#555;margin-top:4px;">▼ detalji</div></div>
+      </div>
+      <div id="aracun-detail-pl${safePid}" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin:8px 0;font-size:12px;">
+        ${kp ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${kp.name||'—'}</b></div>
+          <div><span style="color:#888;">Telefon:</span><br><b style="color:white;">${kp.telefon||'—'}</b></div>
+          <div><span style="color:#888;">Ulica i br.:</span><br><b style="color:white;">${kp.ulica||'—'}</b></div>
+          <div><span style="color:#888;">PTT:</span><br><b style="color:white;">${kp.ptt||'—'}</b></div>
+          <div><span style="color:#888;">Grad:</span><br><b style="color:white;">${kp.grad||'—'}</b></div>
+          <div><span style="color:#888;">Selo:</span><br><b style="color:white;">${kp.selo||'—'}</b></div>
+        </div>` : '<span style="color:#888;">Nema podataka</span>'}
+      </div>
       <div class="racun-bottom"><div class="racun-amt">${(r.iznos||0).toLocaleString()} RSD</div><span class="racun-badge rb-ceka">ČEKA</span></div>
       ${r.adminFotoUrl ? `<div style="margin:8px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📷 Foto uz račun:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;" /></div>` : ''}
       ${r.uplatnicaUrl ? `<div style="margin:10px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(78,205,196,0.3);cursor:pointer;" /></div>` : '<div style="margin:8px 0;font-size:11px;color:#aaa;">Uplatnica nije priložena</div>'}
@@ -1200,10 +1247,14 @@ function renderAdminPoruke(poruke) {
     const statusLabel = getAPStatusLabel(p.status);
     return `<div class="poruka-card ${!p.procitano?'notif-new':''}" onclick="toggleAdminReply('${safeId}')" style="cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div>
+        <div onclick="toggleAPoruka('${safeId}')" style="cursor:pointer;flex:1;">
           <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;">🛍️ Kupac</div>
-          ${p.odTiktok ? `<div style="font-size:13px;color:var(--teal);font-weight:800;">@${p.odTiktok}</div>` : ''}
-          <div style="font-weight:600;font-size:12px;color:rgba(255,255,255,0.6);">${p.odIme||'Kupac'}</div>
+          ${p.odTiktok ? `<div style="font-size:14px;color:var(--teal);font-weight:800;">@${p.odTiktok}</div>` : ''}
+          ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);">${kpd.tiktokNick||''}</div>` : ''; })()}
+          <div id="aporuka-detail-${safeId}" style="display:none;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;margin-top:6px;font-size:11px;">
+            ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;"><div><span style="color:#888;">Ime:</span><br><b style="color:white;">${kpd.name||'—'}</b></div><div><span style="color:#888;">Tel:</span><br><b style="color:white;">${kpd.telefon||'—'}</b></div><div><span style="color:#888;">Ulica:</span><br><b style="color:white;">${kpd.ulica||'—'}</b></div><div><span style="color:#888;">PTT/Grad:</span><br><b style="color:white;">${kpd.ptt||'—'} ${kpd.grad||'—'}</b></div><div><span style="color:#888;">Selo:</span><br><b style="color:white;">${kpd.selo||'—'}</b></div></div>` : ''; })()}
+          </div>
+          <div style="font-size:10px;color:#555;margin-top:2px;">▼ detalji</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:10px;color:var(--gray);">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
@@ -1229,6 +1280,19 @@ function renderAdminPoruke(poruke) {
   }).join('');
 }
 
+
+function toggleAKupacDetail(safeId) {
+  const d = document.getElementById('akupac-detail-' + safeId);
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+function toggleARacunDetail(safeId) {
+  const d = document.getElementById('aracun-detail-' + safeId);
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+function toggleAPoruka(safeId) {
+  const d = document.getElementById('aporuka-detail-' + safeId);
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
 
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
@@ -1649,9 +1713,8 @@ function renderLiveGrid(kupci) {
     return `<div class="live-card" style="border:1.5px solid ${borderColor}55;position:relative;">
       <div style="position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:${dotColor};"></div>
       <div class="live-avatar" style="border:2px solid ${borderColor};">${ini}</div>
-      <div class="live-kname">${k.name||''}</div>
-      <div class="live-ktik" style="color:${k.tiktokIme ? 'var(--teal)' : 'var(--gray)'};">@${k.tiktokIme||'–'}</div>
-      ${k.tiktokNick ? `<div style="font-size:10px;color:var(--gray);">${k.tiktokNick}</div>` : ''}
+      <div class="live-ktik" style="color:var(--teal);font-weight:800;font-size:13px;">@${k.tiktokIme||'–'}</div>
+      <div class="live-kname" style="font-size:11px;color:rgba(255,255,255,0.6);">${k.tiktokNick||k.name||''}</div>
       <div style="font-size:10px;margin-top:4px;color:${dotColor};">${statusText}</div>
     </div>`;
   }).join('');
