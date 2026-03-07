@@ -467,27 +467,6 @@ select.inp-dark option{background:#0d1c2e;}
   <!-- Tab content -->
   <div id="ktab-racuni" style="padding:16px;">
     <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">🔴 Novi Računi</div>
-    <!-- Nova uplata dugme -->
-    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-      <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;">➕ Nova Uplata</div>
-      <label style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
-      <select id="k-nova-admin-sel" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:12px;font-size:14px;font-family:'DM Sans';outline:none;margin-bottom:10px;color:var(--dark);" onchange="loadAdminBankData(this.value)">
-        <option value="">Izaberite admina...</option>
-      </select>
-      <!-- Bank data za izabranog admina -->
-      <div id="k-selected-bank" style="display:none;background:#F4F6FA;border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px;">
-        <div style="font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:8px;">🏦 Podaci za uplatu</div>
-        <div><span style="color:var(--gray);font-size:11px;">Broj računa:</span> <b id="k-sel-bank-num">—</b></div>
-        <div><span style="color:var(--gray);font-size:11px;">Vlasnik:</span> <b id="k-sel-bank-name">—</b></div>
-        <div><span style="color:var(--gray);font-size:11px;">PostNet:</span> <b id="k-sel-postnet-num">—</b></div>
-      </div>
-      <input type="file" id="k-uplatnica-file" accept="image/*" capture="environment" style="display:none;" onchange="previewUplatnica(event)" />
-      <div id="k-uplatnica-preview" style="display:none;margin-bottom:10px;">
-        <img id="k-uplatnica-img" style="width:100%;border-radius:10px;border:2px solid #e0e8ff;" />
-      </div>
-      <button onclick="document.getElementById('k-uplatnica-file').click()" style="width:100%;background:#F4F6FA;border:1.5px dashed #c0d0f0;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:var(--blue);cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">📸 Dodaj Uplatnicu (Kamera/Galerija)</button>
-      <button onclick="posaljiUplatu()" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✓ Pošalji Uplatu</button>
-    </div>
     <div id="k-racuni-list"></div>
   </div>
   <div id="ktab-ceka" style="padding:16px;display:none;">
@@ -1359,6 +1338,10 @@ function onGlobalAdminChange(adminId) {
   // Filtriraj racune
   filterKupacByAdmin(adminId);
 
+  // Ponovo renderuj da se bankdata ažurira u karticama
+  const filtered = adminId ? _allKupacRacuni.filter(r => r.adminId === adminId) : _allKupacRacuni;
+  renderKAllRacuni(filtered);
+
   // Ažuriraj bankdata
   const admin = _adminList.find(a => a.id === adminId);
   if (admin) {
@@ -1414,6 +1397,17 @@ function kRacunCard(r, showUpload, showArhiva) {
   else if (status === 'ceka') statusBadge = '<span style="background:#FFF6DC;color:#9B7200;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">ČEKA</span>';
   else statusBadge = '<span style="background:#FFE9EB;color:#E63946;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">NOVO</span>';
 
+  // bankdata od izabranog admina
+  const adminId = document.getElementById('k-global-admin-sel')?.value;
+  const admin = _adminList.find(a => a.id === adminId);
+  const bankInfo = (admin && admin.bankNum) ? `
+    <div style="background:#F4F6FA;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:12px;">
+      <div style="font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:6px;">🏦 Podaci za uplatu</div>
+      <div><span style="color:#888;">Broj računa:</span> <b>${admin.bankNum}</b></div>
+      ${admin.bankName ? `<div><span style="color:#888;">Vlasnik:</span> <b>${admin.bankName}</b></div>` : ''}
+      ${admin.postnetNum ? `<div><span style="color:#888;">PostNet:</span> <b>${admin.postnetNum}</b></div>` : ''}
+    </div>` : '';
+
   let html = `<div class="k-racun-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
       <div><div style="font-size:14px;font-weight:800;color:#0A1428;">Račun #${broj}</div>
@@ -1427,11 +1421,12 @@ function kRacunCard(r, showUpload, showArhiva) {
     <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div></div>`;
 
   if (showUpload && status !== 'storno') {
+    html += bankInfo;
     html += `<div style="margin-top:12px;border-top:1px dashed #e0e8ff;padding-top:12px;">
-      <div style="font-size:12px;color:#7A90BB;margin-bottom:8px;">Pošaljite uplatnicu:</div>
+      <div style="font-size:12px;color:#7A90BB;margin-bottom:8px;">📎 Pošaljite uplatnicu za ovaj račun:</div>
       <div style="display:flex;gap:8px;">
-        <button onclick="openUplatnica('${r.id}','camera')" style="flex:1;background:#0A1428;color:white;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;">📷 Kamera</button>
-        <button onclick="openUplatnica('${r.id}','gallery')" style="flex:1;background:#1a2a3a;color:white;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;">🖼️ Galerija</button>
+        <button onclick="openUplatnica('${r.id}','camera')" style="flex:1;background:#2E6BE6;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">📷 Kamera</button>
+        <button onclick="openUplatnica('${r.id}','gallery')" style="flex:1;background:#0A1428;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ Galerija</button>
       </div>
       <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:#fff0f1;color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">❌ Storno zahtev</button>
     </div>`;
