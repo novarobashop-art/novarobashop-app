@@ -2191,6 +2191,19 @@ async function kupacReplyToAdmin(adminId, safeId) {
   showToast('✅ Odgovor poslat Adminu!');
 }
 
+async function deleteKPoruka(porukaId, event) {
+  event.stopPropagation();
+  if (!confirm('Obrisati ovu poruku?')) return;
+  try {
+    const { db, doc, deleteDoc } = window._fb;
+    await deleteDoc(doc(db, 'admin_poruke', porukaId));
+    showToast('🗑️ Poruka obrisana');
+  } catch(e) {
+    showToast('❌ Greška pri brisanju');
+    console.error(e);
+  }
+}
+
 function renderKPoruke(poruke) {
   const el = document.getElementById('k-admin-poruke-list');
   if (!el) return;
@@ -2203,9 +2216,12 @@ function renderKPoruke(poruke) {
     return `<div style="background:${st.bg};border:1px solid ${st.border};border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;" onclick="toggleKReply('${safeId}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div style="font-weight:800;font-size:13px;color:${st.color};">${icon}</div>
-        <div style="text-align:right;">
-          <div style="font-size:10px;color:#888;">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
-          ${st.label ? `<div style="font-size:11px;font-weight:700;color:${st.color};margin-top:2px;">${st.label}</div>` : ''}
+        <div style="display:flex;align-items:flex-start;gap:8px;">
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:#888;">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
+            ${st.label ? `<div style="font-size:11px;font-weight:700;color:${st.color};margin-top:2px;">${st.label}</div>` : ''}
+          </div>
+          <button onclick="deleteKPoruka('${p.id}',event)" style="background:rgba(230,57,70,0.1);border:none;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;color:#E63946;flex-shrink:0;line-height:1;">🗑</button>
         </div>
       </div>
       <div style="font-size:14px;color:var(--dark);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
