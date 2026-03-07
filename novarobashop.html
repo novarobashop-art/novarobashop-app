@@ -333,7 +333,7 @@ select.inp-dark option{background:#0d1c2e;}
       <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:14px;">🇷🇸</span>
       <input type="tel" class="inp" id="reg-tel" placeholder="+381 60 123 4567" style="padding-left:38px;" oninput="updateRegProgress()" />
     </div>
-    <div id="reg-error" style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#FF6B76;margin-bottom:16px;display:none;"></div>
+<div id="reg-error" style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#FF6B76;margin-bottom:16px;display:none;"></div>
     <button class="btn-gold" id="reg-btn" onclick="completeRegistration()" style="margin-top:8px;">✓ Završi registraciju</button>
   </div>
 </div>
@@ -392,10 +392,41 @@ select.inp-dark option{background:#0d1c2e;}
     <div id="atab-live" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div style="font-size:16px;font-weight:800;">Live Portal</div>
-        <div class="live-badge">🔴 LIVE</div>
+        <div class="live-badge" id="live-status-badge">🔴 LIVE</div>
       </div>
-      <input type="text" class="live-search" id="live-search" placeholder="🔍 Ukucajte TikTok @username ili nickname..." oninput="doLiveSearch(this.value)" />
+
+      <!-- GO LIVE BUTTON -->
+      <div id="live-btn-container" style="margin-bottom:16px;">
+        <button id="go-live-btn" onclick="toggleLive()" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#ff0050,#ff4d4d);color:white;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:1px;">
+          🎬 Pokreni LIVE – Obavesti kupce
+        </button>
+        <div id="live-active-bar" style="display:none;background:rgba(255,0,80,0.12);border:1.5px solid rgba(255,0,80,0.3);border-radius:14px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#ff0050;animation:pulse 1.2s infinite;"></div>
+            <span style="font-weight:700;color:#ff4d4d;">Kupci su obavešteni da si LIVE!</span>
+          </div>
+          <button onclick="toggleLive()" style="background:rgba(255,255,255,0.1);border:none;color:white;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;">Završi Live</button>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div style="font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">🔍 Pretraži gledaoce</div>
+      <input type="text" class="live-search" id="live-search" placeholder="Ukucajte TikTok @username ili nickname..." oninput="doLiveSearch(this.value)" />
       <div id="live-search-result"></div>
+
+      <!-- LEGENDA -->
+      <div style="display:flex;gap:16px;margin:12px 0 8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);">
+          <div style="width:10px;height:10px;border-radius:50%;background:#00c896;"></div> Registrovan + plaćeno
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);">
+          <div style="width:10px;height:10px;border-radius:50%;background:#FFB800;"></div> Registrovan – kasni
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);">
+          <div style="width:10px;height:10px;border-radius:50%;background:#ff4d4d;"></div> Nije registrovan
+        </div>
+      </div>
+
       <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin:12px 0 8px;">Registrovani kupci</div>
       <div class="live-grid" id="live-grid"></div>
     </div>
@@ -423,11 +454,40 @@ select.inp-dark option{background:#0d1c2e;}
     <div class="k-avatar" id="k-avatar">K</div>
   </div>
 
+  <!-- Admin izbor bar -->
+  <div style="background:white;border-bottom:1px solid #eef1f8;padding:10px 16px;display:flex;align-items:center;gap:10px;">
+    <div style="font-size:12px;font-weight:700;color:var(--gray);white-space:nowrap;">👤 Admin:</div>
+    <select id="k-global-admin-sel" style="flex:1;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:8px 12px;font-size:14px;font-family:'DM Sans';outline:none;color:var(--dark);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
+      <option value="">Izaberite admina...</option>
+    </select>
+  </div>
+
   <input type="file" id="uplatnica-input" accept="image/*" style="display:none;" onchange="uploadUplatnica(event)" />
 
   <!-- Tab content -->
   <div id="ktab-racuni" style="padding:16px;">
     <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">🔴 Novi Računi</div>
+    <!-- Nova uplata dugme -->
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+      <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;">➕ Nova Uplata</div>
+      <label style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
+      <select id="k-nova-admin-sel" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:12px;font-size:14px;font-family:'DM Sans';outline:none;margin-bottom:10px;color:var(--dark);" onchange="loadAdminBankData(this.value)">
+        <option value="">Izaberite admina...</option>
+      </select>
+      <!-- Bank data za izabranog admina -->
+      <div id="k-selected-bank" style="display:none;background:#F4F6FA;border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px;">
+        <div style="font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:8px;">🏦 Podaci za uplatu</div>
+        <div><span style="color:var(--gray);font-size:11px;">Broj računa:</span> <b id="k-sel-bank-num">—</b></div>
+        <div><span style="color:var(--gray);font-size:11px;">Vlasnik:</span> <b id="k-sel-bank-name">—</b></div>
+        <div><span style="color:var(--gray);font-size:11px;">PostNet:</span> <b id="k-sel-postnet-num">—</b></div>
+      </div>
+      <input type="file" id="k-uplatnica-file" accept="image/*" capture="environment" style="display:none;" onchange="previewUplatnica(event)" />
+      <div id="k-uplatnica-preview" style="display:none;margin-bottom:10px;">
+        <img id="k-uplatnica-img" style="width:100%;border-radius:10px;border:2px solid #e0e8ff;" />
+      </div>
+      <button onclick="document.getElementById('k-uplatnica-file').click()" style="width:100%;background:#F4F6FA;border:1.5px dashed #c0d0f0;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:var(--blue);cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">📸 Dodaj Uplatnicu (Kamera/Galerija)</button>
+      <button onclick="posaljiUplatu()" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✓ Pošalji Uplatu</button>
+    </div>
     <div id="k-racuni-list"></div>
   </div>
   <div id="ktab-ceka" style="padding:16px;display:none;">
@@ -451,6 +511,10 @@ select.inp-dark option{background:#0d1c2e;}
     <!-- Poruka adminu -->
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
       <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;">📩 Pošalji poruku Adminu</div>
+      <label style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
+      <select id="k-poruka-admin-sel" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:12px;font-size:14px;font-family:'DM Sans';outline:none;margin-bottom:10px;color:var(--dark);">
+        <option value="">Izaberite admina...</option>
+      </select>
       <textarea id="k-poruka" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:12px;font-size:14px;font-family:'DM Sans';outline:none;resize:none;color:var(--dark);" rows="3" placeholder="Vaša poruka..."></textarea>
       <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';margin-top:8px;">Pošalji Adminu</button>
     </div>
@@ -484,6 +548,26 @@ select.inp-dark option{background:#0d1c2e;}
   </div>
 </div>
 
+<!-- TIKTOK EDIT MODAL -->
+<div class="modal-overlay" id="tiktok-modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:18px;font-weight:800;">✏️ TikTok podatke</div>
+      <button onclick="closeTiktokModal()" style="background:rgba(255,255,255,0.08);border:none;color:white;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:16px;">Unesite TikTok podatke za kupca koji nije mogao sam da se registruje</div>
+    <input type="hidden" id="edit-kupac-id" />
+    <label class="inp-label">TikTok Username</label>
+    <div style="position:relative;">
+      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--teal);font-weight:700;font-size:16px;">@</span>
+      <input type="text" class="inp-dark" id="edit-tiktok-ime" placeholder="vaše.tiktok.ime" style="padding-left:32px;" />
+    </div>
+    <label class="inp-label">TikTok Nickname (ime u chatu)</label>
+    <input type="text" class="inp-dark" id="edit-tiktok-nick" placeholder="Marko 🛍️" />
+    <button class="btn-teal" onclick="saveTiktok()">✓ Sačuvaj TikTok</button>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-box">
@@ -497,6 +581,12 @@ select.inp-dark option{background:#0d1c2e;}
       <input type="text" class="inp-dark" id="set-name" placeholder="Vaše ime..." />
       <label class="inp-label">Email adresa</label>
       <input type="email" class="inp-dark" id="set-email" style="opacity:0.6;" readonly />
+      <label class="inp-label">Vaš TikTok Username</label>
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--teal);font-weight:700;font-size:16px;">@</span>
+        <input type="text" class="inp-dark" id="set-tiktok" placeholder="vaš.tiktok" style="padding-left:32px;" />
+      </div>
+
     </div>
     <div class="form-section">
       <div class="form-section-title" style="color:var(--gold);">🏦 Podaci za uplatu</div>
@@ -609,6 +699,8 @@ async function completeRegistration() {
     const { db, doc, setDoc, collection, query, where, getDocs } = window._fb;
     const u = window._pendingUser;
     const tiktokClean = tiktok.replace('@','').toLowerCase();
+
+    // provjeri duplikat tiktok
     const existing = await getDocs(query(collection(db, 'users'), where('tiktokIme', '==', tiktokClean)));
     if (!existing.empty) {
       err.textContent = '❌ Ovaj TikTok username već postoji!';
@@ -619,7 +711,7 @@ async function completeRegistration() {
 
     await setDoc(doc(db, 'users', u.uid), {
       name: ime, email: u.email, photoURL: u.photoURL || '',
-      role: 'kupac', adminId: null,
+      role: 'kupac',
       tiktokIme: tiktokClean, tiktokNick,
       ulica, ptt, grad, selo, telefon: tel,
       createdAt: new Date().toISOString(),
@@ -682,33 +774,27 @@ async function loadAdminData() {
 
   const { db, collection, onSnapshot, query, where, doc } = window._fb;
 
-  // Load ALL kupci (for live portal search - all registered users)
+  // Load ALL kupci
   onSnapshot(query(collection(db, 'users'), where('role', '==', 'kupac')), snap => {
     const allKupci = [];
     snap.forEach(d => allKupci.push({id:d.id,...d.data()}));
     window._allKupciGlobal = allKupci;
+    _allKupci = allKupci;
+    renderAKupci(allKupci);
+    populateKupacSelect(allKupci);
     renderLiveGrid(allKupci);
   });
 
-  // Load admin's own kupci
-  onSnapshot(query(collection(db, 'users'), where('adminId', '==', u.uid)), snap => {
-    _allKupci = [];
-    snap.forEach(d => _allKupci.push({id:d.id,...d.data()}));
-    renderAKupci(_allKupci);
-    populateKupacSelect(_allKupci);
-  });
-
-  // Load racuni
+  // Load only THIS admin's racuni
   onSnapshot(query(collection(db, 'racuni'), where('adminId', '==', u.uid)), snap => {
     _allRacuni = [];
     snap.forEach(d => _allRacuni.push({id:d.id,...d.data()}));
     renderARacuni(_allRacuni);
     renderAPlacanja(_allRacuni.filter(r => r.status === 'ceka'));
-    // Check overdue - auto block after 3 days
     checkOverdueRacuni(_allRacuni);
   });
 
-  // Load poruke za admina
+  // Load only THIS admin's poruke
   onSnapshot(query(collection(db, 'poruke'), where('adminId', '==', u.uid)), snap => {
     const poruke = [];
     snap.forEach(d => poruke.push({id:d.id,...d.data()}));
@@ -788,6 +874,7 @@ function renderAKupci(kupci) {
       </div>
       <div class="kupac-actions">
         <button class="btn-sm btn-detail" onclick="showKupacRacuniFilter('${k.id}')">🧾 Računi</button>
+        <button class="btn-sm" style="background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2)!important;" onclick="editKupacTiktok('${k.id}','${(k.tiktokIme||'')}','${(k.tiktokNick||'')}')">✏️ TikTok</button>
         ${k.blocked
           ? `<button class="btn-sm btn-unblock" onclick="unblockKupac('${k.id}')">🔓 Odblokiraj</button>`
           : `<button class="btn-sm btn-block" onclick="blockKupac('${k.id}')">🔒 Blokiraj</button>`
@@ -876,6 +963,9 @@ function aTab(name, el) {
     if (div) div.style.display = 'none';
   });
   document.getElementById('atab-' + name).style.display = 'block';
+  if (name === 'live') {
+    renderLiveGrid(window._allKupciGlobal || []);
+  }
 }
 
 function populateKupacSelect(kupci) {
@@ -962,6 +1052,28 @@ async function blockKupac(kupacId) {
   renderAKupci(_allKupci);
 }
 
+function editKupacTiktok(kupacId, tiktokIme, tiktokNick) {
+  document.getElementById('edit-kupac-id').value = kupacId;
+  document.getElementById('edit-tiktok-ime').value = tiktokIme || '';
+  document.getElementById('edit-tiktok-nick').value = tiktokNick || '';
+  document.getElementById('tiktok-modal').classList.add('show');
+}
+
+function closeTiktokModal() {
+  document.getElementById('tiktok-modal').classList.remove('show');
+}
+
+async function saveTiktok() {
+  const kupacId = document.getElementById('edit-kupac-id').value;
+  const tiktokIme = document.getElementById('edit-tiktok-ime').value.trim().replace('@','').toLowerCase();
+  const tiktokNick = document.getElementById('edit-tiktok-nick').value.trim();
+  if (!tiktokIme) { showToast('⚠️ Unesite TikTok username'); return; }
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', kupacId), { tiktokIme, tiktokNick });
+  closeTiktokModal();
+  showToast('✅ TikTok sačuvan!');
+}
+
 async function unblockKupac(kupacId) {
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db, 'users', kupacId), { blocked: false, blockedAt: null });
@@ -989,23 +1101,79 @@ async function sendAdminToHaupt() {
 }
 
 // ===== LIVE PORTAL =====
+let _liveUnsubscribe = null;
+let _knownLiveKupciIds = new Set();
+
+function playKlingel() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784].forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+      g.gain.linearRampToValueAtTime(0.4, ctx.currentTime + i * 0.18 + 0.05);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.25);
+      o.start(ctx.currentTime + i * 0.18);
+      o.stop(ctx.currentTime + i * 0.18 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function startLiveRealtime() {
+  const { db, collection, query, where, onSnapshot } = window._fb;
+  _knownLiveKupciIds = new Set((window._allKupciGlobal || []).map(k => k.id));
+  if (_liveUnsubscribe) _liveUnsubscribe();
+  const q = query(collection(db, 'users'), where('role','==','kupac'));
+  _liveUnsubscribe = onSnapshot(q, snap => {
+    const kupci = [];
+    snap.forEach(d => kupci.push({ id: d.id, ...d.data() }));
+    kupci.forEach(k => {
+      if (!_knownLiveKupciIds.has(k.id)) {
+        _knownLiveKupciIds.add(k.id);
+        playKlingel();
+        showToast('🔔 Novi kupac: ' + (k.name || k.tiktokIme || 'Nepoznat') + ' se upravo registrovao!');
+      }
+    });
+    window._allKupciGlobal = kupci;
+    renderLiveGrid(kupci);
+  });
+}
+
+function stopLiveRealtime() {
+  if (_liveUnsubscribe) { _liveUnsubscribe(); _liveUnsubscribe = null; }
+}
+
 function renderLiveGrid(kupci) {
   const grid = document.getElementById('live-grid');
   if (!grid) return;
-  if (!kupci.length) { grid.innerHTML = '<div style="color:var(--gray);padding:20px;font-size:13px;">Nema registrovanih kupaca.</div>'; return; }
   const today = new Date();
-  grid.innerHTML = kupci.map(k => {
-    const kasni = _allRacuni.some(r => {
+  const withStatus = (kupci||[]).map(k => {
+    const kasni = (_allRacuni||[]).some(r => {
       if (r.kupacId !== k.id || r.status !== 'novo') return false;
       return r.datum && Math.floor((today - new Date(r.datum)) / (1000*60*60*24)) >= 3;
     });
+    return { ...k, kasni };
+  });
+  withStatus.sort((a,b) => (a.kasni === b.kasni) ? 0 : a.kasni ? -1 : 1);
+  if (!withStatus.length) {
+    grid.innerHTML = '<div style="color:var(--gray);padding:20px;font-size:13px;">Nema registrovanih kupaca.</div>';
+    return;
+  }
+  grid.innerHTML = withStatus.map(k => {
     const ini = (k.name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    return `<div class="live-card${kasni?' kasni':''}">
-      <div class="live-avatar${kasni?' kasni-av':''}">${ini}</div>
+    const borderColor = k.kasni ? '#FFB800' : '#00c896';
+    const dotColor = k.kasni ? '#FFB800' : '#00c896';
+    const statusText = k.kasni ? '🟠 Kasni' : '🟢 Plaćeno';
+    return `<div class="live-card" style="border:1.5px solid ${borderColor}55;position:relative;">
+      <div style="position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:${dotColor};"></div>
+      <div class="live-avatar" style="border:2px solid ${borderColor};">${ini}</div>
       <div class="live-kname">${k.name||''}</div>
-      <div class="live-ktik">@${k.tiktokIme||''}</div>
-      ${k.tiktokNick ? `<div style="font-size:10px;color:#00d250;">${k.tiktokNick}</div>` : ''}
-      ${kasni ? '<div style="font-size:10px;color:#FF8C00;margin-top:4px;">⚠️ Kasni</div>' : ''}
+      <div class="live-ktik" style="color:${k.tiktokIme ? 'var(--teal)' : 'var(--gray)'};">@${k.tiktokIme||'–'}</div>
+      ${k.tiktokNick ? `<div style="font-size:10px;color:var(--gray);">${k.tiktokNick}</div>` : ''}
+      <div style="font-size:10px;margin-top:4px;color:${dotColor};">${statusText}</div>
     </div>`;
   }).join('');
 }
@@ -1020,16 +1188,64 @@ function doLiveSearch(val) {
     (x.tiktokNick||'').toLowerCase().includes(s) ||
     (x.name||'').toLowerCase().includes(s)
   );
+  const today = new Date();
   if (found.length) {
-    res.innerHTML = found.map(x => `<div class="live-result live-reg">
-      <div class="live-dot live-dot-g"></div>
-      <div><b>${x.name||''}</b> @${x.tiktokIme||''}${x.tiktokNick ? ' · '+x.tiktokNick : ''}</div>
-    </div>`).join('');
+    res.innerHTML = found.map(x => {
+      const kasni = (_allRacuni||[]).some(r => {
+        if (r.kupacId !== x.id || r.status !== 'novo') return false;
+        return r.datum && Math.floor((today - new Date(r.datum)) / (1000*60*60*24)) >= 3;
+      });
+      if (kasni) {
+        return `<div class="live-result" style="background:rgba(255,184,0,0.1);border:1.5px solid rgba(255,184,0,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <div style="width:12px;height:12px;border-radius:50%;background:#FFB800;flex-shrink:0;"></div>
+          <div><b>${x.name||''}</b> @${x.tiktokIme||''}${x.tiktokNick ? ' · '+x.tiktokNick : ''}<br><span style="font-size:11px;color:#FFB800;">⚠️ Registrovan ali kasni sa plaćanjem</span></div>
+        </div>`;
+      } else {
+        return `<div class="live-result" style="background:rgba(0,200,150,0.1);border:1.5px solid rgba(0,200,150,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <div style="width:12px;height:12px;border-radius:50%;background:#00c896;flex-shrink:0;"></div>
+          <div><b>${x.name||''}</b> @${x.tiktokIme||''}${x.tiktokNick ? ' · '+x.tiktokNick : ''}<br><span style="font-size:11px;color:#00c896;">✅ Registrovan – sve plaćeno</span></div>
+        </div>`;
+      }
+    }).join('');
   } else {
-    res.innerHTML = `<div class="live-result live-noreg">
-      <div class="live-dot live-dot-r"></div>
-      <b>@${val.replace('@','')}</b> — nije registrovan
+    res.innerHTML = `<div style="background:rgba(255,77,77,0.1);border:1.5px solid rgba(255,77,77,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <div style="width:12px;height:12px;border-radius:50%;background:#ff4d4d;flex-shrink:0;"></div>
+      <div><b>@${val.replace('@','')}</b><br><span style="font-size:11px;color:#ff4d4d;">❌ Nije registrovan</span></div>
     </div>`;
+  }
+}
+
+let _isLive = false;
+async function toggleLive() {
+  const { db, collection, addDoc } = window._fb;
+  const btn = document.getElementById('go-live-btn');
+  const bar = document.getElementById('live-active-bar');
+  if (!_isLive) {
+    _isLive = true;
+    btn.style.display = 'none';
+    bar.style.display = 'flex';
+    // start realtime listener
+    startLiveRealtime();
+    // pošalji notifikaciju svim kupcima
+    const adminName = window._currentUser.name || 'Admin';
+    const tiktok = window._currentUser.tiktokAdmin || '';
+    const kupci = window._allKupciGlobal || [];
+    for (const k of kupci) {
+      await addDoc(collection(db, 'notifikacije'), {
+        userId: k.id,
+        tip: 'live',
+        poruka: `🔴 ${adminName} je upravo počeo LIVE${tiktok ? ' @'+tiktok : ''}! Pridruži se!`,
+        vreme: new Date().toISOString(),
+        procitano: false
+      });
+    }
+    showToast(`🔴 LIVE pokrenut! ${kupci.length} kupaca obavešteno!`);
+  } else {
+    _isLive = false;
+    btn.style.display = 'block';
+    bar.style.display = 'none';
+    stopLiveRealtime();
+    showToast('⏹️ Live završen');
   }
 }
 
@@ -1038,6 +1254,8 @@ async function openSettings() {
   const u = window._currentUser;
   document.getElementById('set-name').value = u.name || '';
   document.getElementById('set-email').value = u.email || '';
+  document.getElementById('set-tiktok').value = u.tiktokAdmin || '';
+  document.getElementById('set-admin-code').value = u.adminCode || '';
   const { db, doc, getDoc } = window._fb;
   const userDoc = await getDoc(doc(db, 'users', u.uid));
   if (userDoc.exists()) {
@@ -1050,18 +1268,28 @@ async function openSettings() {
   document.getElementById('settings-modal').classList.add('show');
 }
 
+function copyAdminCode() {
+  const code = document.getElementById('set-admin-code').value;
+  if (!code) { showToast('⚠️ Unesite pozivni kod prvo!'); return; }
+  navigator.clipboard.writeText(code).then(() => showToast('📋 Kod kopiran: ' + code));
+}
+
 function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
 
 async function saveSettings() {
   const name = document.getElementById('set-name').value.trim();
+  const tiktokAdmin = document.getElementById('set-tiktok').value.trim().replace('@','').toLowerCase();
+  const adminCode = document.getElementById('set-admin-code').value.trim().toUpperCase();
   const bankNum = document.getElementById('set-bank-num').value.trim();
   const bankName = document.getElementById('set-bank-name').value.trim();
   const postnetNum = document.getElementById('set-postnet-num').value.trim();
   const postnetName = document.getElementById('set-postnet-name').value.trim();
   const newPass = document.getElementById('set-new-pass').value;
   const { db, doc, updateDoc, auth } = window._fb;
-  await updateDoc(doc(db, 'users', window._currentUser.uid), { name, bankNum, bankName, postnetNum, postnetName });
+  await updateDoc(doc(db, 'users', window._currentUser.uid), { name, tiktokAdmin, adminCode, bankNum, bankName, postnetNum, postnetName });
   window._currentUser.name = name;
+  window._currentUser.tiktokAdmin = tiktokAdmin;
+  window._currentUser.adminCode = adminCode;
   document.getElementById('a-avatar').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('a-header-sub').textContent = name || 'Admin Portal';
   if (newPass && newPass.length >= 6) {
@@ -1077,6 +1305,7 @@ async function saveSettings() {
 
 // ===== KUPAC DATA =====
 let _currentUplatnicaRacunId = null;
+let _allKupacRacuni = []; // sve racune ovog kupca
 
 async function loadKupacData() {
   const u = window._currentUser;
@@ -1084,26 +1313,71 @@ async function loadKupacData() {
   document.getElementById('k-avatar').textContent = initials;
   document.getElementById('k-header-sub').textContent = u.name || 'Moj nalog';
 
-  const { db, collection, onSnapshot, query, where, doc } = window._fb;
+  const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
 
+  // Učitaj sve racune ovog kupca (realtime)
   onSnapshot(query(collection(db, 'racuni'), where('kupacId', '==', u.uid)), snap => {
-    const racuni = [];
-    snap.forEach(d => racuni.push({id:d.id,...d.data()}));
-    renderKAllRacuni(racuni);
-    // Check for overdue notifications
-    checkKupacOverdue(racuni);
+    _allKupacRacuni = [];
+    snap.forEach(d => _allKupacRacuni.push({id:d.id,...d.data()}));
+    // filtriraj po izabranom adminu
+    const sel = document.getElementById('k-global-admin-sel');
+    const adminId = sel ? sel.value : '';
+    filterKupacByAdmin(adminId);
+    checkKupacOverdue(_allKupacRacuni);
   });
 
-  if (u.adminId) {
-    onSnapshot(doc(db, 'users', u.adminId), snap => {
-      if (snap.exists()) {
-        const d = snap.data();
-        document.getElementById('k-bank-num').textContent = d.bankNum || '— nije uneto —';
-        document.getElementById('k-bank-name').textContent = d.bankName || '';
-        document.getElementById('k-postnet-num').textContent = d.postnetNum || '— nije uneto —';
-        document.getElementById('k-postnet-name').textContent = d.postnetName || '';
-      }
-    });
+  // Učitaj listu admina
+  const adminSnap = await getDocs(query(collection(db, 'users'), where('role','==','admin')));
+  _adminList = [];
+  adminSnap.forEach(d => _adminList.push({ id: d.id, ...d.data() }));
+  const adminOptions = '<option value="">— Izaberite admina —</option>' +
+    _adminList.map(a => `<option value="${a.id}">${a.name || a.email}</option>`).join('');
+  ['k-global-admin-sel','k-nova-admin-sel','k-poruka-admin-sel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = adminOptions;
+  });
+}
+
+function filterKupacByAdmin(adminId) {
+  if (!adminId) {
+    // bez izbora - prikaži sve
+    renderKAllRacuni(_allKupacRacuni);
+    return;
+  }
+  // filtriraj racune po adminId
+  const filtered = _allKupacRacuni.filter(r => r.adminId === adminId);
+  renderKAllRacuni(filtered);
+}
+
+function onGlobalAdminChange(adminId) {
+  // Sync svi selektori
+  ['k-nova-admin-sel', 'k-poruka-admin-sel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = adminId;
+  });
+
+  // Filtriraj racune
+  filterKupacByAdmin(adminId);
+
+  // Ažuriraj bankdata
+  const admin = _adminList.find(a => a.id === adminId);
+  if (admin) {
+    // u podrška tabu
+    document.getElementById('k-bank-num').textContent = admin.bankNum || '— nije uneto —';
+    document.getElementById('k-bank-name').textContent = admin.bankName || '';
+    document.getElementById('k-postnet-num').textContent = admin.postnetNum || '— nije uneto —';
+    document.getElementById('k-postnet-name').textContent = admin.postnetName || '';
+    // u nova uplata
+    const box = document.getElementById('k-selected-bank');
+    if (box) {
+      document.getElementById('k-sel-bank-num').textContent = admin.bankNum || '— nije uneto —';
+      document.getElementById('k-sel-bank-name').textContent = admin.bankName || '';
+      document.getElementById('k-sel-postnet-num').textContent = admin.postnetNum || '— nije uneto —';
+      box.style.display = 'block';
+    }
+  } else {
+    const box = document.getElementById('k-selected-bank');
+    if (box) box.style.display = 'none';
   }
 }
 
@@ -1239,7 +1513,7 @@ async function stornoRacun(racunId) {
 async function posaljiPoruku(tip) {
   const fieldId = tip === 'haupt' ? 'k-poruka-haupt' : 'k-poruka';
   const tekst = document.getElementById(fieldId).value.trim();
-  if (!tekst) { showToast('Unesite poruku'); return; }
+  if (!tekst) { showToast('⚠️ Unesite poruku'); return; }
   const { db, collection, addDoc } = window._fb;
 
   if (tip === 'haupt') {
@@ -1253,16 +1527,85 @@ async function posaljiPoruku(tip) {
     });
     showToast('✅ Poruka poslata Hauptu!');
   } else {
+    const adminSel = document.getElementById('k-poruka-admin-sel');
+    const adminId = adminSel.value;
+    const adminName = adminSel.options[adminSel.selectedIndex]?.text || '';
+    if (!adminId) { showToast('⚠️ Izaberite admina!'); return; }
     await addDoc(collection(db, 'poruke'), {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
-      adminId: window._currentUser.adminId,
+      adminId,
+      adminName,
       tekst,
-      vreme: new Date().toISOString()
+      vreme: new Date().toISOString(),
+      procitano: false
     });
     showToast('✅ Poruka poslata Adminu!');
   }
   document.getElementById(fieldId).value = '';
+}
+
+let _adminList = [];
+let _uplatnicaBase64 = null;
+
+async function loadAdminBankData(adminId) {
+  const box = document.getElementById('k-selected-bank');
+  if (!adminId) { box.style.display = 'none'; return; }
+  const admin = _adminList.find(a => a.id === adminId);
+  if (admin) {
+    document.getElementById('k-sel-bank-num').textContent = admin.bankNum || '— nije uneto —';
+    document.getElementById('k-sel-bank-name').textContent = admin.bankName || '';
+    document.getElementById('k-sel-postnet-num').textContent = admin.postnetNum || '— nije uneto —';
+    box.style.display = 'block';
+  }
+}
+
+function previewUplatnica(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _uplatnicaBase64 = e.target.result;
+    document.getElementById('k-uplatnica-img').src = _uplatnicaBase64;
+    document.getElementById('k-uplatnica-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function posaljiUplatu() {
+  const adminSel = document.getElementById('k-nova-admin-sel');
+  const adminId = adminSel.value;
+  const adminName = adminSel.options[adminSel.selectedIndex]?.text || '';
+  if (!adminId) { showToast('⚠️ Izaberite admina!'); return; }
+  if (!_uplatnicaBase64) { showToast('⚠️ Dodajte uplatnicu!'); return; }
+  const { db, collection, addDoc } = window._fb;
+  const today = new Date().toISOString().slice(0,10);
+  const broj = Math.floor(1000 + Math.random() * 9000);
+  await addDoc(collection(db, 'racuni'), {
+    adminId,
+    kupacId: window._currentUser.uid,
+    kupacName: window._currentUser.name,
+    iznos: 0,
+    opis: 'Uplata od kupca',
+    status: 'ceka',
+    paketStatus: 'prep',
+    datum: today, broj,
+    uplatnicaUrl: _uplatnicaBase64,
+    uplatnicaVreme: new Date().toISOString(),
+    createdAt: new Date().toISOString()
+  });
+  await addDoc(collection(db, 'notifikacije'), {
+    userId: adminId,
+    tip: 'nova_uplata',
+    poruka: window._currentUser.name + ' je poslao uplatnicu!',
+    vreme: new Date().toISOString(),
+    procitano: false
+  });
+  _uplatnicaBase64 = null;
+  document.getElementById('k-uplatnica-preview').style.display = 'none';
+  document.getElementById('k-nova-admin-sel').value = '';
+  document.getElementById('k-selected-bank').style.display = 'none';
+  showToast('✅ Uplata poslata Adminu!');
 }
 
 // Close modal on overlay click
