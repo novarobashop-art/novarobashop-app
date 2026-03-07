@@ -1321,10 +1321,16 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
   try {
     const ta = document.getElementById('areply-text-' + safeId);
     const tekst = ta ? ta.value.trim() : '';
+    console.log('replyToKupac:', {kupacId, safeId, tekst: tekst.slice(0,20), hasUser: !!window._currentUser, hasFb: !!window._fb});
     if (!tekst) { showToast('⚠️ Unesite odgovor'); return; }
     if (!kupacId) { showToast('❌ Greška: nema kupacId!'); return; }
     if (!window._fb) { showToast('❌ Firebase nije spreman, pokušaj ponovo'); return; }
-    if (!window._currentUser) { showToast('❌ Nisi prijavljen!'); return; }
+    if (!window._currentUser) {
+      // Try to recover currentUser from Firebase auth
+      showToast('⚠️ Sesija istekla - pokušavam ponovo...');
+      await new Promise(r => setTimeout(r, 1000));
+      if (!window._currentUser) { showToast('❌ Nisi prijavljen - osveži stranicu!'); return; }
+    }
     const { db, collection, addDoc, doc, updateDoc } = window._fb;
     const u = window._currentUser;
     
