@@ -1184,7 +1184,7 @@ function renderAdminPoruke(poruke) {
         <!-- Reply -->
         <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'DM Sans';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok ? '@'+p.odTiktok : p.odIme||'kupcu'}..."></textarea>
         <div style="display:flex;gap:8px;margin-top:6px;">
-          <button onclick="replyToKupac('${safeOd}','${safeIme}','${safeId}','${p.id}')" style="flex:1;background:rgba(0,180,120,0.15);color:#00c896;border:1px solid rgba(0,180,120,0.3);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
+          <button data-kupac-id="${p.od}" data-kupac-name="${p.odIme||''}" data-safe-id="${safeId}" data-poruka-id="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:rgba(0,180,120,0.15);color:#00c896;border:1px solid rgba(0,180,120,0.3);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
           <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🗑️</button>
         </div>
       </div>
@@ -1294,6 +1294,14 @@ async function debugSendToKupac() {
     res.textContent = '❌ GREŠKA: ' + (err.code || err.message);
     res.style.color = 'red';
   }
+}
+
+function replyToKupacBtn(btn) {
+  const kupacId = btn.getAttribute('data-kupac-id');
+  const kupacName = btn.getAttribute('data-kupac-name');
+  const safeId = btn.getAttribute('data-safe-id');
+  const porukaId = btn.getAttribute('data-poruka-id');
+  replyToKupac(kupacId, kupacName, safeId, porukaId);
 }
 
 async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
