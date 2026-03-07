@@ -1280,7 +1280,14 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
     vreme: new Date().toISOString(),
     procitano: false
   });
-  // Mark as reseno
+  // Notifikacija damit Kupac es in Obaveštenja sieht
+  await addDoc(collection(db, 'notifikacije'), {
+    userId: kupacId,
+    tip: 'poruka_od_admina',
+    poruka: '📩 ' + (u.name||'Admin') + ': ' + tekst.slice(0, 80),
+    vreme: new Date().toISOString(),
+    procitano: false
+  });
   await updateDoc(doc(db, 'poruke', realPorukaId), { status: 'reseno' });
   sendPushToUser(kupacId, '📩 Poruka od Admina', tekst.slice(0,60));
   if (ta) ta.value = '';
