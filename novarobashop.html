@@ -14,6 +14,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
@@ -28,11 +29,25 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const googleProvider = new GoogleAuthProvider();
+  const messaging = getMessaging(app);
 
   // HAUPT UID - nije dostupan ovde, samo admin i kupac
   const HAUPT_UID = '8MVnqyppnHZFv1dCbB1RYqCjCod2';
 
-  window._fb = { auth, db, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc };
+  window._fb = { auth, db, messaging, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, getToken, onMessage };
+
+  // Registruj Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/novarobashop-app/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  }
+
+  // Foreground push notifications
+  onMessage(messaging, payload => {
+    const { title, body } = payload.notification || {};
+    showToast(`🔔 ${title}: ${body}`, 5000);
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -671,6 +686,8 @@ function showPortalByRole(role) {
     document.getElementById('kupac-screen').style.display = 'block';
     loadKupacData();
   }
+  // Push notification permission
+  setTimeout(initPushNotifications, 2000);
 }
 
 function showRegistrationScreen() {
@@ -1880,6 +1897,24 @@ async function sendMahnungen(racuni) {
       vreme: new Date().toISOString(),
       procitano: false
     });
+  }
+}
+
+// ===== PUSH NOTIFICATIONS =====
+const VAPID_KEY = 'BHyKcuHzDE813s9vLJyPJvJQS6k7XZ_ckFpbDo7x1O15QMJPO357AyDDzgNrgPomkeSsnf1aEjifX0UI5YDdGvE';
+
+async function initPushNotifications() {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const { messaging, getToken, db, doc, updateDoc } = window._fb;
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    if (token && window._currentUser) {
+      await updateDoc(doc(db, 'users', window._currentUser.uid), { fcmToken: token });
+      console.log('FCM token saved ✅');
+    }
+  } catch(err) {
+    console.log('Push init error:', err);
   }
 }
 
