@@ -511,13 +511,6 @@ select.inp-dark option{background:#0d1c2e;}
           style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'DM Sans';outline:none;width:140px;" />
       </div>
 
-      <div style="background:rgba(255,100,0,0.1);border:1px solid orange;border-radius:10px;padding:10px;margin-bottom:12px;">
-        <div style="font-size:11px;color:orange;font-weight:700;margin-bottom:6px;">🔧 DIRECT TEST</div>
-        <input id="dt-uid" class="inp-dark" placeholder="Kupac UID..." style="margin-bottom:4px;font-size:12px;" value="7yebOcQlnWU7KB5iCGQ99pQZYSI3" />
-        <input id="dt-msg" class="inp-dark" placeholder="Poruka..." style="margin-bottom:4px;font-size:12px;" value="Test od admina" />
-        <button onclick="directTest()" style="width:100%;background:orange;color:#000;border:none;border-radius:8px;padding:8px;font-weight:800;cursor:pointer;font-family:'DM Sans';font-size:13px;">🚀 DIREKTNO POŠALJI</button>
-        <div id="dt-result" style="margin-top:4px;font-size:11px;color:#aaa;word-break:break-all;"></div>
-      </div>
       <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
       <!-- Poruke od Haupta -->
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
@@ -1158,15 +1151,14 @@ function renderAdminPoruke(poruke) {
   if (!poruke.length) { el.innerHTML = '<div class="section-empty">Nema poruka od kupaca.</div>'; return; }
   el.innerHTML = poruke.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(p => {
     const safeId = p.id.replace(/[^a-zA-Z0-9]/g,'_');
-    const safeOd = (p.od||'').replace(/'/g,"\'");
-    const safeIme = (p.odIme||'').replace(/'/g,"\'");
     const statusStyle = getAPStatusStyle(p.status);
     const statusLabel = getAPStatusLabel(p.status);
-    return `<div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;" onclick="toggleAdminReply('${safeId}')">
+    return `<div class="poruka-card ${!p.procitano?'notif-new':''}" onclick="toggleAdminReply('${safeId}')" style="cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div>
+          <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;">🛍️ Kupac</div>
           ${p.odTiktok ? `<div style="font-size:13px;color:var(--teal);font-weight:800;">@${p.odTiktok}</div>` : ''}
-          <div style="font-weight:700;font-size:12px;color:rgba(255,255,255,0.6);">${p.odIme||'Kupac'}</div>
+          <div style="font-weight:600;font-size:12px;color:rgba(255,255,255,0.6);">${p.odIme||'Kupac'}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:10px;color:var(--gray);">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
@@ -1175,22 +1167,21 @@ function renderAdminPoruke(poruke) {
       </div>
       <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${p.tekst}</div>
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
-        <!-- Status buttons -->
         <div style="display:flex;gap:6px;margin-bottom:10px;">
           <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
           <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
           <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(45,190,108,0.15);color:#2DBE6C;border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
         </div>
-        <!-- Reply -->
-        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'DM Sans';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok ? '@'+p.odTiktok : p.odIme||'kupcu'}..."></textarea>
+        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'DM Sans';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
         <div style="display:flex;gap:8px;margin-top:6px;">
-          <button data-kupac-id="${p.od}" data-kupac-name="${p.odIme||''}" data-safe-id="${safeId}" data-poruka-id="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:rgba(0,180,120,0.15);color:#00c896;border:1px solid rgba(0,180,120,0.3);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
-          <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🗑️</button>
+          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📩 Pošalji odgovor</button>
+          <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;">🗑️</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
+
 
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
@@ -1296,34 +1287,12 @@ async function debugSendToKupac() {
   }
 }
 
-async function directTest() {
-  const uid = document.getElementById('dt-uid').value.trim();
-  const msg = document.getElementById('dt-msg').value.trim();
-  const res = document.getElementById('dt-result');
-  res.style.color = '#aaa';
-  res.textContent = '⏳ Pokušavam...';
-  try {
-    const { db, collection, addDoc } = window._fb;
-    const docRef = await addDoc(collection(db, 'notifikacije'), {
-      userId: uid,
-      tip: 'poruka_od_admina',
-      poruka: '📩 ' + msg,
-      vreme: new Date().toISOString(),
-      procitano: false
-    });
-    res.style.color = '#00ff88';
-    res.textContent = '✅ OK! Doc ID: ' + docRef.id;
-  } catch(e) {
-    res.style.color = 'red';
-    res.textContent = '❌ ' + (e.code||e.message||JSON.stringify(e));
-  }
-}
-
 function replyToKupacBtn(btn) {
-  const kupacId = btn.getAttribute('data-kupac-id');
-  const kupacName = btn.getAttribute('data-kupac-name');
-  const safeId = btn.getAttribute('data-safe-id');
-  const porukaId = btn.getAttribute('data-poruka-id');
+  const kupacId = btn.getAttribute('data-kid');
+  const kupacName = btn.getAttribute('data-kname');
+  const safeId = btn.getAttribute('data-sid');
+  const porukaId = btn.getAttribute('data-pid');
+  console.log('replyToKupacBtn called:', kupacId, kupacName, safeId, porukaId);
   replyToKupac(kupacId, kupacName, safeId, porukaId);
 }
 
