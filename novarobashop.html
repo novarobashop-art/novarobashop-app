@@ -99,15 +99,41 @@
         }
 
         window._currentUser = { uid: user.uid, email: user.email, ...userData };
-        window.showPortalByRole(userData.role);
+        // Wait for main script to expose the function
+        if (typeof window.showPortalByRole === 'function') {
+          window.showPortalByRole(userData.role);
+        } else {
+          const t = setInterval(() => {
+            if (typeof window.showPortalByRole === 'function') {
+              clearInterval(t);
+              window.showPortalByRole(userData.role);
+            }
+          }, 50);
+        }
       } else {
         // Novi Google korisnik → registracija
         window._pendingUser = { uid: user.uid, email: user.email, photoURL: user.photoURL, displayName: user.displayName };
-        window.showRegistrationScreen();
+        if (typeof window.showRegistrationScreen === 'function') {
+          window.showRegistrationScreen();
+        } else {
+          const t2 = setInterval(() => {
+            if (typeof window.showRegistrationScreen === 'function') {
+              clearInterval(t2); window.showRegistrationScreen();
+            }
+          }, 50);
+        }
       }
     } else {
       window._currentUser = null;
-      window.showLoginScreen();
+      if (typeof window.showLoginScreen === 'function') {
+        window.showLoginScreen();
+      } else {
+        const t3 = setInterval(() => {
+          if (typeof window.showLoginScreen === 'function') {
+            clearInterval(t3); window.showLoginScreen();
+          }
+        }, 50);
+      }
     }
   });
 
@@ -2338,10 +2364,19 @@ function msgFotoPreview(inputEl, previewId) {
     _fotoCache[previewId] = compressed;
     const prev = document.getElementById('foto-prev-' + previewId);
     if (prev) {
-      prev.innerHTML = '<div style="position:relative;margin-top:6px;">'
-        + '<img src="' + compressed + '" onclick="openImgViewer(this.src)" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;" />'
-        + '<button onclick="clearMsgFoto('' + previewId + '')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:900;cursor:pointer;line-height:1;">✕</button>'
-        + '</div>';
+      var d = document.createElement('div');
+      d.style.cssText = 'position:relative;margin-top:6px;';
+      var im = document.createElement('img');
+      im.src = compressed;
+      im.onclick = function() { openImgViewer(this.src); };
+      im.style.cssText = 'width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;';
+      var xb = document.createElement('button');
+      xb.textContent = '✕';
+      xb.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:900;cursor:pointer;line-height:1;';
+      xb.onclick = function() { clearMsgFoto(previewId); };
+      d.appendChild(im); d.appendChild(xb);
+      prev.innerHTML = '';
+      prev.appendChild(d);
     }
   };
   reader.readAsDataURL(file);
@@ -2534,9 +2569,9 @@ document.addEventListener('keydown', e => {
 
 
 // Expose to Firebase module
-window.showLoginScreen = showLoginScreen;
-window.showPortalByRole = showPortalByRole;
-window.showRegistrationScreen = showRegistrationScreen;
+window.showLoginScreen = function(){ showLoginScreen(); };
+window.showPortalByRole = function(r){ showPortalByRole(r); };
+window.showRegistrationScreen = function(){ showRegistrationScreen(); };
 </script>
 </body>
 </html>
