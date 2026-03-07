@@ -1266,34 +1266,42 @@ function showKupacDetails(kupacId) {
 
 // Reply to kupac from admin
 async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
-  const ta = document.getElementById('areply-text-' + safeId);
-  const tekst = ta ? ta.value.trim() : '';
-  if (!tekst) { showToast('⚠️ Unesite odgovor'); return; }
-  const { db, collection, addDoc, doc, updateDoc } = window._fb;
-  const u = window._currentUser;
-  await addDoc(collection(db, 'admin_poruke'), {
-    od: u.uid,
-    odIme: u.name,
-    doKupacId: kupacId,
-    doKupacIme: kupacName,
-    tekst,
-    vreme: new Date().toISOString(),
-    procitano: false
-  });
-  // Notifikacija damit Kupac es in Obaveštenja sieht
-  await addDoc(collection(db, 'notifikacije'), {
-    userId: kupacId,
-    tip: 'poruka_od_admina',
-    poruka: '📩 ' + (u.name||'Admin') + ': ' + tekst.slice(0, 80),
-    vreme: new Date().toISOString(),
-    procitano: false
-  });
-  await updateDoc(doc(db, 'poruke', realPorukaId), { status: 'reseno' });
-  sendPushToUser(kupacId, '📩 Poruka od Admina', tekst.slice(0,60));
-  if (ta) ta.value = '';
-  const box = document.getElementById('areply-box-' + safeId);
-  if (box) box.style.display = 'none';
-  showToast('✅ Odgovor poslat kupcu!');
+  try {
+    const ta = document.getElementById('areply-text-' + safeId);
+    const tekst = ta ? ta.value.trim() : '';
+    if (!tekst) { showToast('⚠️ Unesite odgovor'); return; }
+    if (!kupacId) { showToast('❌ Greška: nema kupacId!'); return; }
+    const { db, collection, addDoc, doc, updateDoc } = window._fb;
+    const u = window._currentUser;
+    
+    // 1. Save message
+    await addDoc(collection(db, 'admin_poruke'), {
+      od: u.uid, odIme: u.name,
+      doKupacId: kupacId, doKupacIme: kupacName,
+      tekst, vreme: new Date().toISOString(), procitano: false
+    });
+    
+    // 2. Notifikacija - kupac sees it in Obaveštenja
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: kupacId,
+      tip: 'poruka_od_admina',
+      poruka: '📩 ' + (u.name||'Admin') + ': ' + tekst.slice(0, 80),
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+    
+    // 3. Mark original message as reseno
+    try { await updateDoc(doc(db, 'poruke', realPorukaId), { status: 'reseno' }); } catch(e) {}
+    
+    sendPushToUser(kupacId, '📩 Poruka od Admina', tekst.slice(0,60));
+    if (ta) ta.value = '';
+    const box = document.getElementById('areply-box-' + safeId);
+    if (box) box.style.display = 'none';
+    showToast('✅ Odgovor poslat kupcu!');
+  } catch(err) {
+    console.error('replyToKupac error:', err);
+    showToast('❌ Greška slanja: ' + (err.code || err.message || err), 5000);
+  }
 }
 
 let _racunFotoBase64 = null;
