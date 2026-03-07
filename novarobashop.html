@@ -355,6 +355,8 @@ select.inp-dark option{background:#0d1c2e;}
     <button class="a-tab active" onclick="aTab('kupci',this)">👥 Kupci</button>
     <button class="a-tab" onclick="aTab('racuni',this)">🧾 Računi</button>
     <button class="a-tab" onclick="aTab('placanja',this)">💰 Plaćanja</button>
+    <button class="a-tab" onclick="aTab('placeno',this)">✅ Plaćeno</button>
+    <button class="a-tab" onclick="aTab('arhiva',this)">📦 Arhiva</button>
     <button class="a-tab" onclick="aTab('live',this)">🔴 Live</button>
     <button class="a-tab" onclick="aTab('podrska-admin',this)">💬 Podrška</button>
   </div>
@@ -393,6 +395,16 @@ select.inp-dark option{background:#0d1c2e;}
     <!-- PLAĆANJA TAB -->
     <div id="atab-placanja" style="display:none;">
       <div id="a-placanja-list"></div>
+    </div>
+
+    <!-- PLAĆENO TAB -->
+    <div id="atab-placeno" style="display:none;">
+      <div id="a-placeno-list"></div>
+    </div>
+
+    <!-- ARHIVA TAB (Poslato) -->
+    <div id="atab-arhiva" style="display:none;">
+      <div id="a-arhiva-list"></div>
     </div>
 
     <!-- LIVE TAB -->
@@ -777,6 +789,8 @@ async function loadAdminData() {
     snap.forEach(d => _allRacuni.push({id:d.id,...d.data()}));
     renderARacuni(_allRacuni);
     renderAPlacanja(_allRacuni.filter(r => r.status === 'ceka'));
+    renderAPlaceno(_allRacuni);
+    renderAArhiva(_allRacuni);
     checkOverdueRacuni(_allRacuni);
   });
 
@@ -881,11 +895,8 @@ function filterKupci(val) {
   ));
 }
 
-function renderARacuni(racuni) {
-  const el = document.getElementById('a-racuni-list');
-  if (!racuni.length) { el.innerHTML = '<div class="section-empty">Nema računa.</div>'; return; }
-  el.innerHTML = racuni.map(r => `
-    <div class="racun-card">
+function adminRacunCard(r) {
+  return `<div class="racun-card">
       <div class="racun-top">
         <div class="racun-id">Račun #${r.broj||r.id.slice(-4)}</div>
         <div class="racun-date">${r.datum||''}</div>
@@ -908,7 +919,33 @@ function renderARacuni(racuni) {
         <button class="btn-sm" style="flex:1;background:#E0FBF0;color:#1A8B4D;border:1px solid rgba(45,190,108,0.3);" onclick="confirmPayment('${r.id}')">✓ Potvrdi plaćanje</button>
         <button class="btn-sm btn-block" onclick="rejectPayment('${r.id}')">✗ Odbij</button>
       </div>` : ''}
-    </div>`).join('');
+    </div>`;
+}
+
+function renderARacuni(racuni) {
+  const el = document.getElementById('a-racuni-list');
+  // Samo novo i ceka u Računi tabu
+  const aktivni = racuni.filter(r => r.status === 'novo' || r.status === 'ceka');
+  if (!aktivni.length) { el.innerHTML = '<div class="section-empty">Nema aktivnih računa.</div>'; return; }
+  el.innerHTML = aktivni.map(r => adminRacunCard(r)).join('');
+}
+
+function renderAPlaceno(racuni) {
+  const el = document.getElementById('a-placeno-list');
+  // Plaćeno ali još nije poslato
+  const placeni = racuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship');
+  if (!placeni.length) { el.innerHTML = '<div class="section-empty">Nema potvrđenih plaćanja.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:#4ECDC4;font-weight:700;margin-bottom:10px;">✅ Potvrđeno plaćanje – čeka slanje (${placeni.length})</div>`
+    + placeni.map(r => adminRacunCard(r)).join('');
+}
+
+function renderAArhiva(racuni) {
+  const el = document.getElementById('a-arhiva-list');
+  // Poslato ili storno
+  const arhiva = racuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno');
+  if (!arhiva.length) { el.innerHTML = '<div class="section-empty">Nema poslanih paketa.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:10px;">📦 Poslato / Arhiva (${arhiva.length})</div>`
+    + arhiva.map(r => adminRacunCard(r)).join('');
 }
 
 function renderAPlacanja(racuni) {
@@ -947,14 +984,12 @@ function renderAdminPoruke(poruke) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','racuni','placanja','live','podrska-admin'].forEach(n => {
+  ['kupci','racuni','placanja','placeno','arhiva','live','podrska-admin'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
   document.getElementById('atab-' + name).style.display = 'block';
-  if (name === 'live') {
-    renderLiveGrid(window._allKupciGlobal || []);
-  }
+  if (name === 'live') renderLiveGrid(window._allKupciGlobal || []);
 }
 
 function populateKupacSelect(kupci) {
@@ -1412,7 +1447,7 @@ function checkKupacOverdue(racuni) {
 function renderKAllRacuni(racuni) {
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => r.status === 'placeno' || r.status === 'storno'));
+  renderKArhiva(racuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
 }
