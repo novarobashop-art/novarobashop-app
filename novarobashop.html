@@ -1106,6 +1106,7 @@ async function addRacun() {
     vreme: new Date().toISOString(),
     procitano: false
   });
+  sendPushToUser(kupacId, '🧾 Nova Računa', 'Imate novu računu u iznosu od ' + iznos.toLocaleString() + ' RSD');
 
   document.getElementById('racun-iznos').value = '';
   document.getElementById('racun-opis').value = '';
@@ -1139,6 +1140,7 @@ async function setPaket(racunId, status, btn) {
       vreme: new Date().toISOString(),
       procitano: false
     });
+    sendPushToUser(r.kupacId, '📦 Paket Poslat!', `Vaš paket za Račun #${r.broj} je poslat!`);
     showToast('📦 Paket označen kao poslat!');
   }
 }
@@ -1157,6 +1159,7 @@ async function confirmPayment(racunId) {
     vreme: new Date().toISOString(),
     procitano: false
   });
+  sendPushToUser(r.kupacId, '✅ Uplata Potvrđena!', `Račun #${r.broj} - ${(r.iznos||0).toLocaleString()} RSD potvrđen!`);
   showToast('✅ Plaćanje potvrđeno!');
 }
 
@@ -1656,6 +1659,7 @@ async function uploadUplatnica(event) {
         vreme: new Date().toISOString(),
         procitano: false
       });
+      sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`);
       showToast('✅ Uplatnica poslata! Admin proverava.');
       kNavTab('ceka');
     } catch(err) { showToast('Greška pri slanju.'); }
@@ -1902,6 +1906,7 @@ async function sendMahnungen(racuni) {
 
 // ===== PUSH NOTIFICATIONS =====
 const VAPID_KEY = 'BHyKcuHzDE813s9vLJyPJvJQS6k7XZ_ckFpbDo7x1O15QMJPO357AyDDzgNrgPomkeSsnf1aEjifX0UI5YDdGvE';
+const PUSH_WORKER_URL = 'https://novarobashop-push.novarobashop.workers.dev';
 
 async function initPushNotifications() {
   try {
@@ -1915,6 +1920,23 @@ async function initPushNotifications() {
     }
   } catch(err) {
     console.log('Push init error:', err);
+  }
+}
+
+async function sendPushToUser(userId, title, body) {
+  try {
+    const { db, doc, getDoc } = window._fb;
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (!userDoc.exists()) return;
+    const fcmToken = userDoc.data().fcmToken;
+    if (!fcmToken) return;
+    await fetch(PUSH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: fcmToken, title, body })
+    });
+  } catch(err) {
+    console.log('Push send error:', err);
   }
 }
 
