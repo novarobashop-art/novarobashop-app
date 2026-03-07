@@ -15,6 +15,7 @@
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+  import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
@@ -34,7 +35,8 @@
   // HAUPT UID - nije dostupan ovde, samo admin i kupac
   const HAUPT_UID = '8MVnqyppnHZFv1dCbB1RYqCjCod2';
 
-  window._fb = { auth, db, messaging, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, getToken, onMessage };
+  const storage = getStorage(app);
+  window._fb = { auth, db, messaging, storage, ref, uploadString, getDownloadURL, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, getToken, onMessage };
 
   // Registruj Service Worker
   if ('serviceWorker' in navigator) {
@@ -1326,15 +1328,20 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
     const { db, collection, addDoc, doc, updateDoc } = window._fb;
     const u = window._currentUser;
     
-    // 1. Save message
-    const fotoData = _fotoCache['a'+safeId] || null;
+    // 1. Upload foto if exists, then save message
+    let fotoUrl = null;
+    const fotoData = _fotoCache['a'+safeId];
+    if (fotoData) {
+      const path = 'poruke/' + u.uid + '/' + Date.now() + '.jpg';
+      fotoUrl = await uploadFotoToStorage(fotoData, path);
+    }
+    clearMsgFoto('a'+safeId);
     await addDoc(collection(db, 'admin_poruke'), {
       od: u.uid, odIme: u.name,
       doKupacId: kupacId, doKupacIme: kupacName,
-      tekst, foto: fotoData || null,
+      tekst, foto: fotoUrl,
       vreme: new Date().toISOString(), procitano: false
     });
-    clearMsgFoto('a'+safeId);
     
     // 2. Notifikacija - kupac sees it in Obaveštenja
     await addDoc(collection(db, 'notifikacije'), {
@@ -2079,17 +2086,22 @@ async function posaljiPoruku(tip) {
     const adminId = adminSel.value;
     const adminName = adminSel.options[adminSel.selectedIndex]?.text || '';
     if (!adminId) { showToast('⚠️ Izaberite admina!'); return; }
-    const fotoAdm = _fotoCache['kporuka'] || null;
+    let fotoAdmUrl = null;
+    const fotoAdm = _fotoCache['kporuka'];
+    if (fotoAdm) {
+      const path = 'poruke/' + window._currentUser.uid + '/' + Date.now() + '.jpg';
+      fotoAdmUrl = await uploadFotoToStorage(fotoAdm, path);
+    }
+    clearMsgFoto('kporuka');
     await addDoc(collection(db, 'poruke'), {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
       odTiktok: window._currentUser.tiktokIme || '',
       adminId, adminName,
-      tekst, foto: fotoAdm || null,
+      tekst, foto: fotoAdmUrl,
       vreme: new Date().toISOString(),
       procitano: false
     });
-    clearMsgFoto('kporuka');
     showToast('✅ Poruka poslata Adminu!');
   }
   document.getElementById(fieldId).value = '';
@@ -2125,17 +2137,22 @@ async function kupacReplyToAdmin(adminId, safeId) {
   if (!adminId || adminId === 'haupt') { showToast('⚠️ Ne možeš odgovoriti Hauptu ovde'); return; }
   const { db, collection, addDoc } = window._fb;
   const u = window._currentUser;
-  const fotoData = _fotoCache['k'+safeId] || null;
+  let fotoKUrl = null;
+  const fotoKData = _fotoCache['k'+safeId];
+  if (fotoKData) {
+    const path = 'poruke/' + u.uid + '/' + Date.now() + '.jpg';
+    fotoKUrl = await uploadFotoToStorage(fotoKData, path);
+  }
+  clearMsgFoto('k'+safeId);
   await addDoc(collection(db, 'poruke'), {
     od: u.uid,
     odIme: u.name,
     odTiktok: u.tiktokIme || '',
     adminId: adminId,
-    tekst, foto: fotoData || null,
+    tekst, foto: fotoKUrl,
     vreme: new Date().toISOString(),
     procitano: false
   });
-  clearMsgFoto('k'+safeId);
   if (ta) ta.value = '';
   const box = document.getElementById('kreply-box-' + safeId);
   if (box) box.style.display = 'none';
@@ -2250,6 +2267,19 @@ const NOTIF_ICONS = {
 
 // ===== FOTO HELPER FÜR NACHRICHTEN =====
 let _fotoCache = {}; // safeId -> base64
+
+async function uploadFotoToStorage(base64Data, path) {
+  try {
+    const { storage, ref, uploadString, getDownloadURL } = window._fb;
+    const fotoRef = ref(storage, path);
+    await uploadString(fotoRef, base64Data, 'data_url');
+    const url = await getDownloadURL(fotoRef);
+    return url;
+  } catch(err) {
+    console.error('Upload foto error:', err);
+    return null;
+  }
+}
 
 function msgFotoPreview(inputEl, previewId) {
   const file = inputEl.files[0];
