@@ -1903,7 +1903,7 @@ async function loadKupacData() {
   const u = window._currentUser;
   const initials = (u.name||'K').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('k-avatar').textContent = initials;
-  document.getElementById('k-header-sub').textContent = u.name || 'Moj nalog';
+  document.getElementById('k-header-sub').textContent = (u.tiktokIme ? '@'+u.tiktokIme : u.name) || 'Moj nalog';
 
   const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
 
@@ -1945,7 +1945,7 @@ async function loadKupacData() {
   _adminList = [];
   adminSnap.forEach(d => _adminList.push({ id: d.id, ...d.data() }));
   const adminOptions = '<option value="">— Izaberite admina —</option>' +
-    _adminList.map(a => `<option value="${a.id}">${a.name || a.email}</option>`).join('');
+    _adminList.map(a => `<option value="${a.id}">${a.tiktokIme ? '@'+a.tiktokIme+' · '+(a.tiktokNick||'') : (a.name||a.email)}</option>`).join('');
   ['k-global-admin-sel','k-nova-admin-sel','k-poruka-admin-sel'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = adminOptions;
