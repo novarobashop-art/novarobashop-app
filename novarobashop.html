@@ -1369,7 +1369,6 @@ async function openSettings() {
   document.getElementById('set-name').value = u.name || '';
   document.getElementById('set-email').value = u.email || '';
   document.getElementById('set-tiktok').value = u.tiktokAdmin || '';
-  document.getElementById('set-admin-code').value = u.adminCode || '';
   const { db, doc, getDoc } = window._fb;
   const userDoc = await getDoc(doc(db, 'users', u.uid));
   if (userDoc.exists()) {
@@ -1382,28 +1381,20 @@ async function openSettings() {
   document.getElementById('settings-modal').classList.add('show');
 }
 
-function copyAdminCode() {
-  const code = document.getElementById('set-admin-code').value;
-  if (!code) { showToast('⚠️ Unesite pozivni kod prvo!'); return; }
-  navigator.clipboard.writeText(code).then(() => showToast('📋 Kod kopiran: ' + code));
-}
-
 function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
 
 async function saveSettings() {
   const name = document.getElementById('set-name').value.trim();
   const tiktokAdmin = document.getElementById('set-tiktok').value.trim().replace('@','').toLowerCase();
-  const adminCode = document.getElementById('set-admin-code').value.trim().toUpperCase();
   const bankNum = document.getElementById('set-bank-num').value.trim();
   const bankName = document.getElementById('set-bank-name').value.trim();
   const postnetNum = document.getElementById('set-postnet-num').value.trim();
   const postnetName = document.getElementById('set-postnet-name').value.trim();
   const newPass = document.getElementById('set-new-pass').value;
   const { db, doc, updateDoc, auth } = window._fb;
-  await updateDoc(doc(db, 'users', window._currentUser.uid), { name, tiktokAdmin, adminCode, bankNum, bankName, postnetNum, postnetName });
+  await updateDoc(doc(db, 'users', window._currentUser.uid), { name, tiktokAdmin, bankNum, bankName, postnetNum, postnetName });
   window._currentUser.name = name;
   window._currentUser.tiktokAdmin = tiktokAdmin;
-  window._currentUser.adminCode = adminCode;
   document.getElementById('a-avatar').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('a-header-sub').textContent = name || 'Admin Portal';
   if (newPass && newPass.length >= 6) {
