@@ -2295,19 +2295,25 @@ function compressImage(base64, maxSize=800, quality=0.75) {
 
 // Fullscreen image viewer
 function openImgViewer(src) {
-  let overlay = document.getElementById('img-viewer-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'img-viewer-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-    overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
-    document.body.appendChild(overlay);
-  }
-  overlay.innerHTML = '<div style="position:relative;max-width:95vw;max-height:95vh;">'
-    + '<img src="' + src + '" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:10px;display:block;" />'
-    + '<button onclick="document.getElementById('img-viewer-overlay').remove()" style="position:absolute;top:-12px;right:-12px;background:#E63946;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:900;cursor:pointer;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,0.5);">✕</button>'
-    + '</div>';
-  overlay.style.display = 'flex';
+  var old = document.getElementById('img-viewer-overlay');
+  if (old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'img-viewer-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  overlay.onclick = function(e) { if(e.target===overlay||e.target===wrap) overlay.remove(); };
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:relative;max-width:95vw;max-height:95vh;';
+  var image = document.createElement('img');
+  image.src = src;
+  image.style.cssText = 'max-width:95vw;max-height:90vh;object-fit:contain;border-radius:10px;display:block;';
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'position:absolute;top:-12px;right:-12px;background:#E63946;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:900;cursor:pointer;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,0.5);';
+  closeBtn.onclick = function() { overlay.remove(); };
+  wrap.appendChild(image);
+  wrap.appendChild(closeBtn);
+  overlay.appendChild(wrap);
+  document.body.appendChild(overlay);
 }
 
 async function uploadFotoToStorage(base64Data, path) {
