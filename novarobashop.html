@@ -711,10 +711,10 @@ function showToast(msg, dur=3000) {
   setTimeout(() => t.classList.remove('show'), dur);
 }
 
-// Safety: if loading hangs, show login after 8s
+// Safety: if loading hangs AND no user logged in, show login after 15s
 setTimeout(() => {
   const loading = document.getElementById('loading');
-  if (loading && loading.style.display !== 'none') {
+  if (loading && loading.style.display !== 'none' && !window._currentUser) {
     console.warn('Loading timeout - forcing login screen');
     showLoginScreen();
   }
@@ -1321,6 +1321,8 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
     const tekst = ta ? ta.value.trim() : '';
     if (!tekst) { showToast('⚠️ Unesite odgovor'); return; }
     if (!kupacId) { showToast('❌ Greška: nema kupacId!'); return; }
+    if (!window._fb) { showToast('❌ Firebase nije spreman, pokušaj ponovo'); return; }
+    if (!window._currentUser) { showToast('❌ Nisi prijavljen!'); return; }
     const { db, collection, addDoc, doc, updateDoc } = window._fb;
     const u = window._currentUser;
     
@@ -2054,9 +2056,11 @@ async function stornoRacun(racunId) {
 }
 
 async function posaljiPoruku(tip) {
+  try {
   const fieldId = tip === 'haupt' ? 'k-poruka-haupt' : 'k-poruka';
   const tekst = document.getElementById(fieldId).value.trim();
   if (!tekst) { showToast('⚠️ Unesite poruku'); return; }
+  if (!window._fb || !window._currentUser) { showToast('❌ Greška: nisi prijavljen!'); return; }
   const { db, collection, addDoc } = window._fb;
 
   if (tip === 'haupt') {
@@ -2089,6 +2093,10 @@ async function posaljiPoruku(tip) {
     showToast('✅ Poruka poslata Adminu!');
   }
   document.getElementById(fieldId).value = '';
+  } catch(err) {
+    console.error('posaljiPoruku error:', err);
+    showToast('❌ Greška: ' + (err.code || err.message || err), 5000);
+  }
 }
 
 function getKStatusStyle(status) {
