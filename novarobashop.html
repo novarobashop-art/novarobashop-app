@@ -510,6 +510,14 @@ select.inp-dark option{background:#0d1c2e;}
         <input type="text" id="admin-poruke-search" placeholder="🔍 @tiktok..." oninput="filterAdminPoruke(this.value)"
           style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'DM Sans';outline:none;width:140px;" />
       </div>
+      <!-- DEBUG TEST BUTTON - REMOVE LATER -->
+      <div id="debug-test-box" style="background:rgba(255,0,0,0.1);border:1px solid red;border-radius:10px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:12px;color:#ff6666;font-weight:700;margin-bottom:8px;">🔧 TEST - Direktno pošalji notifikaciju kupcu</div>
+        <input id="debug-kupac-id" class="inp-dark" placeholder="Upiši kupac UID..." style="margin-bottom:6px;" />
+        <input id="debug-tekst" class="inp-dark" placeholder="Test poruka..." style="margin-bottom:6px;" />
+        <button onclick="debugSendToKupac()" style="background:red;color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:'DM Sans';">TEST POŠALJI</button>
+        <div id="debug-result" style="margin-top:6px;font-size:11px;color:#aaa;"></div>
+      </div>
       <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
       <!-- Poruke od Haupta -->
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
@@ -1265,6 +1273,29 @@ function showKupacDetails(kupacId) {
 }
 
 // Reply to kupac from admin
+async function debugSendToKupac() {
+  const kupacId = document.getElementById('debug-kupac-id').value.trim();
+  const tekst = document.getElementById('debug-tekst').value.trim() || 'Test poruka';
+  const res = document.getElementById('debug-result');
+  if (!kupacId) { res.textContent = '⚠️ Upiši kupac UID!'; return; }
+  try {
+    const { db, collection, addDoc } = window._fb;
+    res.textContent = '⏳ Šaljem...';
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: kupacId,
+      tip: 'poruka_od_admina',
+      poruka: '📩 TEST: ' + tekst,
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+    res.textContent = '✅ Poslato! Proveri Firestore → notifikacije';
+    res.style.color = '#00ff88';
+  } catch(err) {
+    res.textContent = '❌ GREŠKA: ' + (err.code || err.message);
+    res.style.color = 'red';
+  }
+}
+
 async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
   try {
     const ta = document.getElementById('areply-text-' + safeId);
