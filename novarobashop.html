@@ -378,6 +378,13 @@ select.inp-dark option{background:#0d1c2e;}
         <input type="number" class="inp-dark" id="racun-iznos" placeholder="1500" />
         <label class="inp-label">Opis</label>
         <input type="text" class="inp-dark" id="racun-opis" placeholder="Naziv paketa..." />
+        <label class="inp-label">Foto (opciono)</label>
+        <input type="file" id="racun-foto-input" accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
+        <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
+          <img id="racun-foto-img" style="width:100%;border-radius:10px;border:2px solid rgba(255,255,255,0.1);" />
+          <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Ukloni foto</button>
+        </div>
+        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#aaa;cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">📷 Slikaj Foto</button>
         <button class="btn-teal" onclick="addRacun()">✓ Kreiraj račun</button>
       </div>
       <div id="a-racuni-list"></div>
@@ -895,6 +902,8 @@ function renderARacuni(racuni) {
         <button class="paket-btn ${r.paketStatus==='ship'?'sel-ship':''}" onclick="setPaket('${r.id}','ship',this)">🚚 Poslato</button>
         <button class="paket-btn ${r.paketStatus==='cancel'?'sel-cancel':''}" onclick="setPaket('${r.id}','cancel',this)">❌ Storno</button>
       </div>
+      ${r.adminFotoUrl ? `<div style="margin-top:10px;"><img src="${r.adminFotoUrl}" style="width:100%;border-radius:10px;border:2px solid rgba(255,255,255,0.1);" /></div>` : ''}
+      ${r.uplatnicaUrl ? `<div style="margin-top:8px;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" style="width:100%;border-radius:10px;border:2px solid rgba(78,205,196,0.3);" /></div>` : ''}
       ${r.status==='ceka' ? `<div style="margin-top:8px;display:flex;gap:6px;">
         <button class="btn-sm" style="flex:1;background:#E0FBF0;color:#1A8B4D;border:1px solid rgba(45,190,108,0.3);" onclick="confirmPayment('${r.id}')">✓ Potvrdi plaćanje</button>
         <button class="btn-sm btn-block" onclick="rejectPayment('${r.id}')">✗ Odbij</button>
@@ -911,7 +920,8 @@ function renderAPlacanja(racuni) {
       <div class="racun-top"><div class="racun-id">Račun #${r.broj||r.id.slice(-4)}</div><div class="racun-date">${r.datum||''}</div></div>
       <div class="racun-kupac">👤 ${r.kupacName||''}</div>
       <div class="racun-bottom"><div class="racun-amt">${(r.iznos||0).toLocaleString()} RSD</div><span class="racun-badge rb-ceka">ČEKA</span></div>
-      ${r.uplatnicaUrl ? `<div style="margin:10px 0;"><img src="${r.uplatnicaUrl}" style="width:100%;border-radius:10px;border:2px solid #e0e8ff;" /></div>` : '<div style="margin:8px 0;font-size:11px;color:#aaa;">Uplatnica nije priložena</div>'}
+      ${r.adminFotoUrl ? `<div style="margin:8px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📷 Foto uz račun:</div><img src="${r.adminFotoUrl}" style="width:100%;border-radius:10px;border:2px solid rgba(255,255,255,0.1);" /></div>` : ''}
+      ${r.uplatnicaUrl ? `<div style="margin:10px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" style="width:100%;border-radius:10px;border:2px solid rgba(78,205,196,0.3);" /></div>` : '<div style="margin:8px 0;font-size:11px;color:#aaa;">Uplatnica nije priložena</div>'}
       <div style="display:flex;gap:6px;margin-top:8px;">
         <button class="btn-sm" style="flex:1;background:#E0FBF0;color:#1A8B4D;border:1px solid rgba(45,190,108,0.3);" onclick="confirmPayment('${r.id}')">✓ Potvrdi</button>
         <button class="btn-sm btn-block" onclick="rejectPayment('${r.id}')">✗ Odbij</button>
@@ -953,6 +963,26 @@ function populateKupacSelect(kupci) {
     kupci.map(k => `<option value="${k.id}" data-name="${k.name}">${k.name}</option>`).join('');
 }
 
+let _racunFotoBase64 = null;
+
+function previewRacunFoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _racunFotoBase64 = e.target.result;
+    document.getElementById('racun-foto-img').src = _racunFotoBase64;
+    document.getElementById('racun-foto-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearRacunFoto() {
+  _racunFotoBase64 = null;
+  document.getElementById('racun-foto-preview').style.display = 'none';
+  document.getElementById('racun-foto-input').value = '';
+}
+
 async function addRacun() {
   const sel = document.getElementById('racun-kupac-sel');
   const kupacId = sel.value;
@@ -965,15 +995,17 @@ async function addRacun() {
   const today = new Date().toISOString().slice(0,10);
   const broj = Math.floor(1000 + Math.random() * 9000);
 
-  await addDoc(collection(db, 'racuni'), {
+  const racunData = {
     adminId: window._currentUser.uid,
     kupacId, kupacName, iznos, opis,
     status: 'novo', paketStatus: 'prep',
     datum: today, broj,
     createdAt: new Date().toISOString()
-  });
+  };
+  if (_racunFotoBase64) racunData.adminFotoUrl = _racunFotoBase64;
 
-  // Save notification for kupac
+  await addDoc(collection(db, 'racuni'), racunData);
+
   await addDoc(collection(db, 'notifikacije'), {
     userId: kupacId,
     tip: 'nova_racun',
@@ -984,6 +1016,7 @@ async function addRacun() {
 
   document.getElementById('racun-iznos').value = '';
   document.getElementById('racun-opis').value = '';
+  clearRacunFoto();
   showToast('✅ Račun kreiran!');
 }
 
@@ -1416,6 +1449,7 @@ function kRacunCard(r, showUpload, showArhiva) {
     </div>`;
   if (r.opis) html += `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
   html += `<div style="font-size:22px;font-weight:800;color:#0A1428;margin-bottom:8px;">${iznos} RSD</div>`;
+  if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:#7A90BB;margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" style="width:100%;border-radius:10px;border:2px solid #e0e8ff;" /></div>`;
   html += `<div style="display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #F0F2F8;">
     <div class="k-paket-dot ${ps}"></div>
     <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div></div>`;
