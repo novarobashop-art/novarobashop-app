@@ -510,13 +510,13 @@ select.inp-dark option{background:#0d1c2e;}
         <input type="text" id="admin-poruke-search" placeholder="🔍 @tiktok..." oninput="filterAdminPoruke(this.value)"
           style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'DM Sans';outline:none;width:140px;" />
       </div>
-      <!-- DEBUG TEST BUTTON - REMOVE LATER -->
-      <div id="debug-test-box" style="background:rgba(255,0,0,0.1);border:1px solid red;border-radius:10px;padding:12px;margin-bottom:12px;">
-        <div style="font-size:12px;color:#ff6666;font-weight:700;margin-bottom:8px;">🔧 TEST - Direktno pošalji notifikaciju kupcu</div>
-        <input id="debug-kupac-id" class="inp-dark" placeholder="Upiši kupac UID..." style="margin-bottom:6px;" />
-        <input id="debug-tekst" class="inp-dark" placeholder="Test poruka..." style="margin-bottom:6px;" />
-        <button onclick="debugSendToKupac()" style="background:red;color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:'DM Sans';">TEST POŠALJI</button>
-        <div id="debug-result" style="margin-top:6px;font-size:11px;color:#aaa;"></div>
+
+      <div style="background:rgba(255,100,0,0.1);border:1px solid orange;border-radius:10px;padding:10px;margin-bottom:12px;">
+        <div style="font-size:11px;color:orange;font-weight:700;margin-bottom:6px;">🔧 DIRECT TEST</div>
+        <input id="dt-uid" class="inp-dark" placeholder="Kupac UID..." style="margin-bottom:4px;font-size:12px;" value="7yebOcQlnWU7KB5iCGQ99pQZYSI3" />
+        <input id="dt-msg" class="inp-dark" placeholder="Poruka..." style="margin-bottom:4px;font-size:12px;" value="Test od admina" />
+        <button onclick="directTest()" style="width:100%;background:orange;color:#000;border:none;border-radius:8px;padding:8px;font-weight:800;cursor:pointer;font-family:'DM Sans';font-size:13px;">🚀 DIREKTNO POŠALJI</button>
+        <div id="dt-result" style="margin-top:4px;font-size:11px;color:#aaa;word-break:break-all;"></div>
       </div>
       <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
       <!-- Poruke od Haupta -->
@@ -1293,6 +1293,29 @@ async function debugSendToKupac() {
   } catch(err) {
     res.textContent = '❌ GREŠKA: ' + (err.code || err.message);
     res.style.color = 'red';
+  }
+}
+
+async function directTest() {
+  const uid = document.getElementById('dt-uid').value.trim();
+  const msg = document.getElementById('dt-msg').value.trim();
+  const res = document.getElementById('dt-result');
+  res.style.color = '#aaa';
+  res.textContent = '⏳ Pokušavam...';
+  try {
+    const { db, collection, addDoc } = window._fb;
+    const docRef = await addDoc(collection(db, 'notifikacije'), {
+      userId: uid,
+      tip: 'poruka_od_admina',
+      poruka: '📩 ' + msg,
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+    res.style.color = '#00ff88';
+    res.textContent = '✅ OK! Doc ID: ' + docRef.id;
+  } catch(e) {
+    res.style.color = 'red';
+    res.textContent = '❌ ' + (e.code||e.message||JSON.stringify(e));
   }
 }
 
