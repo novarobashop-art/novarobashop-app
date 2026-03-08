@@ -1,3 +1,10 @@
+// ===== NOVAROBASHOP SERVICE WORKER =====
+// VERSION: 202603081400
+// ⚠️ Promeni VERSION broj svaki put kad uploaduješ novu verziju!
+const SW_VERSION = '202603081400';
+const CACHE_NAME = 'nvrs-' + SW_VERSION;
+
+// ── Firebase Push Notifications ──
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -23,43 +30,68 @@ messaging.onBackgroundMessage(function(payload) {
   });
 });
 
-// ── AUTO UPDATE: Neue Version → Cache leeren → Seite neu laden ──
-const CACHE_NAME = 'novarobashop-v1';
-
-// Bei Installation: sofort aktivieren
+// ── Install: odmah preuzmi kontrolu ──
 self.addEventListener('install', function(e) {
-  self.skipWaiting();
+  e.waitUntil(self.skipWaiting());
 });
 
-// Bei Aktivierung: alten Cache löschen
+// ── Activate: obriši SVE stare cache verzije ──
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.map(function(key) {
+          if (key !== CACHE_NAME) {
+            console.log('[SW] Brišem stari cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
     }).then(function() {
-      return self.clients.claim();
+      console.log('[SW] Nova verzija aktivna:', SW_VERSION);
+      return self.clients.matchAll({ type: 'window' }).then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({ type: 'SW_UPDATED', version: SW_VERSION });
+        });
+        return self.clients.claim();
+      });
     })
   );
 });
 
-// Alle Requests durchlassen (kein Caching) - immer frische Version
+// ── Fetch: HTML uvek svež, ostalo iz cache-a ──
 self.addEventListener('fetch', function(e) {
-  // Nur HTML Seite abfangen - immer vom Netzwerk holen
-  if (e.request.url.includes('novarobashop.html')) {
+  const url = e.request.url;
+
+  // HTML stranica - uvek sa mreže
+  if (url.includes('.html')) {
     e.respondWith(
-      fetch(e.request, { cache: 'no-store' }).catch(function() {
-        return caches.match(e.request);
-      })
+      fetch(e.request, { cache: 'no-store' })
+        .catch(function() { return caches.match(e.request); })
     );
     return;
   }
-  // Alles andere normal durchlassen
-  e.respondWith(fetch(e.request));
+
+  // Firebase i Google APIs - uvek sa mreže
+  if (url.includes('firebase') || url.includes('googleapis') || url.includes('gstatic')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // Ostalo (ikone, fontovi) - cache
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
+      return cached || fetch(e.request).then(function(response) {
+        return caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(e.request, response.clone());
+          return response;
+        });
+      });
+    })
+  );
 });
 
-// Nachricht vom Tab empfangen: neue Version verfügbar
+// ── Poruka od stranice ──
 self.addEventListener('message', function(e) {
   if (e.data && e.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
