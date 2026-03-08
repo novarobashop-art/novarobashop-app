@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603081342">
+<html lang="sr" data-version="202603081352">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -64,10 +64,30 @@
   const storage = getStorage(app);
   window._fb = { auth, db, messaging, storage, ref, uploadString, getDownloadURL, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, getToken, onMessage };
 
-  // Registruj Service Worker
+  // Registruj Service Worker + Auto Update
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/novarobashop-app/sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
+      .then(reg => {
+        console.log('SW registered:', reg.scope);
+        // Provjeri odmah i svakih 2 minute da li ima nova verzija
+        function checkSWUpdate() {
+          reg.update().then(() => {
+            if (reg.waiting) {
+              // Nova verzija čeka - pošalji signal i reload
+              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        }
+        setTimeout(checkSWUpdate, 10000);
+        setInterval(checkSWUpdate, 120000);
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) checkSWUpdate();
+        });
+        // Kad SW preuzme kontrolu - reload stranice
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload(true);
+        });
+      })
       .catch(err => console.log('SW error:', err));
   }
 
