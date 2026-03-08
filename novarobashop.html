@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603081253">
+<html lang="sr" data-version="202603081256">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -23,25 +23,25 @@
       const newV = match[1];
       const curV = document.documentElement.getAttribute('data-version');
       if (newV && curV && newV !== curV) {
+        var old = document.getElementById('_update_banner');
+        if (old) return;
         const toast = document.createElement('div');
-        toast.innerHTML = '🔄 Nova verzija dostupna! <b style="cursor:pointer;text-decoration:underline;" onclick="location.reload(true)">Klikni ovde da ažuriraš</b>';
+        toast.id = '_update_banner';
+        toast.innerHTML = '🔄 Nova verzija dostupna! <b style="cursor:pointer;text-decoration:underline;" onclick="location.reload(true)">Klikni ovde</b>';
         toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2E6BE6;color:white;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;';
         document.body.appendChild(toast);
       }
     } catch(e) {}
   }
-  // Provjeri na učitavanju i svakih 90 sekundi
   window.addEventListener('load', function() {
     setTimeout(checkUpdate, 5000);
     setInterval(checkUpdate, 90000);
   });
-  // Provjeri kad korisnik vrati tab (fokus)
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) checkUpdate();
   });
 })();
 </script>
-
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script type="module">
@@ -623,6 +623,10 @@ select.inp-dark option{background:#0d1c2e;}
     <div style="font-size:13px;font-weight:700;color:#1A8B4D;margin-bottom:12px;">🟢 Plaćeno</div>
     <div id="k-arhiva-list"></div>
   </div>
+  <div id="ktab-poslato" style="padding:16px;display:none;">
+    <div style="font-size:13px;font-weight:700;color:#4ECDC4;margin-bottom:12px;">📦 Poslato</div>
+    <div id="k-poslato-list"></div>
+  </div>
   <div id="ktab-podrska" style="padding:16px;display:none;">
     <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:6px;">💬 Podrška i Uplata</div>
 
@@ -687,6 +691,10 @@ select.inp-dark option{background:#0d1c2e;}
     <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟢</div>
       <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:#aaa;">Arhiva</div>
+    </div>
+    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+      <div class="k-nav-icon">📦</div>
+      <div class="k-nav-lbl" id="knav-lbl-poslato" style="color:#aaa;">Poslato</div>
     </div>
     <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
       <div class="k-nav-icon">🔔</div>
@@ -1500,9 +1508,10 @@ function previewRacunFoto(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    _racunFotoBase64 = e.target.result;
-    document.getElementById('racun-foto-img').src = _racunFotoBase64;
+  reader.onload = async e => {
+    const compressed = await compressImage(e.target.result, 800, 0.75);
+    _racunFotoBase64 = compressed;
+    document.getElementById('racun-foto-img').src = compressed;
     document.getElementById('racun-foto-preview').style.display = 'block';
   };
   reader.readAsDataURL(file);
@@ -1532,7 +1541,16 @@ async function addRacun() {
     datum: today, broj,
     createdAt: new Date().toISOString()
   };
-  if (_racunFotoBase64) racunData.adminFotoUrl = _racunFotoBase64;
+  if (_racunFotoBase64) {
+    showToast('⏳ Šaljem sliku...', 15000);
+    const path = 'racuni/' + window._currentUser.uid + '/' + Date.now() + '.jpg';
+    const fotoUrl = await uploadFotoToStorage(_racunFotoBase64, path);
+    if (fotoUrl) {
+      racunData.adminFotoUrl = fotoUrl;
+    } else {
+      showToast('⚠️ Slika nije mogla biti poslana, račun se šalje bez slike.');
+    }
+  }
 
   await addDoc(collection(db, 'racuni'), racunData);
 
@@ -1552,7 +1570,12 @@ async function addRacun() {
   document.getElementById('racun-kupac-search').value = '';
   document.getElementById('racun-kupac-selected').style.display = 'none';
   clearRacunFoto();
-  showToast('✅ Račun kreiran!');
+
+  if (racunData.adminFotoUrl) {
+    showToast('✅ Račun sa slikom kreiran i poslat kupcu!');
+  } else {
+    showToast('✅ Račun kreiran i poslat kupcu!');
+  }
 }
 
 async function setPaket(racunId, status, btn) {
@@ -2049,9 +2072,12 @@ function renderKAllRacuni(racuni) {
   console.log('renderKAllRacuni - sve racune:', racuni.map(r => ({id:r.id.slice(-4), status:r.status, paketStatus:r.paketStatus})));
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => r.status === 'placeno' || r.paketStatus === 'ship' || r.status === 'storno'));
+  renderKArhiva(racuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship' && r.status !== 'storno'));
+  renderKPoslato(racuni.filter(r => r.paketStatus === 'ship'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
+  const p = racuni.filter(r => r.paketStatus === 'ship').length;
+  document.getElementById('knav-lbl-poslato').textContent = 'Poslato' + (p > 0 ? ' (' + p + ')' : '');
 }
 
 function kRacunCard(r, showUpload, showArhiva) {
@@ -2130,14 +2156,21 @@ function renderKArhiva(racuni) {
   el.innerHTML = racuni.map(r => kRacunCard(r, false, true)).join('');
 }
 
+function renderKPoslato(racuni) {
+  const el = document.getElementById('k-poslato-list');
+  if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema poslatih paketa.</div>'; return; }
+  el.innerHTML = '<div style="background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1A8B8B;">📦 Vaši paketi su na putu! Očekujte isporuku uskoro.</div>'
+    + racuni.map(r => kRacunCard(r, false, true)).join('');
+}
+
 function kNavTab(name) {
-  ['racuni','ceka','arhiva','notif','podrska'].forEach(n => {
+  ['racuni','ceka','arhiva','poslato','notif','podrska'].forEach(n => {
     document.getElementById('ktab-' + n).style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
     if (lbl) lbl.style.color = '#aaa';
   });
   document.getElementById('ktab-' + name).style.display = 'block';
-  const colors = { racuni:'var(--red)', ceka:'#9B7200', arhiva:'#1A8B4D', notif:'var(--blue)', podrska:'var(--blue)' };
+  const colors = { racuni:'var(--red)', ceka:'#9B7200', arhiva:'#1A8B4D', poslato:'#4ECDC4', notif:'var(--blue)', podrska:'var(--blue)' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name];
   // Označi sve kao pročitano kad otvori notif tab
