@@ -1466,9 +1466,10 @@ function previewRacunFoto(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    _racunFotoBase64 = e.target.result;
-    document.getElementById('racun-foto-img').src = _racunFotoBase64;
+  reader.onload = async e => {
+    const compressed = await compressImage(e.target.result, 800, 0.75);
+    _racunFotoBase64 = compressed;
+    document.getElementById('racun-foto-img').src = compressed;
     document.getElementById('racun-foto-preview').style.display = 'block';
   };
   reader.readAsDataURL(file);
@@ -1498,7 +1499,11 @@ async function addRacun() {
     datum: today, broj,
     createdAt: new Date().toISOString()
   };
-  if (_racunFotoBase64) racunData.adminFotoUrl = _racunFotoBase64;
+  if (_racunFotoBase64) {
+    const path = 'racuni/' + window._currentUser.uid + '/' + Date.now() + '.jpg';
+    const fotoUrl = await uploadFotoToStorage(_racunFotoBase64, path);
+    if (fotoUrl) racunData.adminFotoUrl = fotoUrl;
+  }
 
   await addDoc(collection(db, 'racuni'), racunData);
 
