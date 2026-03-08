@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603081334">
+<html lang="sr" data-version="202603081342">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -22,19 +22,13 @@
       if (!match) return;
       const newV = match[1];
       const curV = document.documentElement.getAttribute('data-version');
-      if (newV && curV && newV !== curV) {
-        // Automatisch neu laden - Kunde merkt nichts
-        location.reload(true);
-      }
+      if (newV && curV && newV !== curV) location.reload(true);
     } catch(e) {}
   }
   window.addEventListener('load', function() {
-    // Erste Prüfung nach 10 Sekunden
     setTimeout(checkUpdate, 10000);
-    // Danach alle 2 Minuten
     setInterval(checkUpdate, 120000);
   });
-  // Sofort prüfen wenn Tab wieder geöffnet wird
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) checkUpdate();
   });
@@ -485,7 +479,7 @@ select.inp-dark option{background:#0d1c2e;}
         <label class="inp-label">Foto (opciono)</label>
         <input type="file" id="racun-foto-input" accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
         <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
-          <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;" />
+          <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
           <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Ukloni foto</button>
         </div>
         <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#aaa;cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">📷 Slikaj Foto</button>
@@ -1145,8 +1139,8 @@ function adminRacunCard(r) {
         <button class="paket-btn ${r.paketStatus==='cancel'?'sel-cancel':''}" onclick="setPaket('${r.id}','cancel',this)">❌ Storno</button>
         <button class="paket-btn" style="color:#ff4d4d;" onclick="deleteRacun('${r.id}')">🗑️ Obriši</button>
       </div>
-      ${r.adminFotoUrl ? `<div style="margin-top:10px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;" /></div>` : ''}
-      ${r.uplatnicaUrl ? `<div style="margin-top:8px;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(78,205,196,0.3);cursor:pointer;" /></div>` : ''}
+      ${r.adminFotoUrl ? `<div style="margin-top:10px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" /></div>` : ''}
+      ${r.uplatnicaUrl ? `<div style="margin-top:8px;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(78,205,196,0.3);cursor:pointer;display:block;" /></div>` : ''}
       ${r.status==='ceka' ? `<div style="margin-top:8px;display:flex;gap:6px;">
         <button class="btn-sm" style="flex:1;background:#E0FBF0;color:#1A8B4D;border:1px solid rgba(45,190,108,0.3);" onclick="confirmPayment('${r.id}')">✓ Potvrdi plaćanje</button>
         <button class="btn-sm btn-block" onclick="rejectPayment('${r.id}')">✗ Odbij</button>
@@ -1214,8 +1208,8 @@ function renderAPlacanja(racuni) {
         </div>` : '<span style="color:#888;">Nema podataka</span>'}
       </div>
       <div class="racun-bottom"><div class="racun-amt">${(r.iznos||0).toLocaleString()} RSD</div><span class="racun-badge rb-ceka">ČEKA</span></div>
-      ${r.adminFotoUrl ? `<div style="margin:8px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📷 Foto uz račun:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;" /></div>` : ''}
-      ${r.uplatnicaUrl ? `<div style="margin:10px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid rgba(78,205,196,0.3);cursor:pointer;" /></div>` : '<div style="margin:8px 0;font-size:11px;color:#aaa;">Uplatnica nije priložena</div>'}
+      ${r.adminFotoUrl ? `<div style="margin:8px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📷 Foto uz račun:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" /></div>` : ''}
+      ${r.uplatnicaUrl ? `<div style="margin:10px 0;"><div style="font-size:10px;color:var(--gray);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(78,205,196,0.3);cursor:pointer;display:block;" /></div>` : '<div style="margin:8px 0;font-size:11px;color:#aaa;">Uplatnica nije priložena</div>'}
       <div style="display:flex;gap:6px;margin-top:8px;">
         <button class="btn-sm" style="flex:1;background:#E0FBF0;color:#1A8B4D;border:1px solid rgba(45,190,108,0.3);" onclick="confirmPayment('${r.id}')">✓ Potvrdi</button>
         <button class="btn-sm btn-block" onclick="rejectPayment('${r.id}')">✗ Odbij</button>
@@ -1301,7 +1295,7 @@ function renderAdminPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;" />` : ''}
+      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />` : ''}
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
           <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
@@ -2110,7 +2104,7 @@ function kRacunCard(r, showUpload, showArhiva) {
     </div>`;
   if (r.opis) html += `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
   html += `<div style="font-size:22px;font-weight:800;color:#0A1428;margin-bottom:8px;">${iznos} RSD</div>`;
-  if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:#7A90BB;margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid #e0e8ff;cursor:pointer;" /></div>`;
+  if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:#7A90BB;margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
   html += `<div style="display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #F0F2F8;">
     <div class="k-paket-dot ${ps}"></div>
     <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div></div>`;
@@ -2128,7 +2122,7 @@ function kRacunCard(r, showUpload, showArhiva) {
   }
 
   if (r.uplatnicaUrl) {
-    html += `<div style="margin-top:10px;"><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:2px solid #e0e8ff;cursor:pointer;" /></div>`;
+    html += `<div style="margin-top:10px;"><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
   }
 
   html += '</div>';
@@ -2352,7 +2346,7 @@ function renderKPoruke(poruke) {
         </div>
       </div>
       <div style="font-size:14px;color:var(--dark);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;" />` : ''}
+      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;display:block;" />` : ''}
       ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <textarea id="kreply-text-${safeId}" style="width:100%;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:10px;font-size:13px;font-family:'DM Sans';outline:none;resize:none;color:var(--dark);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
         ${fotoButtonsHtml('k'+safeId, true)}
