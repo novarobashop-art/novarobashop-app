@@ -1500,9 +1500,14 @@ async function addRacun() {
     createdAt: new Date().toISOString()
   };
   if (_racunFotoBase64) {
+    showToast('⏳ Šaljem sliku...', 15000);
     const path = 'racuni/' + window._currentUser.uid + '/' + Date.now() + '.jpg';
     const fotoUrl = await uploadFotoToStorage(_racunFotoBase64, path);
-    if (fotoUrl) racunData.adminFotoUrl = fotoUrl;
+    if (fotoUrl) {
+      racunData.adminFotoUrl = fotoUrl;
+    } else {
+      showToast('⚠️ Slika nije mogla biti poslana, račun se šalje bez slike.');
+    }
   }
 
   await addDoc(collection(db, 'racuni'), racunData);
@@ -1523,7 +1528,12 @@ async function addRacun() {
   document.getElementById('racun-kupac-search').value = '';
   document.getElementById('racun-kupac-selected').style.display = 'none';
   clearRacunFoto();
-  showToast('✅ Račun kreiran!');
+
+  if (racunData.adminFotoUrl) {
+    showToast('✅ Račun sa slikom kreiran i poslat kupcu!');
+  } else {
+    showToast('✅ Račun kreiran i poslat kupcu!');
+  }
 }
 
 async function setPaket(racunId, status, btn) {
