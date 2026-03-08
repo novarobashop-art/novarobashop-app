@@ -589,6 +589,10 @@ select.inp-dark option{background:#0d1c2e;}
     <div style="font-size:13px;font-weight:700;color:#1A8B4D;margin-bottom:12px;">🟢 Plaćeno</div>
     <div id="k-arhiva-list"></div>
   </div>
+  <div id="ktab-poslato" style="padding:16px;display:none;">
+    <div style="font-size:13px;font-weight:700;color:#4ECDC4;margin-bottom:12px;">📦 Poslato</div>
+    <div id="k-poslato-list"></div>
+  </div>
   <div id="ktab-podrska" style="padding:16px;display:none;">
     <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:6px;">💬 Podrška i Uplata</div>
 
@@ -653,6 +657,10 @@ select.inp-dark option{background:#0d1c2e;}
     <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟢</div>
       <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:#aaa;">Arhiva</div>
+    </div>
+    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+      <div class="k-nav-icon">📦</div>
+      <div class="k-nav-lbl" id="knav-lbl-poslato" style="color:#aaa;">Poslato</div>
     </div>
     <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
       <div class="k-nav-icon">🔔</div>
@@ -1535,6 +1543,7 @@ async function addRacun() {
     showToast('✅ Račun kreiran i poslat kupcu!');
   }
 }
+}
 
 async function setPaket(racunId, status, btn) {
   if (status === 'cancel') {
@@ -2030,9 +2039,12 @@ function renderKAllRacuni(racuni) {
   console.log('renderKAllRacuni - sve racune:', racuni.map(r => ({id:r.id.slice(-4), status:r.status, paketStatus:r.paketStatus})));
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => r.status === 'placeno' || r.paketStatus === 'ship' || r.status === 'storno'));
+  renderKArhiva(racuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship' && r.status !== 'storno'));
+  renderKPoslato(racuni.filter(r => r.paketStatus === 'ship'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
+  const p = racuni.filter(r => r.paketStatus === 'ship').length;
+  document.getElementById('knav-lbl-poslato').textContent = 'Poslato' + (p > 0 ? ' (' + p + ')' : '');
 }
 
 function kRacunCard(r, showUpload, showArhiva) {
@@ -2111,14 +2123,21 @@ function renderKArhiva(racuni) {
   el.innerHTML = racuni.map(r => kRacunCard(r, false, true)).join('');
 }
 
+function renderKPoslato(racuni) {
+  const el = document.getElementById('k-poslato-list');
+  if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema poslatih paketa.</div>'; return; }
+  el.innerHTML = `<div style="background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1A8B8B;">📦 Vaši paketi su na putu! Očekujte isporuku uskoro.</div>`
+    + racuni.map(r => kRacunCard(r, false, true)).join('');
+}
+
 function kNavTab(name) {
-  ['racuni','ceka','arhiva','notif','podrska'].forEach(n => {
+  ['racuni','ceka','arhiva','poslato','notif','podrska'].forEach(n => {
     document.getElementById('ktab-' + n).style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
     if (lbl) lbl.style.color = '#aaa';
   });
   document.getElementById('ktab-' + name).style.display = 'block';
-  const colors = { racuni:'var(--red)', ceka:'#9B7200', arhiva:'#1A8B4D', notif:'var(--blue)', podrska:'var(--blue)' };
+  const colors = { racuni:'var(--red)', ceka:'#9B7200', arhiva:'#1A8B4D', poslato:'#4ECDC4', notif:'var(--blue)', podrska:'var(--blue)' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name];
   // Označi sve kao pročitano kad otvori notif tab
