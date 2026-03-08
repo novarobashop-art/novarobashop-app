@@ -1,17 +1,11 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603081438">
+<html lang="sr" data-version="202603081512">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#040810">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Novarobashop">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Novarobashop">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -75,21 +69,30 @@
     navigator.serviceWorker.register('/novarobashop-app/sw.js')
       .then(reg => {
         console.log('SW registered:', reg.scope);
-        // Provjeri odmah i svakih 2 minute da li ima nova verzija
+
+        // Slušaj poruku od SW da je nova verzija aktivna
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SW_UPDATED') {
+            console.log('Nova SW verzija:', e.data.version);
+            window.location.reload(true);
+          }
+        });
+
+        // Provjeri update odmah i svakih 2 minute
         function checkSWUpdate() {
           reg.update().then(() => {
             if (reg.waiting) {
-              // Nova verzija čeka - pošalji signal i reload
               reg.waiting.postMessage({ type: 'SKIP_WAITING' });
             }
-          });
+          }).catch(()=>{});
         }
-        setTimeout(checkSWUpdate, 10000);
+        setTimeout(checkSWUpdate, 8000);
         setInterval(checkSWUpdate, 120000);
         document.addEventListener('visibilitychange', () => {
           if (!document.hidden) checkSWUpdate();
         });
-        // Kad SW preuzme kontrolu - reload stranice
+
+        // Reload kad SW preuzme kontrolu
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload(true);
         });
@@ -342,86 +345,6 @@ select.inp-dark option{background:#0d1c2e;}
 </style>
 </head>
 <body>
-<!-- PWA Install Banner -->
-<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;padding:12px 16px;background:linear-gradient(135deg,#0d1f3c,#040810);border-top:1px solid rgba(78,205,196,0.3);box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
-  <div style="display:flex;align-items:center;gap:12px;max-width:500px;margin:0 auto;">
-    <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;" />
-    <div style="flex:1;">
-      <div style="font-size:14px;font-weight:800;color:white;">Dodaj na početni ekran</div>
-      <div style="font-size:11px;color:var(--gray);margin-top:2px;">Instalirajte app za brži pristup</div>
-    </div>
-    <button id="pwa-install-btn" style="background:var(--teal);color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Instaliraj</button>
-    <button onclick="document.getElementById('pwa-banner').style.display='none';localStorage.setItem('pwa-dismissed','1')" style="background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;padding:4px;">✕</button>
-  </div>
-</div>
-
-<!-- iOS Install Uputstvo -->
-<div id="ios-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;padding:16px;background:linear-gradient(135deg,#0d1f3c,#040810);border-top:1px solid rgba(78,205,196,0.3);box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
-  <div style="max-width:500px;margin:0 auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:white;">📱 Dodaj na početni ekran</div>
-      <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('pwa-dismissed','1')" style="background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;">✕</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;flex:1;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">1️⃣</span>
-        <span style="font-size:12px;color:white;">Pritisnite <b>Share</b> dugme <span style="font-size:16px;">⬆️</span> dole</span>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;flex:1;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">2️⃣</span>
-        <span style="font-size:12px;color:white;">Izaberite <b>"Dodaj na početni ekran"</b></span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// PWA Install Logic
-(function(){
-  // Ne prikazuj ako je već odbijen ili instaliran
-  if (localStorage.getItem('pwa-dismissed') || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
-
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  const isAndroid = /android/i.test(navigator.userAgent);
-  let deferredPrompt = null;
-
-  // Android: čekaj beforeinstallprompt event
-  window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    setTimeout(function() {
-      if (!localStorage.getItem('pwa-dismissed')) {
-        document.getElementById('pwa-banner').style.display = 'block';
-      }
-    }, 3000);
-  });
-
-  document.getElementById('pwa-install-btn').addEventListener('click', function() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function(result) {
-        if (result.outcome === 'accepted') {
-          document.getElementById('pwa-banner').style.display = 'none';
-          localStorage.setItem('pwa-dismissed', '1');
-        }
-        deferredPrompt = null;
-      });
-    }
-  });
-
-  // iOS Safari: pokaži uputstvo
-  if (isIOS && /safari/i.test(navigator.userAgent)) {
-    setTimeout(function() {
-      if (!localStorage.getItem('pwa-dismissed')) {
-        document.getElementById('ios-banner').style.display = 'block';
-      }
-    }, 3000);
-  }
-})();
-</script>
-
 
 <div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;">
   <div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;">Nova<span style="color:var(--gold);">roba</span>shop</div>
