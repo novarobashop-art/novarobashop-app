@@ -1,7 +1,7 @@
 // ===== NOVAROBASHOP SERVICE WORKER =====
 // VERSION: 202603081400
 // ⚠️ Promeni VERSION broj svaki put kad uploaduješ novu verziju!
-const SW_VERSION = '202603121400';
+const SW_VERSION = '202603121500';
 const CACHE_NAME = 'nvrs-' + SW_VERSION;
 
 // ── Firebase Push Notifications ──
