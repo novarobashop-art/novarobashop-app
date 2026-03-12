@@ -1,7 +1,7 @@
 // ===== NOVAROBASHOP SERVICE WORKER =====
-// VERSION: 202603081400
+// VERSION: 202603121700
 // ⚠️ Promeni VERSION broj svaki put kad uploaduješ novu verziju!
-const SW_VERSION = '202603121600';
+const SW_VERSION = '202603121700';
 const CACHE_NAME = 'nvrs-' + SW_VERSION;
 
 // ── Firebase Push Notifications ──
@@ -35,25 +35,24 @@ self.addEventListener('install', function(e) {
   e.waitUntil(self.skipWaiting());
 });
 
-// ── Activate: obriši SVE stare cache verzije ──
+// ── Activate: NUCLEAR RESET - briše SVE cache i reloaduje sve klijente ──
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.map(function(key) {
-          if (key !== CACHE_NAME) {
-            console.log('[SW] Brišem stari cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
+      return Promise.all(keys.map(function(key) {
+        console.log('[SW] Brišem cache:', key);
+        return caches.delete(key);
+      }));
     }).then(function() {
       console.log('[SW] Nova verzija aktivna:', SW_VERSION);
-      return self.clients.matchAll({ type: 'window' }).then(function(clients) {
-        clients.forEach(function(client) {
-          client.postMessage({ type: 'SW_UPDATED', version: SW_VERSION });
-        });
-        return self.clients.claim();
+      return self.clients.claim();
+    }).then(function() {
+      return self.clients.matchAll({ type: 'window' });
+    }).then(function(clients) {
+      clients.forEach(function(client) {
+        client.postMessage({ type: 'SW_UPDATED', version: SW_VERSION });
+        // Force reload svakog klijenta
+        client.navigate(client.url);
       });
     })
   );

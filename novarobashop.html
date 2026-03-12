@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603121600">
+<html lang="sr" data-version="202603121700">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -60,9 +60,11 @@
       if (newV && curV && newV !== curV) location.reload(true);
     } catch(e) {}
   }
+  // Sofort beim Start und dann alle 30 Sekunden
+  checkUpdate();
   window.addEventListener('load', function() {
-    checkUpdate(); // sofort beim Start!
-    setInterval(checkUpdate, 120000);
+    setTimeout(checkUpdate, 2000);
+    setInterval(checkUpdate, 30000);
   });
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) checkUpdate();
