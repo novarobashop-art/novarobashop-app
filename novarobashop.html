@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603121400">
+<html lang="sr" data-version="202603121500">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -26,7 +26,7 @@
     } catch(e) {}
   }
   window.addEventListener('load', function() {
-    setTimeout(checkUpdate, 10000);
+    checkUpdate(); // sofort beim Start!
     setInterval(checkUpdate, 120000);
   });
   document.addEventListener('visibilitychange', function() {
@@ -45,7 +45,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
-    authDomain: "novarobashop-art.github.io",
+    authDomain: "novarobashop-e2a61.firebaseapp.com",
     projectId: "novarobashop-e2a61",
     storageBucket: "novarobashop-e2a61.firebasestorage.app",
     messagingSenderId: "262847590425",
