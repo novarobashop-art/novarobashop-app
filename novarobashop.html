@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603121500">
+<html lang="sr" data-version="202603121600">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,6 +12,41 @@
 <link rel="manifest" href="manifest.json">
 <title>Novarobashop</title>
 <script>
+// === BROWSER CHECK - TikTok/WhatsApp/Instagram verboten ===
+(function() {
+  var ua = navigator.userAgent || '';
+  var isBad = /FBAN|FBAV|Instagram|Musical.ly|TikTok|BytedanceWebview|FB_IAB|FBIOS|Twitter|Line\/|KAKAOTALK|MicroMessenger/i.test(ua);
+  if (isBad) {
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.innerHTML = '';
+      document.body.style.cssText = 'margin:0;padding:0;background:#040810;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;';
+      document.body.innerHTML = `
+        <div style="text-align:center;padding:30px;max-width:340px;">
+          <div style="font-size:60px;margin-bottom:20px;">🚫</div>
+          <h2 style="color:#fff;font-size:22px;margin-bottom:12px;">Ne možeš se prijaviti ovde!</h2>
+          <p style="color:#aaa;font-size:15px;margin-bottom:24px;line-height:1.5;">
+            Google prijava ne radi unutar TikTok ili WhatsApp pregledača.<br><br>
+            Moraš otvoriti stranicu u <strong style="color:#fff">Chrome</strong> ili <strong style="color:#fff">Safari</strong> pregledaču.
+          </p>
+          <div style="background:#1a2235;border-radius:16px;padding:20px;margin-bottom:20px;">
+            <p style="color:#fff;font-size:14px;font-weight:600;margin:0 0 12px;">Kako otvoriti u Chrome-u:</p>
+            <p style="color:#aaa;font-size:13px;margin:0;line-height:1.8;">
+              1️⃣ Pritisni <strong style="color:#fff">⋮</strong> (tri tačke) gore desno<br>
+              2️⃣ Izaberi <strong style="color:#fff">"Otvori u pregledaču"</strong><br>
+              ili<br>
+              3️⃣ Kopiraj link i otvori u <strong style="color:#fff">Chrome</strong>
+            </p>
+          </div>
+          <button onclick="window.open('https://novarobashop-art.github.io/novarobashop-app/novarobashop.html','_blank')" 
+            style="background:#2563eb;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:16px;font-weight:600;cursor:pointer;width:100%;">
+            🌐 Otvori u Chrome-u
+          </button>
+        </div>
+      `;
+    });
+    return;
+  }
+})();
 // === AUTO UPDATE CHECK ===
 (function() {
   async function checkUpdate() {
