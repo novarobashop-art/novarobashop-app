@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603121200">
+<html lang="sr" data-version="202603121400">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -45,7 +45,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
-    authDomain: "novarobashop-e2a61.firebaseapp.com",
+    authDomain: "novarobashop-art.github.io",
     projectId: "novarobashop-e2a61",
     storageBucket: "novarobashop-e2a61.firebasestorage.app",
     messagingSenderId: "262847590425",
@@ -112,7 +112,9 @@
       if (user.uid === HAUPT_UID) {
         await signOut(auth);
         window.showLoginScreen();
-        setTimeout(() => {
+        // Safety timeout - nicht unterbrechen wenn Redirect läuft
+setTimeout(() => {
+  if (window._redirectInProgress) return;
           const err = document.getElementById('login-error');
           err.textContent = '🔒 Haupt nalog nije dostupan ovde.';
           err.classList.add('show');
@@ -130,7 +132,9 @@
         if (userData.blocked) {
           await signOut(auth);
           window.showLoginScreen();
-          setTimeout(() => {
+          // Safety timeout - nicht unterbrechen wenn Redirect läuft
+setTimeout(() => {
+  if (window._redirectInProgress) return;
             const err = document.getElementById('login-error');
             err.textContent = '🔒 Vaš nalog je blokiran. Kontaktirajte podršku.';
             err.classList.add('show');
@@ -144,7 +148,9 @@
           if (userData.licencaDo && userData.licencaDo < today) {
             await signOut(auth);
             window.showLoginScreen();
-            setTimeout(() => {
+            // Safety timeout - nicht unterbrechen wenn Redirect läuft
+setTimeout(() => {
+  if (window._redirectInProgress) return;
               const err = document.getElementById('login-error');
               err.textContent = '🔒 Vaša licenca je istekla. Kontaktirajte Haupt.';
               err.classList.add('show');
@@ -803,13 +809,16 @@ function showToast(msg, dur=3000) {
 }
 
 // Safety: if loading hangs AND no user logged in, show login after 15s
+// Safety timeout - nicht unterbrechen wenn Redirect läuft
 setTimeout(() => {
+  if (window._redirectInProgress) return;
   const loading = document.getElementById('loading');
   if (loading && loading.style.display !== 'none' && !window._currentUser) {
     console.warn('Loading timeout - forcing login screen');
     _showLoginScreen();
   }
-}, 15000);
+  // Timeout verlängert + Redirect-Schutz
+}, 25000);
 
 function _showLoginScreen() {
   document.getElementById('loading').style.display = 'none';
@@ -847,12 +856,24 @@ function _showRegistrationScreen() {
 async function doGoogleLogin() {
   const btn = document.getElementById('google-btn');
   btn.disabled = true;
-  btn.textContent = 'Prijavljivanje...';
+  btn.textContent = 'Učitavanje...';
   try {
-    const { auth, signInWithRedirect, googleProvider } = window._fb;
-    await signInWithRedirect(auth, googleProvider);
-    // Seite wird weitergeleitet zu Google - kein Popup nötig
+    const { auth, signInWithPopup, googleProvider } = window._fb;
+    await signInWithPopup(auth, googleProvider);
+    // onAuthStateChanged kümmert sich um den Rest
   } catch(err) {
+    const code = err.code || '';
+    // Popup blockiert → Redirect als Fallback
+    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user') {
+      try {
+        const { auth, signInWithRedirect, googleProvider } = window._fb;
+        sessionStorage.setItem('googleRedirect', '1');
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      } catch(err2) {
+        console.error('Redirect fallback fehler:', err2);
+      }
+    }
     document.getElementById('login-error').textContent = 'Google prijava nije uspela. Pokušajte ponovo.';
     document.getElementById('login-error').classList.add('show');
     btn.disabled = false;
@@ -860,8 +881,10 @@ async function doGoogleLogin() {
   }
 }
 
-// ===== GOOGLE REDIRECT RESULT (wird nach Rückkehr von Google aufgerufen) =====
+// ===== GOOGLE REDIRECT RESULT (Fallback nach Redirect) =====
 async function checkRedirectResult() {
+  if (!sessionStorage.getItem('googleRedirect')) return;
+  sessionStorage.removeItem('googleRedirect');
   let tries = 0;
   while (!window._fb && tries < 50) {
     await new Promise(r => setTimeout(r, 100));
@@ -870,7 +893,7 @@ async function checkRedirectResult() {
   if (!window._fb) return;
   try {
     const { auth, getRedirectResult } = window._fb;
-    const result = await getRedirectResult(auth);
+    await getRedirectResult(auth);
   } catch(err) {
     console.error('Redirect result Fehler:', err);
     const loginError = document.getElementById('login-error');
