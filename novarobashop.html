@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-version="202603121700">
+<html lang="sr" data-version="202603141800">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -2292,14 +2292,19 @@ function openUplatnica(racunId, mode) {
 async function uploadUplatnica(event) {
   const file = event.target.files[0];
   if (!file || !_currentUplatnicaRacunId) return;
-  showToast('Učitavanje slike...');
+  showToast('⏳ Slanje slike...');
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const base64 = e.target.result;
-    const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
     try {
+      // Kompresuj sliku pre uploada
+      const compressed = await compressImage(e.target.result, 800, 0.75);
+      // Upload u Firebase Storage (ne Firestore!)
+      const path = 'uplatnice/' + _currentUplatnicaRacunId + '_' + Date.now() + '.jpg';
+      const uplatnicaUrl = await uploadFotoToStorage(compressed, path);
+      if (!uplatnicaUrl) { showToast('❌ Greška pri uploadu slike. Pokušaj ponovo.'); return; }
+      const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
       await updateDoc(doc(db, 'racuni', _currentUplatnicaRacunId), {
-        status: 'ceka', uplatnicaUrl: base64, uplatnicaVreme: new Date().toISOString()
+        status: 'ceka', uplatnicaUrl: uplatnicaUrl, uplatnicaVreme: new Date().toISOString()
       });
       // Obavesti admina
       const racunSnap = await getDoc(doc(db, 'racuni', _currentUplatnicaRacunId));
@@ -2315,7 +2320,10 @@ async function uploadUplatnica(event) {
       sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`);
       showToast('✅ Uplatnica poslata! Admin proverava.');
       kNavTab('ceka');
-    } catch(err) { showToast('Greška pri slanju.'); }
+    } catch(err) {
+      console.error('uploadUplatnica error:', err);
+      showToast('❌ Greška pri slanju. Pokušaj ponovo.');
+    }
     event.target.value = '';
   };
   reader.readAsDataURL(file);
