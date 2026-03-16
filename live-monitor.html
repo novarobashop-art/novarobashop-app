@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔴 LIVE Monitor — Novarobashop</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, orderBy, onSnapshot, limit }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const cfg = {
+    apiKey:"AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
+    authDomain:"novarobashop-e2a61.firebaseapp.com",
+    projectId:"novarobashop-e2a61",
+    storageBucket:"novarobashop-e2a61.firebasestorage.app",
+    messagingSenderId:"262847590425",
+    appId:"1:262847590425:web:16e3f34e21a2661d0dfa88"
+  };
+  const app=initializeApp(cfg), auth=getAuth(app), db=getFirestore(app);
+  window._db=db; window._auth=auth;
+  window._signIn=signInWithEmailAndPassword;
+  window._signOut=signOut;
+  window._fb={ collection, query, where, orderBy, onSnapshot, limit };
+
+  onAuthStateChanged(auth, user => {
+    if(user){ 
+      document.getElementById('ls').style.display='none';
+      document.getElementById('ms').style.display='flex';
+      window._uid=user.uid;
+      startMonitor();
+    } else {
+      document.getElementById('ls').style.display='flex';
+      document.getElementById('ms').style.display='none';
+      _unsubs.forEach(u=>{try{u();}catch(e){}});
+      _unsubs=[];
+    }
+  });
+</script>
+<style>
+:root{--dark:#06090f;--d2:#0d1626;--teal:#14b8a6;--gold:#f59e0b;--green:#22c55e;--red:#ef4444;--orange:#f97316;--gray:#64748b;--gray2:#94a3b8;--brd:rgba(148,163,184,0.1);--card:rgba(13,22,38,0.9);}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:white;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:rgba(148,163,184,0.2);border-radius:4px;}
+
+/* LOGIN */
+#ls{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
+  background:radial-gradient(ellipse at 30% 30%,rgba(20,184,166,0.07) 0%,transparent 55%),
+             radial-gradient(ellipse at 70% 70%,rgba(239,68,68,0.06) 0%,transparent 55%),
+             linear-gradient(160deg,#0d1626,#06090f);}
+.lbox{background:rgba(13,22,38,0.95);border:1px solid rgba(148,163,184,0.12);border-radius:24px;padding:32px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.llogo{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;text-align:center;margin-bottom:4px;}
+.llogo span{color:var(--gold);}
+.lsub{text-align:center;font-size:11px;color:var(--gray2);margin-bottom:24px;text-transform:uppercase;letter-spacing:2px;}
+.linp{width:100%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(148,163,184,0.12);border-radius:12px;padding:12px 14px;color:white;font-size:14px;font-family:'DM Sans';outline:none;margin-bottom:12px;transition:border-color 0.2s;}
+.linp:focus{border-color:var(--teal);}
+.lbtn{width:100%;background:linear-gradient(135deg,var(--teal),#0d9488);border:none;border-radius:12px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 4px 18px rgba(20,184,166,0.3);}
+.lerr{color:#fca5a5;font-size:13px;text-align:center;margin-top:8px;min-height:18px;}
+
+/* MONITOR */
+#ms{display:none;flex-direction:column;height:100vh;}
+
+/* TOPBAR */
+.tb{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;height:54px;background:rgba(6,9,15,0.96);border-bottom:1px solid var(--brd);backdrop-filter:blur(20px);flex-shrink:0;gap:12px;}
+.tb-logo{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;white-space:nowrap;}
+.tb-logo span{color:var(--gold);}
+.live-pill{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:800;letter-spacing:1px;box-shadow:0 3px 12px rgba(220,38,38,0.5);animation:glow 2s ease-in-out infinite;flex-shrink:0;}
+.ldot{width:8px;height:8px;border-radius:50%;background:white;animation:blink 1s infinite;}
+@keyframes glow{0%,100%{box-shadow:0 3px 12px rgba(220,38,38,0.4)}50%{box-shadow:0 3px 24px rgba(220,38,38,0.8)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.stats{display:flex;gap:8px;align-items:center;}
+.sp{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid var(--brd);border-radius:50px;padding:5px 12px;}
+.sp-n{font-size:18px;font-weight:800;line-height:1;}
+.sp-l{font-size:9px;color:var(--gray2);text-transform:uppercase;letter-spacing:0.8px;}
+.tb-search{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(148,163,184,0.12);border-radius:50px;padding:0 14px;flex:1;max-width:260px;transition:border-color 0.2s;}
+.tb-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,0.1);}
+.tb-search input{background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans';padding:8px 0;width:100%;}
+.tb-logout{background:rgba(239,68,68,0.08);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';white-space:nowrap;}
+
+/* FILTERBAR */
+.fb-bar{display:flex;align-items:center;gap:6px;padding:7px 16px;height:42px;background:rgba(6,9,15,0.6);border-bottom:1px solid rgba(148,163,184,0.07);flex-shrink:0;overflow-x:auto;}
+.fb-bar::-webkit-scrollbar{display:none;}
+.fb{padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;background:rgba(148,163,184,0.07);color:var(--gray2);font-family:'DM Sans';transition:all 0.15s;white-space:nowrap;}
+.fb:hover{background:rgba(148,163,184,0.12);color:white;}
+.fb-all  {background:rgba(255,255,255,0.1)!important;color:white!important;}
+.fb-reg  {background:rgba(34,197,94,0.12)!important;color:#4ade80!important;border-color:rgba(34,197,94,0.25)!important;}
+.fb-kasni{background:rgba(249,115,22,0.12)!important;color:#fb923c!important;border-color:rgba(249,115,22,0.25)!important;}
+.fb-noreg{background:rgba(239,68,68,0.12)!important;color:#f87171!important;border-color:rgba(239,68,68,0.25)!important;}
+.sdd{margin-left:auto;background:rgba(255,255,255,0.06);border:1px solid rgba(148,163,184,0.12);border-radius:8px;padding:4px 10px;color:white;font-size:11px;font-family:'DM Sans';outline:none;cursor:pointer;}
+
+/* MAIN 3 COLS */
+.main{flex:1;display:grid;grid-template-columns:1fr 1fr 300px;overflow:hidden;min-height:0;}
+.col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--brd);}
+.col:last-child{border-right:none;}
+.col-h{padding:9px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--brd);flex-shrink:0;display:flex;align-items:center;gap:8px;}
+.col-b{flex:1;overflow-y:auto;padding:10px;}
+
+/* KUPACI GRID */
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;}
+.kc{border-radius:13px;padding:11px 9px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:transform 0.15s;position:relative;}
+.kc:hover{transform:translateY(-3px);}
+.kc.reg  {background:rgba(34,197,94,0.07);border-color:rgba(34,197,94,0.25);}
+.kc.kasni{background:rgba(249,115,22,0.07);border-color:rgba(249,115,22,0.25);}
+.kc.noreg{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.15);}
+.kc-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin:0 auto 6px;}
+.kc-av.reg  {background:rgba(34,197,94,0.15);color:#4ade80;}
+.kc-av.kasni{background:rgba(249,115,22,0.15);color:#fb923c;}
+.kc-av.noreg{background:rgba(239,68,68,0.12);color:#f87171;}
+.kc-t{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kc-n{font-size:9px;color:var(--gray2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kc-i{font-size:10px;font-weight:800;color:white;margin-top:3px;}
+.kc-s{font-size:9px;font-weight:700;margin-top:2px;}
+.kc-badge{position:absolute;top:5px;right:5px;background:#f97316;color:white;border-radius:50px;padding:1px 5px;font-size:7px;font-weight:800;}
+
+/* CHAT FEED */
+.ci{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:11px;margin-bottom:5px;border-left:3px solid transparent;animation:sli 0.3s ease;}
+@keyframes sli{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.ci.reg  {background:rgba(34,197,94,0.07);border-left-color:#22c55e;}
+.ci.kasni{background:rgba(249,115,22,0.07);border-left-color:#f97316;}
+.ci.noreg{background:rgba(239,68,68,0.06);border-left-color:#ef4444;}
+.ci.unk  {background:rgba(148,163,184,0.05);border-left-color:#64748b;}
+.cd{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.cd.reg  {background:#22c55e;box-shadow:0 0 5px #22c55e;}
+.cd.kasni{background:#f97316;box-shadow:0 0 5px #f97316;}
+.cd.noreg{background:#ef4444;box-shadow:0 0 5px #ef4444;}
+.cd.unk  {background:#64748b;}
+.cn{font-size:12px;font-weight:800;}
+.cnick{font-size:10px;color:var(--gray2);margin-left:5px;}
+.cs-badge{font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:5px;}
+.cs-reg  {background:rgba(34,197,94,0.15);color:#4ade80;}
+.cs-kasni{background:rgba(249,115,22,0.15);color:#fb923c;}
+.cs-noreg{background:rgba(239,68,68,0.15);color:#f87171;}
+.cs-unk  {background:rgba(148,163,184,0.1);color:#94a3b8;}
+.cc{font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;}
+.ct{font-size:9px;color:var(--gray);margin-left:auto;white-space:nowrap;}
+
+/* RIGHT PANEL */
+.sr-card{border-radius:13px;padding:13px;margin-bottom:8px;border:2px solid;}
+.sr-card.reg  {background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.4);}
+.sr-card.kasni{background:rgba(249,115,22,0.08);border-color:rgba(249,115,22,0.4);}
+.sr-card.noreg{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.4);}
+.ri{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(148,163,184,0.06);animation:sli 0.4s ease;}
+.ri-av{width:30px;height:30px;border-radius:50%;background:rgba(20,184,166,0.15);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+
+/* NOTICE */
+.notice{text-align:center;padding:30px 14px;}
+.notice-icon{font-size:28px;margin-bottom:8px;}
+.notice-t{font-size:13px;font-weight:700;color:var(--gray2);margin-bottom:4px;}
+.notice-s{font-size:11px;color:var(--gray);line-height:1.6;}
+
+/* TOOLTIP */
+.tip{position:fixed;z-index:9999;pointer-events:none;background:rgba(13,22,38,0.98);border:1px solid rgba(148,163,184,0.2);border-radius:14px;padding:14px;min-width:210px;max-width:250px;box-shadow:0 16px 40px rgba(0,0,0,0.7);opacity:0;transition:opacity 0.15s;}
+.empty{text-align:center;padding:40px 14px;color:var(--gray);font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="ls">
+  <div class="lbox">
+    <div class="llogo">Nova<span>roba</span>shop</div>
+    <div class="lsub">🔴 Live Monitor — Drugi Monitor</div>
+    <input type="email"    class="linp" id="le" placeholder="Email adresa..." />
+    <input type="password" class="linp" id="lp" placeholder="Lozinka..." />
+    <button class="lbtn" onclick="doLogin()">🖥️ Otvori Live Monitor</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- MONITOR -->
+<div id="ms">
+  <!-- TOPBAR -->
+  <div class="tb">
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <div class="tb-logo">Nova<span>roba</span>shop</div>
+      <div class="live-pill"><div class="ldot"></div>LIVE</div>
+    </div>
+    <div class="stats">
+      <div class="sp"><div><div class="sp-n" style="color:#4ade80;" id="s-r">0</div><div class="sp-l">Reg.</div></div></div>
+      <div class="sp"><div><div class="sp-n" style="color:#fb923c;" id="s-k">0</div><div class="sp-l">Kasni</div></div></div>
+      <div class="sp"><div><div class="sp-n" style="color:#f87171;" id="s-n">0</div><div class="sp-l">Nije reg.</div></div></div>
+      <div class="sp"><div><div class="sp-n" style="color:#a78bfa;" id="s-c">0</div><div class="sp-l">Chat</div></div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;">
+      <div class="tb-search">
+        <span style="color:var(--gray2);">🔍</span>
+        <input id="srch" type="text" placeholder="@tiktok ili nickname... (Ctrl+F)" oninput="onSearch(this.value)" />
+      </div>
+      <button class="tb-logout" onclick="doLogout()">Odjavi</button>
+    </div>
+  </div>
+
+  <!-- FILTERBAR -->
+  <div class="fb-bar">
+    <button class="fb fb-all"   onclick="setF('all',this)"   id="f-all">⬜ Svi</button>
+    <button class="fb"          onclick="setF('reg',this)"   id="f-reg">🟢 Registrovani</button>
+    <button class="fb"          onclick="setF('kasni',this)" id="f-kasni">🟠 Kasni</button>
+    <button class="fb"          onclick="setF('noreg',this)" id="f-noreg">🔴 Nije reg.</button>
+    <div style="width:1px;height:18px;background:var(--brd);margin:0 4px;"></div>
+    <span style="font-size:10px;color:var(--gray2);white-space:nowrap;">Chat filter:</span>
+    <button class="fb fb-all" onclick="setCF('all',this)"   id="cf-all"  style="font-size:10px;padding:3px 9px;">Svi</button>
+    <button class="fb"        onclick="setCF('reg',this)"   id="cf-reg"  style="font-size:10px;padding:3px 9px;">🟢</button>
+    <button class="fb"        onclick="setCF('kasni',this)" id="cf-k"    style="font-size:10px;padding:3px 9px;">🟠</button>
+    <button class="fb"        onclick="setCF('noreg',this)" id="cf-n"    style="font-size:10px;padding:3px 9px;">🔴</button>
+    <select class="sdd" onchange="onSort(this.value)">
+      <option value="tiktok">@TikTok A–Z</option>
+      <option value="nick">Nickname A–Z</option>
+      <option value="status">Po statusu</option>
+      <option value="iznos">Iznos ↓</option>
+    </select>
+  </div>
+
+  <!-- 3 COLS -->
+  <div class="main">
+    <!-- COL1: Kupaci -->
+    <div class="col">
+      <div class="col-h" style="color:var(--teal);">
+        <span>👥</span><span id="gtit">Kupci — učitavanje...</span>
+      </div>
+      <div class="col-b">
+        <div class="kg" id="kg"><div class="empty">⏳ Učitavanje...</div></div>
+      </div>
+    </div>
+
+    <!-- COL2: TikTok Live Chat -->
+    <div class="col">
+      <div class="col-h" style="color:#a78bfa;">
+        <span>💬</span><span>TikTok Live Chat</span>
+        <div id="csdot" style="width:7px;height:7px;border-radius:50%;background:#64748b;margin-left:auto;"></div>
+        <span id="cstxt" style="font-size:9px;color:var(--gray2);">Nije aktivan</span>
+      </div>
+      <div class="col-b" id="chat-col">
+        <div class="notice">
+          <div class="notice-icon">🎬</div>
+          <div class="notice-t">Live chat nije aktivan</div>
+          <div class="notice-s">
+            Pokreni Live u <b style="color:white;">novarobashop.html</b><br>
+            klikom na <b style="color:#ff4d4d;">🎬 Pokreni LIVE</b><br><br>
+            Chat komentari sa TikToka<br>
+            pojaviće se ovde automatski — sa bojom po statusu.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL3: Search + Recent -->
+    <div class="col">
+      <div class="col-h" style="color:var(--gold);">
+        <span>🔍</span><span>Pretraga i Nedavni</span>
+      </div>
+      <div class="col-b">
+        <div id="srch-panel">
+          <div style="font-size:12px;color:var(--gray2);text-align:center;padding:16px 0;">Ukucaj @tiktok u pretragu gore</div>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:1.5px;margin:12px 0 8px;padding-top:12px;border-top:1px solid var(--brd);">🆕 Viđeni u chatu</div>
+        <div id="rec-list"><div style="font-size:12px;color:var(--gray2);text-align:center;padding:14px 0;">Čekam chat...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tip" id="tip"></div>
+
+<script>
+const RAILWAY = 'https://novarobashop-tiktok-server.up.railway.app';
+let _kupci=[], _racuni=[], _filter='all', _cfilt='all', _sort='tiktok', _srch='', _chat=[], _chatCnt=0, _recent=[], _unsubs=[];
+
+// ── AUTH ──
+async function doLogin(){
+  const e=document.getElementById('le').value.trim(), p=document.getElementById('lp').value;
+  document.getElementById('lerr').textContent='';
+  try{await window._signIn(window._auth,e,p);}
+  catch(err){document.getElementById('lerr').textContent='❌ Pogrešan email ili lozinka.';}
+}
+async function doLogout(){await window._signOut(window._auth);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('ls').style.display!=='none')doLogin();
+  if((e.key==='f'||e.key==='F')&&(e.ctrlKey||e.metaKey)){e.preventDefault();document.getElementById('srch').focus();}
+  if(e.key==='Escape'){document.getElementById('srch').value='';onSearch('');}
+});
+
+// ── START ──
+function startMonitor(){
+  const {collection:col,query:q,where:wh,onSnapshot:snap,orderBy:ob,limit:lim}=window._fb;
+  const db=window._db, uid=window._uid;
+  // Kupci
+  _unsubs.push(snap(q(col(db,'users'),wh('role','==','kupac')),s=>{
+    _kupci=[];s.forEach(d=>_kupci.push({id:d.id,...d.data()}));render();
+  }));
+  // Racuni
+  _unsubs.push(snap(q(col(db,'racuni'),wh('adminId','==',uid)),s=>{
+    _racuni=[];s.forEach(d=>_racuni.push({id:d.id,...d.data()}));render();
+  }));
+  // Live chat feed
+  _unsubs.push(snap(q(col(db,'live_chat'),wh('adminId','==',uid),ob('timestamp','desc'),lim(150)),s=>{
+    let got=[];
+    s.docChanges().forEach(ch=>{if(ch.type==='added')got.push({id:ch.doc.id,...ch.doc.data()});});
+    if(!got.length)return;
+    got.forEach(item=>{
+      _chat.unshift(item); _chatCnt++;
+      const tid=(item.tiktokId||'').toLowerCase();
+      if(tid&&!_recent.find(x=>x.tiktok.toLowerCase()===tid)){
+        _recent.unshift({tiktok:item.tiktokId,statusColor:item.statusColor||'unknown',time:new Date()});
+        if(_recent.length>30)_recent.pop();
+      }
+    });
+    if(_chat.length>200)_chat=_chat.slice(0,200);
+    document.getElementById('csdot').style.cssText='width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;margin-left:auto;';
+    document.getElementById('cstxt').textContent='Povezan';
+    document.getElementById('s-c').textContent=_chatCnt;
+    renderChat();renderRecent();
+  }));
+}
+
+// ── HELPERS ──
+function getStatus(k){
+  const r=_racuni.filter(x=>x.kupacId===k.id);
+  if(!r.length)return 'noreg';
+  const today=new Date();today.setHours(0,0,0,0);
+  if(r.some(x=>x.status==='novo'&&x.datum&&Math.floor((today-new Date(x.datum))/(864e5))>=3))return 'kasni';
+  return 'reg';
+}
+function getIznos(k){return _racuni.filter(r=>r.kupacId===k.id).reduce((s,r)=>s+(r.iznos||0),0);}
+function ini(n){return(n||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);}
+function sc(s){return s==='reg'?'#4ade80':s==='kasni'?'#fb923c':'#f87171';}
+function sl(s){return s==='reg'?'✅ Plaćeno':s==='kasni'?'⚠️ Kasni':'❌ Nije reg.';}
+function cs(s){return s==='green'?'reg':s==='orange'?'kasni':s==='red'?'noreg':'unk';}
+
+// ── RENDER KUPACI ──
+function render(){
+  let list=[..._kupci];
+  if(_filter!=='all')list=list.filter(k=>getStatus(k)===_filter);
+  if(_srch){const s=_srch.replace('@','').toLowerCase();list=list.filter(k=>(k.tiktokIme||'').toLowerCase().includes(s)||(k.tiktokNick||'').toLowerCase().includes(s)||(k.name||'').toLowerCase().includes(s));}
+  if(_sort==='tiktok')list.sort((a,b)=>(a.tiktokIme||'').localeCompare(b.tiktokIme||''));
+  if(_sort==='nick')  list.sort((a,b)=>(a.tiktokNick||'').localeCompare(b.tiktokNick||''));
+  if(_sort==='status')list.sort((a,b)=>({reg:0,kasni:1,noreg:2}[getStatus(a)]||3)-({reg:0,kasni:1,noreg:2}[getStatus(b)]||3));
+  if(_sort==='iznos') list.sort((a,b)=>getIznos(b)-getIznos(a));
+  document.getElementById('s-r').textContent=_kupci.filter(k=>getStatus(k)==='reg').length;
+  document.getElementById('s-k').textContent=_kupci.filter(k=>getStatus(k)==='kasni').length;
+  document.getElementById('s-n').textContent=_kupci.filter(k=>getStatus(k)==='noreg').length;
+  const labels={all:'Svi kupci',reg:'✅ Registrovani',kasni:'⚠️ Kasni',noreg:'🔴 Nisu registrovani'};
+  document.getElementById('gtit').textContent=`${labels[_filter]} — ${list.length}`;
+  const g=document.getElementById('kg');
+  if(!list.length){g.innerHTML=`<div class="empty">Nema kupaca.</div>`;return;}
+  g.innerHTML=list.map(k=>{
+    const st=getStatus(k),iz=getIznos(k),c=sc(st);
+    return `<div class="kc ${st}" onmouseenter="showTip(event,'${k.id}')" onmouseleave="hideTip()" onclick="pinSearch('@${k.tiktokIme||''}')">
+      ${st==='kasni'?`<div class="kc-badge">KASNI</div>`:''}
+      <div class="kc-av ${st}">${ini(k.tiktokNick||k.name)}</div>
+      <div class="kc-t" style="color:${c};">@${k.tiktokIme||'—'}</div>
+      <div class="kc-n">${k.tiktokNick||k.name||'—'}</div>
+      ${iz>0?`<div class="kc-i">${iz.toLocaleString()} RSD</div>`:''}
+      <div class="kc-s" style="color:${c};">${sl(st)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER CHAT ──
+function renderChat(){
+  let items=[..._chat];
+  if(_cfilt!=='all'){
+    items=items.filter(i=>{
+      const s=i.statusColor;
+      if(_cfilt==='reg')   return s==='green';
+      if(_cfilt==='kasni') return s==='orange';
+      if(_cfilt==='noreg') return s==='red'||!s||s==='unknown';
+      return true;
+    });
+  }
+  const el=document.getElementById('chat-col');
+  if(!items.length){
+    el.innerHTML=`<div class="notice"><div class="notice-icon">💬</div><div class="notice-t">Nema chat poruka</div><div class="notice-s">Čekam komentare sa TikTok Livea...</div></div>`;
+    return;
+  }
+  el.innerHTML=items.map(d=>{
+    const s=cs(d.statusColor);
+    const c=s==='reg'?'#4ade80':s==='kasni'?'#fb923c':s==='noreg'?'#f87171':'#94a3b8';
+    const lb=s==='reg'?'✅ Registrovan':s==='kasni'?'⚠️ Kasni':s==='noreg'?'❌ Nije reg.':'❓ Nepoznat';
+    const t=d.timestamp?.toDate?d.timestamp.toDate():new Date(d.timestamp||Date.now());
+    const ts=t.toLocaleTimeString('sr-Latn',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const k=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===(d.tiktokId||'').toLowerCase());
+    return `<div class="ci ${s}">
+      <div class="cd ${s}"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;">
+          <span class="cn" style="color:${c};">@${d.tiktokId||'?'}</span>
+          ${k?`<span class="cnick">${k.tiktokNick||k.name||''}</span>`:''}
+          <span class="cs-badge cs-${s}">${lb}</span>
+          <span class="ct">${ts}</span>
+        </div>
+        <div class="cc">${d.comment||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RECENT ──
+function renderRecent(){
+  const el=document.getElementById('rec-list');
+  if(!_recent.length){el.innerHTML=`<div style="font-size:12px;color:var(--gray2);text-align:center;padding:12px 0;">Nema poruka</div>`;return;}
+  el.innerHTML=_recent.slice(0,15).map(({tiktok,statusColor,time})=>{
+    const k=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tiktok.toLowerCase());
+    const s=statusColor==='green'?'reg':statusColor==='orange'?'kasni':'noreg';
+    const c=sc(s);
+    const mins=Math.floor((new Date()-time)/60000);
+    const ts=mins<1?'upravo':mins<60?mins+'min':Math.floor(mins/60)+'h';
+    return `<div class="ri">
+      <div class="ri-av" style="background:${s==='reg'?'rgba(34,197,94,0.15)':s==='kasni'?'rgba(249,115,22,0.15)':'rgba(239,68,68,0.12)'};color:${c};">${ini(k?.tiktokNick||k?.name||tiktok)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:800;color:${c};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@${tiktok}</div>
+        ${k?`<div style="font-size:10px;color:var(--gray2);">${k.tiktokNick||k.name||''}</div>`:`<div style="font-size:10px;color:var(--gray);">Neregistrovan</div>`}
+      </div>
+      <div style="font-size:9px;color:var(--gray2);">${ts}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SEARCH ──
+function onSearch(v){_srch=v;render();renderSearchPanel(v);}
+function pinSearch(v){document.getElementById('srch').value=v;onSearch(v);}
+function renderSearchPanel(val){
+  const p=document.getElementById('srch-panel');
+  if(!val){p.innerHTML=`<div style="font-size:12px;color:var(--gray2);text-align:center;padding:14px 0;">Ukucaj @tiktok u pretragu</div>`;return;}
+  const s=val.replace('@','').toLowerCase();
+  const res=_kupci.filter(k=>(k.tiktokIme||'').toLowerCase().includes(s)||(k.tiktokNick||'').toLowerCase().includes(s)||(k.name||'').toLowerCase().includes(s)).slice(0,4);
+  if(!res.length){
+    p.innerHTML=`<div style="text-align:center;padding:14px;">
+      <div style="font-size:26px;margin-bottom:6px;">🔴</div>
+      <div style="font-weight:800;font-size:15px;color:#f87171;">Nije registrovan!</div>
+      <div style="font-size:12px;color:var(--gray2);margin-top:3px;">@${val.replace('@','')} nije u sistemu</div>
+    </div>`;return;
+  }
+  p.innerHTML=res.map(k=>{
+    const st=getStatus(k),iz=getIznos(k),c=sc(st);
+    return `<div class="sr-card ${st}" onclick="pinSearch('@${k.tiktokIme||''}')">
+      <div style="font-size:15px;font-weight:800;color:${c};">@${k.tiktokIme||'—'}</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:5px;">${k.tiktokNick||k.name||'—'}</div>
+      <div style="font-size:13px;font-weight:800;color:${c};">${sl(st)}</div>
+      ${iz>0?`<div style="font-size:12px;color:#94a3b8;margin-top:3px;">💰 ${iz.toLocaleString()} RSD</div>`:''}
+      ${k.telefon?`<div style="font-size:11px;color:#94a3b8;margin-top:2px;">📞 ${k.telefon}</div>`:''}
+      ${k.ulica?`<div style="font-size:11px;color:#94a3b8;margin-top:2px;">🏠 ${k.ulica}, ${k.grad||''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── FILTER/SORT ──
+function setF(f,btn){_filter=f;document.querySelectorAll('.fb[id^="f-"]').forEach(b=>b.className='fb');btn.className=`fb fb-${f}`;render();}
+function setCF(f,btn){_cfilt=f;document.querySelectorAll('.fb[id^="cf-"]').forEach(b=>b.className='fb');btn.className=`fb fb-${f}`;renderChat();}
+function onSort(v){_sort=v;render();}
+
+// ── TOOLTIP ──
+function showTip(e,id){
+  const k=_kupci.find(x=>x.id===id);if(!k)return;
+  const st=getStatus(k),c=sc(st),r=_racuni.filter(x=>x.kupacId===id);
+  const pl=r.filter(x=>x.status==='placeno'||x.paketStatus==='ship').reduce((s,x)=>s+(x.iznos||0),0);
+  const ce=r.filter(x=>x.status==='ceka').length,nv=r.filter(x=>x.status==='novo').length;
+  const tip=document.getElementById('tip');
+  tip.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(20,184,166,0.15);color:#5eead4;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;">${ini(k.tiktokNick||k.name)}</div>
+      <div><div style="font-size:14px;font-weight:800;color:#5eead4;">@${k.tiktokIme||'—'}</div><div style="font-size:11px;color:#94a3b8;">${k.tiktokNick||k.name||'—'}</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:800;color:${c};margin-bottom:8px;">${sl(st)}</div>
+    <div style="font-size:11px;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;margin-bottom:8px;">
+      ${k.name   ?`<span style="color:#64748b;">Ime:</span><span style="font-weight:700;">${k.name}</span>`:''}
+      ${k.ulica  ?`<span style="color:#64748b;">Ulica:</span><span style="font-weight:700;">${k.ulica}</span>`:''}
+      ${k.grad   ?`<span style="color:#64748b;">Grad:</span><span style="font-weight:700;">${k.ptt||''} ${k.grad}</span>`:''}
+      ${k.telefon?`<span style="color:#64748b;">Tel:</span><span style="font-weight:700;">${k.telefon}</span>`:''}
+    </div>
+    ${r.length?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;text-align:center;">
+      <div style="background:rgba(34,197,94,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#4ade80;">${pl.toLocaleString()}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Plaćeno</div></div>
+      <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#fcd34d;">${ce}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Čeka</div></div>
+      <div style="background:rgba(239,68,68,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#f87171;">${nv}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Novo</div></div>
+    </div>`:'<div style="font-size:11px;color:#64748b;">Nema računa</div>'}`;
+  const rect=e.currentTarget.getBoundingClientRect();
+  let L=rect.right+10, T=rect.top;
+  if(L+260>window.innerWidth)L=rect.left-265;
+  if(T+220>window.innerHeight)T=window.innerHeight-230;
+  tip.style.left=L+'px';tip.style.top=Math.max(8,T)+'px';tip.style.opacity='1';
+}
+function hideTip(){document.getElementById('tip').style.opacity='0';}
+</script>
+</body>
+</html>
