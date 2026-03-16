@@ -1397,7 +1397,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
                 <input type="number" id="ln-kolicina" class="inp-dark" value="1" min="1" max="99" style="width:54px;margin-bottom:0;font-size:15px;font-weight:800;text-align:center;" title="Količina" />
                 <button onclick="dodajLnArtikal()" style="background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:10px;padding:0 16px;color:#160900;font-size:20px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
               </div>
-              <div style="font-size:10px;color:var(--txt3);margin-top:5px;">Kupac piše cenu u chat → dodaje se automatski</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:5px;">👆 Dodaj artikal → kupci pišu cenu ili "3x500" u TikTok chat</div>
             </div>
 
             <!-- AUKCIJA MODE -->
@@ -4133,9 +4133,18 @@ function checkNarudzba(chatItem) {
 
   if (!trazenaCena || trazenaKolicina < 1) return;
 
+  // Ako nema aktivnih artikala — upozori admina
+  if (_lnArtikli.length === 0) {
+    showToast('⚠️ Nema aktivnih artikala! Dodaj artikal prvo.', 4000);
+    return;
+  }
+
   // Pronadji artikal sa tom cenom
   const matchedArtikal = _lnArtikli.find(a => Math.round(a.cena) === trazenaCena);
-  if (!matchedArtikal) return;
+  if (!matchedArtikal) {
+    // Kupac je napisao broj koji ne odgovara ni jednom artiklu — tiho ignorisi
+    return;
+  }
 
   // Provjeri koliko je STVARNO ostalo (stanje minus sve vec rezervisano od drugih kupaca)
   const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
@@ -4186,7 +4195,15 @@ function renderLnKorpe() {
   const entries = Object.values(_lnKorpe);
   count.textContent = entries.filter(e => !e.racunSent).length;
 
-  if (!entries.length) { list.innerHTML = '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px;">Čekam narudžbine...</div>'; return; }
+  if (!entries.length) {
+    // Provjeri da li ima aktivnih artikala
+    if (_lnArtikli.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:#fcd34d;font-size:12px;padding:20px 10px;background:rgba(245,158,11,0.07);border-radius:10px;margin:8px;">⚠️ Dodaj artikal sa cenom i količinom,<br>pa će kupci pisati cenu u chat!</div>';
+    } else {
+      list.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px 10px;">Čekam da kupci pišu cene u chat...<br><span style="font-size:10px;opacity:0.6;">npr. "500" ili "3x500"</span></div>';
+    }
+    return;
+  }
 
   list.innerHTML = entries.map(({ kupac, stavke, racunSent }) => {
     const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
