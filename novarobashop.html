@@ -1784,6 +1784,48 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   </div>
 </div>
 
+<!-- QUICK RAČUN MODAL (Live Tab) -->
+<div class="modal-overlay" id="quick-racun-modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:18px;font-weight:800;">⚡ Brza Račun</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px;" id="qr-kupac-name-lbl">Kupac</div>
+      </div>
+      <button onclick="closeQuickRacun()" style="background:rgba(255,255,255,0.08);border:none;color:white;border-radius:10px;padding:8px 14px;font-size:14px;cursor:pointer;">✕</button>
+    </div>
+    <input type="hidden" id="qr-kupac-id" />
+    <label class="inp-label">Iznos (RSD)</label>
+    <input type="number" class="inp-dark" id="qr-iznos" placeholder="1500" style="font-size:20px;font-weight:800;" />
+    <label class="inp-label">Opis paketa</label>
+    <input type="text" class="inp-dark" id="qr-opis" placeholder="Naziv paketa..." />
+    <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
+      ✓ Kreiraj Račun
+    </button>
+  </div>
+</div>
+
+<!-- NOTIZ MODAL (Admin → Kupac) -->
+<div class="modal-overlay" id="notiz-modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:18px;font-weight:800;">📝 Privatna Beleška</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px;" id="notiz-kupac-lbl">Kupac</div>
+      </div>
+      <button onclick="closeNotiz()" style="background:rgba(255,255,255,0.08);border:none;color:white;border-radius:10px;padding:8px 14px;font-size:14px;cursor:pointer;">✕</button>
+    </div>
+    <div style="background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#c4b5fd;">
+      🔒 Beleška je vidljiva samo tebi — kupac je ne vidi.
+    </div>
+    <input type="hidden" id="notiz-kupac-id" />
+    <textarea class="inp-dark" id="notiz-text" rows="4" placeholder="npr. VIP kupac, uvek plaća na vreme... ili kasni sa plaćanjem..." style="resize:none;margin-bottom:14px;"></textarea>
+    <button onclick="saveNotiz()" style="width:100%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 6px 18px rgba(139,92,246,0.3);">
+      💾 Sačuvaj Belešku
+    </button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1862,6 +1904,15 @@ function _showPortalByRole(role) {
   if (role === 'admin') {
     document.getElementById('admin-screen').style.display = 'block';
     loadAdminData();
+    // Update lastSeen on login and every 2 minutes
+    const _updateLastSeen = async () => {
+      try {
+        const { db, doc, updateDoc } = window._fb;
+        await updateDoc(doc(db, 'users', window._currentUser.uid), { lastSeen: new Date().toISOString() });
+      } catch(e) {}
+    };
+    _updateLastSeen();
+    setInterval(_updateLastSeen, 120000);
   } else if (role === 'kupac') {
     document.getElementById('kupac-screen').style.display = 'block';
     loadKupacData();
@@ -2187,6 +2238,7 @@ function renderAKupci(kupci) {
         <button class="btn-sm btn-detail" onclick="showKupacDetails('${k.id}')">👁️ Detalji</button>
         <button class="btn-sm btn-detail" onclick="showKupacRacuniFilter('${k.id}')">🧾 Računi</button>
         <button class="btn-sm" style="background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2)!important;" onclick="editKupacTiktok('${k.id}','${(k.tiktokIme||'')}','${(k.tiktokNick||'')}')">✏️ TikTok</button>
+        <button class="btn-sm" style="background:rgba(139,92,246,0.1);color:#c4b5fd;border:1px solid rgba(139,92,246,0.2)!important;" onclick="openNotiz('${k.id}','${(k.tiktokIme||k.name||'').replace(/'/g,'')}')">📝 Beleška</button>
         ${k.blocked
           ? `<button class="btn-sm btn-unblock" onclick="unblockKupac('${k.id}')">🔓 Odblokiraj</button>`
           : `<button class="btn-sm btn-block" onclick="blockKupac('${k.id}')">🔒 Blokiraj</button>`
@@ -3335,20 +3387,31 @@ async function setPaket(racunId, status, btn) {
   const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
   await updateDoc(doc(db, 'racuni', racunId), { paketStatus: status });
 
-  // Ako je poslato – obavesti kupca
+  // Ako je poslato – obavesti kupca sa lepšom porukom
   if (status === 'ship') {
     const racunSnap = await getDoc(doc(db, 'racuni', racunId));
     const r = racunSnap.data();
+    const adminName = window._currentUser?.name || 'Admin';
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 3);
+    const dateStr = deliveryDate.toLocaleDateString('sr-Latn', {weekday:'long', day:'numeric', month:'long'});
     await addDoc(collection(db,'notifikacije'), {
       userId: r.kupacId,
-      tip: 'poslato',
+      tip: 'paket_poslat',
       racunId,
-      poruka: `📦 Vaš paket za Račun #${r.broj} je poslat! Očekujte isporuku.`,
+      poruka: `📦 Tvoj paket je na putu!\n\n` +
+              `Proizvod: ${r.opis||'Paket'}\n` +
+              `Iznos: ${(r.iznos||0).toLocaleString()} RSD\n` +
+              `📅 Očekivana isporuka: ${dateStr}\n\n` +
+              `Paket šalje: ${adminName}\n` +
+              `Provjeri svoju adresu u Podešavanjima!`,
       vreme: new Date().toISOString(),
       procitano: false
     });
-    sendPushToUser(r.kupacId, '📦 Paket Poslat!', `Vaš paket za Račun #${r.broj} je poslat!`);
-    showToast('📦 Paket označen kao poslat!');
+    sendPushToUser(r.kupacId, '📦 Paket Poslat!', `Račun #${r.broj} — očekivana isporuka: ${dateStr}`);
+    // Also call sendShippingNotification helper
+    sendShippingNotification(racunId, r.kupacId, r.kupacName, r.opis, r.iznos);
+    showToast('📦 Paket označen kao poslat! Kupac obavešten.');
   }
 }
 
@@ -3506,14 +3569,16 @@ function renderLiveGrid(kupci) {
   grid.innerHTML = withStatus.map(k => {
     const ini = (k.name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
     const borderColor = k.kasni ? '#FFB800' : '#00c896';
-    const dotColor = k.kasni ? '#FFB800' : '#00c896';
-    const statusText = k.kasni ? '🟠 Kasni' : '🟢 Plaćeno';
+    const dotColor    = k.kasni ? '#FFB800' : '#00c896';
+    const statusText  = k.kasni ? '🟠 Kasni' : '🟢 Plaćeno';
+    const safeId = k.id.replace(/[^a-zA-Z0-9]/g,'_');
     return `<div class="live-card" style="border:1.5px solid ${borderColor}55;position:relative;">
       <div style="position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:${dotColor};"></div>
       <div class="live-avatar" style="border:2px solid ${borderColor};">${ini}</div>
       <div class="live-ktik" style="color:var(--teal);font-weight:800;font-size:13px;">@${k.tiktokIme||'–'}</div>
       <div class="live-kname" style="font-size:11px;color:rgba(255,255,255,0.6);">${k.tiktokNick||k.name||''}</div>
       <div style="font-size:10px;margin-top:4px;color:${dotColor};">${statusText}</div>
+      <button onclick="openQuickRacun('${k.id}','${(k.name||'').replace(/'/g,'')}')" style="width:100%;margin-top:8px;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';">⚡ Brza Račun</button>
     </div>`;
   }).join('');
 }
@@ -4008,7 +4073,9 @@ function kRacunCard(r, showUpload, showArhiva) {
   if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:var(--gray2);margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
   html += `<div style="display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #F0F2F8;">
     <div class="k-paket-dot ${ps}"></div>
-    <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div></div>`;
+    <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div>
+    ${(status==='placeno'||ps==='ship') ? `<button onclick="shareRacunAsImage('${r.id}')" style="margin-left:auto;background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📸 Podeli</button>` : ''}
+  </div>`;
 
   if (showUpload && status !== 'storno') {
     html += bankInfo;
@@ -4161,6 +4228,154 @@ function renderKHome() {
 }
 
 // Call renderKHome after racuni load — see renderKHome() above
+// ══════════════════════════════════════════
+// ⚡ FEATURE 1 — SCHNELL-RECHNUNG (Live Tab)
+// ══════════════════════════════════════════
+function openQuickRacun(kupacId, kupacName) {
+  document.getElementById('qr-kupac-id').value = kupacId;
+  document.getElementById('qr-kupac-name-lbl').textContent = kupacName || 'Kupac';
+  document.getElementById('qr-iznos').value = '';
+  document.getElementById('qr-opis').value = '';
+  document.getElementById('quick-racun-modal').classList.add('show');
+  setTimeout(() => document.getElementById('qr-iznos').focus(), 200);
+}
+function closeQuickRacun() {
+  document.getElementById('quick-racun-modal').classList.remove('show');
+}
+async function submitQuickRacun() {
+  const kupacId = document.getElementById('qr-kupac-id').value;
+  const iznos   = parseFloat(document.getElementById('qr-iznos').value);
+  const opis    = document.getElementById('qr-opis').value.trim();
+  if (!kupacId || !iznos) { showToast('⚠️ Unesite iznos'); return; }
+  const btn = document.getElementById('qr-btn');
+  btn.disabled = true; btn.textContent = 'Kreiranje...';
+  const { db, collection, addDoc } = window._fb;
+  const today = new Date().toISOString().slice(0,10);
+  const broj  = Math.floor(1000 + Math.random() * 9000);
+  const kupac = (_allKupci||[]).find(k=>k.id===kupacId);
+  await addDoc(collection(db,'racuni'), {
+    adminId: window._currentUser.uid,
+    kupacId, kupacName: kupac?.name||'', iznos, opis,
+    status:'novo', paketStatus:'prep',
+    datum: today, broj, createdAt: new Date().toISOString()
+  });
+  await addDoc(collection(db,'notifikacije'), {
+    userId: kupacId, tip:'nova_racun',
+    poruka: '🧾 Nova računa: ' + iznos.toLocaleString() + ' RSD',
+    vreme: new Date().toISOString(), procitano: false
+  });
+  closeQuickRacun();
+  showToast('✅ Račun kreiran za ' + (kupac?.tiktokIme ? '@'+kupac.tiktokIme : kupac?.name||'kupca') + '!');
+  btn.disabled = false; btn.textContent = '✓ Kreiraj Račun';
+}
+
+// ══════════════════════════════════════════
+// 📝 FEATURE 2 — PRIVATNA BELEŠKA O KUPCU
+// ══════════════════════════════════════════
+async function openNotiz(kupacId, kupacName) {
+  document.getElementById('notiz-kupac-id').value = kupacId;
+  document.getElementById('notiz-kupac-lbl').textContent = kupacName || 'Kupac';
+  // Load existing note
+  const { db, doc, getDoc } = window._fb;
+  const snap = await getDoc(doc(db, 'admin_beleske', window._currentUser.uid + '_' + kupacId));
+  document.getElementById('notiz-text').value = snap.exists() ? (snap.data().tekst||'') : '';
+  document.getElementById('notiz-modal').classList.add('show');
+  setTimeout(() => document.getElementById('notiz-text').focus(), 200);
+}
+function closeNotiz() {
+  document.getElementById('notiz-modal').classList.remove('show');
+}
+async function saveNotiz() {
+  const kupacId = document.getElementById('notiz-kupac-id').value;
+  const tekst   = document.getElementById('notiz-text').value.trim();
+  const { db, doc, setDoc } = window._fb;
+  await setDoc(doc(db, 'admin_beleske', window._currentUser.uid + '_' + kupacId), {
+    adminId: window._currentUser.uid, kupacId, tekst,
+    updatedAt: new Date().toISOString()
+  });
+  closeNotiz();
+  showToast(tekst ? '📝 Beleška sačuvana!' : '🗑️ Beleška obrisana!');
+}
+
+// ══════════════════════════════════════════
+// 📦 FEATURE 3 — LEPŠA LIEFERBENACHRICHTIGUNG
+// ══════════════════════════════════════════
+async function sendShippingNotification(racunId, kupacId, kupacName, opis, iznos) {
+  const { db, collection, addDoc } = window._fb;
+  const adminName = window._currentUser?.name || 'Admin';
+  // Estimate delivery: 2-5 days
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 3);
+  const dateStr = deliveryDate.toLocaleDateString('sr-Latn', {day:'numeric', month:'long'});
+  await addDoc(collection(db,'notifikacije'), {
+    userId: kupacId,
+    tip: 'paket_poslat',
+    poruka: `📦 Tvoj paket je na putu!\n\nProizvod: ${opis||'Paket'}\nIznos: ${(iznos||0).toLocaleString()} RSD\nOčekivana isporuka: ${dateStr}\n\nAdmin: ${adminName}`,
+    racunId, vreme: new Date().toISOString(), procitano: false
+  });
+}
+
+// ══════════════════════════════════════════
+// 📸 FEATURE 4 — RAČUN KAO SLIKA (Kupac)
+// ══════════════════════════════════════════
+function shareRacunAsImage(racunId) {
+  const r = (window._kAllRacuni||[]).find(x=>x.id===racunId);
+  if (!r) return;
+  const u = window._currentUser;
+  const adminId = document.getElementById('k-global-admin-sel')?.value;
+  const admin = _adminList.find(a=>a.id===adminId);
+
+  // Create a nice card in a hidden canvas via HTML→image
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+
+  const st = r.paketStatus==='ship'?{c:'#10b981',l:'📦 Poslato'}:r.status==='placeno'?{c:'#10b981',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:{c:'#ef4444',l:'🔴 Novo'};
+
+  overlay.innerHTML = `
+    <div id="racun-share-card" style="background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;font-family:'DM Sans',sans-serif;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#0f172a;">Nova<span style="color:#d97706;">roba</span>shop</div>
+        <div style="font-size:11px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Potvrda Narudžbine</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;">Račun #${r.broj||r.id.slice(-4)}</div>
+          <span style="background:${st.c}22;color:${st.c};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;">${st.l}</span>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-1px;">${(r.iznos||0).toLocaleString()} RSD</div>
+        ${r.opis?`<div style="font-size:12px;color:#64748b;margin-top:4px;">${r.opis}</div>`:''}
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px;">${r.datum||''}</div>
+      </div>
+      <div style="border-top:1px solid #f1f5f9;padding-top:12px;">
+        <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Kupac</div>
+        <div style="font-size:14px;font-weight:700;color:#0f172a;">${u.name||''}</div>
+        ${u.tiktokIme?`<div style="font-size:12px;color:#14b8a6;">@${u.tiktokIme}</div>`:''}
+      </div>
+      ${admin?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px;font-size:11px;color:#94a3b8;text-align:center;">Admin: ${admin.name||''}</div>`:''}
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:340px;">
+      <button onclick="window._doShareRacun()" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📤 Podeli</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,0.12);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Zatvori</button>
+    </div>`;
+
+  window._doShareRacun = async function() {
+    const card = document.getElementById('racun-share-card');
+    try {
+      // Use Web Share API if available
+      const txt = `Novarobashop — Račun #${r.broj||r.id.slice(-4)}\n${(r.iznos||0).toLocaleString()} RSD\n${r.opis||''}\nStatus: ${st.l}`;
+      if (navigator.share) {
+        await navigator.share({ title: 'Novarobashop Račun', text: txt });
+      } else {
+        await navigator.clipboard.writeText(txt);
+        showToast('📋 Podaci kopirani u clipboard!');
+      }
+    } catch(e) { showToast('📋 Koristite screenshot za deljenje'); }
+  };
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+}
+
 function openUplatnica(racunId, mode) {
   _currentUplatnicaRacunId = racunId;
   const input = document.getElementById('uplatnica-input');
@@ -4699,6 +4914,8 @@ async function sendPushToUser(userId, title, body) {
 document.addEventListener('click', e => {
   if (e.target && e.target.id === 'settings-modal') closeSettings();
   if (e.target && e.target.id === 'kupac-settings-modal') closeKupacSettings();
+  if (e.target && e.target.id === 'quick-racun-modal') closeQuickRacun();
+  if (e.target && e.target.id === 'notiz-modal') closeNotiz();
 });
 
 document.addEventListener('keydown', e => {
