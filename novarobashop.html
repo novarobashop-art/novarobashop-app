@@ -3771,17 +3771,18 @@ async function toggleLive() {
     const tiktok = window._currentUser.tiktokAdmin || '';
     if (tiktok) {
       try {
-        await fetch(`${RAILWAY_URL}/start-live`, {
+        const resp = await fetch(`${RAILWAY_URL}/start-live`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ adminId: window._currentUser.uid, tiktokUsername: tiktok })
         });
         document.getElementById('live-chat-status').innerHTML = '🟢 Povezan – čeka komentare';
-        startLiveChatFeed();
       } catch(e) {
-        document.getElementById('live-chat-status').innerHTML = '🔴 Server nedostupan';
+        document.getElementById('live-chat-status').innerHTML = '🟡 Server – čeka komentare';
       }
     }
+    // Uvek startuj chat feed — čita iz Firebase bez obzira na server
+    startLiveChatFeed();
 
     // Obavesti kupce
     const adminName = window._currentUser.name || 'Admin';
