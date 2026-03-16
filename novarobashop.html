@@ -3797,6 +3797,14 @@ async function toggleLive() {
     _isLive = true;
     btn.style.display = 'none';
     bar.style.display = 'flex';
+
+    // Reset sve za novi live
+    _lnKorpe = {};
+    _lnArtikli = [];
+    _lnRacunGesendet = new Set();
+    renderLnKorpe();
+    renderLnArtikli();
+
     startLiveRealtime();
 
     // Povezi Railway server sa TikTok Live
