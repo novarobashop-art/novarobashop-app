@@ -4180,11 +4180,11 @@ function renderPonude() {}
 function zakljuciAukciju() { showToast('ℹ️ Koristi novi Live Narudžbine sistem'); }
 
 function startLiveChatFeed() {
-  const { db, collection, query, where, orderBy, onSnapshot } = window._fb;
+  const { db, collection, query, where, onSnapshot, limit } = window._fb;
   const feed = document.getElementById('live-chat-feed');
   feed.innerHTML = '';
   const adminId = window._currentUser.uid;
-  const q = query(collection(db, 'live_chat'), where('adminId','==',adminId), orderBy('timestamp','desc'));
+  const q = query(collection(db, 'live_chat'), where('adminId','==',adminId), limit(100));
   _liveChatUnsub = onSnapshot(q, snap => {
     snap.docChanges().forEach(change => {
       if (change.type === 'added') {
