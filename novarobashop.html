@@ -3803,22 +3803,28 @@ async function toggleLive() {
 
     startLiveRealtime();
 
-    // Povezi Railway server sa TikTok Live
+    // ODMAH startuj chat feed — ne cekaj Railway server
+    startLiveChatFeed();
+    document.getElementById('live-chat-status').innerHTML = '🟡 Povezujem se...';
+
+    // Povezi Railway server sa TikTok Live (u pozadini)
     const tiktok = window._currentUser.tiktokAdmin || '';
     if (tiktok) {
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // 5 sec timeout
         const resp = await fetch(`${RAILWAY_URL}/start-live`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminId: window._currentUser.uid, tiktokUsername: tiktok })
+          body: JSON.stringify({ adminId: window._currentUser.uid, tiktokUsername: tiktok }),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
         document.getElementById('live-chat-status').innerHTML = '🟢 Povezan – čeka komentare';
       } catch(e) {
-        document.getElementById('live-chat-status').innerHTML = '🟡 Server – čeka komentare';
+        document.getElementById('live-chat-status').innerHTML = '🟡 Lokalni mod – čeka komentare';
       }
     }
-    // Uvek startuj chat feed — čita iz Firebase bez obzira na server
-    startLiveChatFeed();
 
     // Obavesti kupce
     const adminName = window._currentUser.name || 'Admin';
