@@ -4342,7 +4342,6 @@ function startLiveChatFeed() {
   );
 
   // KRITIČNO: Zapamti vreme starta — ignorisi stare poruke za narudzbine
-  const _feedStartTime = Date.now();
   let _initialLoadDone = false;
 
   _liveChatUnsub = onSnapshot(q, snap => {
@@ -4365,29 +4364,19 @@ function startLiveChatFeed() {
       feed.appendChild(card);
     });
 
-    // Za narudzbine — obradi SAMO poruke koje su stigle POSLE starta livea
-    snap.docChanges().forEach(change => {
-      if (change.type === 'added') {
-        const cntEl = document.getElementById('live-chat-count');
-        if (cntEl) cntEl.textContent = snap.size;
+    const cntEl = document.getElementById('live-chat-count');
+    if (cntEl) cntEl.textContent = snap.size;
 
-        if (_initialLoadDone) {
-          // Ovo je sigurno nova poruka — obradi za narudzbinu
+    // Za narudzbine — SAMO posle inicijalnog load-a obradi nove poruke
+    if (_initialLoadDone) {
+      snap.docChanges().forEach(change => {
+        if (change.type === 'added') {
           checkChatForOrder(change.doc.data());
-        } else {
-          // Tokom inicijalnog load-a — provjeri timestamp da li je stvarno nova
-          const d = change.doc.data();
-          let msgMs = 0;
-          if (d.timestamp && d.timestamp.toMillis) msgMs = d.timestamp.toMillis();
-          else if (d.timestamp && d.timestamp.seconds) msgMs = d.timestamp.seconds * 1000;
-          if (msgMs > _feedStartTime - 5000) {
-            // Poruka je max 5 sekundi stara — smatraj novom
-            checkChatForOrder(d);
-          }
         }
-      }
-    });
+      });
+    }
 
+    // Prvi snapshot = inicijalni load — sve sto dolazi posle je nova poruka
     if (!_initialLoadDone) _initialLoadDone = true;
 
   }, err => {
