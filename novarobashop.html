@@ -1438,7 +1438,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <div style="display:flex;flex-direction:column;overflow:hidden;">
           <div style="padding:10px 14px;font-size:10px;font-weight:800;color:var(--emerald);text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--brd);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
             <span>📋 Narudžbine <span id="ln-count" style="background:rgba(16,185,129,0.2);border-radius:20px;padding:2px 7px;font-size:9px;margin-left:4px;">0</span></span>
-            <button onclick="posaljiSveLnRacune()" style="background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:8px;padding:5px 12px;color:white;font-size:11px;font-weight:800;cursor:pointer;font-family:'DM Sans';">📤 Sve</button>
+          </div>
+          <!-- INFO: Računi se šalju automatski kad završiš Live -->
+          <div style="padding:8px 10px;background:rgba(245,158,11,0.07);border-bottom:1px solid rgba(245,158,11,0.15);font-size:10px;color:#fcd34d;text-align:center;flex-shrink:0;">
+            ⚡ Računi se šalju automatski kad klikneš <b>Završi Live</b>
           </div>
 
           <div style="flex:1;overflow-y:auto;padding:10px;" id="ln-box">
@@ -3812,7 +3815,23 @@ async function toggleLive() {
         body: JSON.stringify({ adminId: window._currentUser.uid })
       });
     } catch(e) {}
-    showToast('⏹️ Live završen');
+
+    // ── AUTOMATSKI POŠALJI SVE RAČUNE kad se Live završi ──
+    const pending = Object.values(_lnKorpe).filter(k => !k.racunSent && k.stavke.length > 0);
+    if (pending.length > 0) {
+      showToast('📤 Šaljem račune za ' + pending.length + ' kupac(a)...', 4000);
+      for (const k of pending) await posaljiLnRacun(k.kupac.id);
+      showToast('✅ Live završen! ' + pending.length + ' račun(a) poslato!', 4000);
+    } else {
+      showToast('⏹️ Live završen');
+    }
+
+    // Reset korpe za sledeći live
+    _lnKorpe = {};
+    _lnArtikli = [];
+    _lnRacunGesendet = new Set();
+    renderLnKorpe();
+    renderLnArtikli();
   }
 }
 
@@ -3952,6 +3971,7 @@ function renderAukPonude() {
 }
 let _lnArtikli = [];  // [{ naziv, cena }] — aktivni artikli koje admin dodaje
 let _lnKorpe   = {};  // { kupacId: { kupac, stavke:[{naziv,cena}], racunSent } }
+let _lnRacunGesendet = new Set(); // kupacId-evi koji su VEC dobili racun ovog livea — ne mogu vise naručiti
 
 // Admin dodaje artikal sa cenom
 function dodajLnArtikal() {
@@ -4044,6 +4064,9 @@ function checkNarudzba(chatItem) {
     (k.tiktokNick||'').toLowerCase() === tiktokId
   );
   if (!kupac) return;
+
+  // BLOKADA: Ako je kupac vec dobio racun ovog livea — ignorisi sve dalje komentare
+  if (_lnRacunGesendet.has(kupac.id)) return;
   if (_lnKorpe[kupac.id]?.racunSent) return;
 
   // Izvuci broj iz komentara
@@ -4052,19 +4075,26 @@ function checkNarudzba(chatItem) {
   if (!nums) return;
 
   // Provjeri da li broj odgovara nekoj ceni artikla
-  const matchedArtikal = _lnArtikli.find(a => nums.some(n => parseInt(n) === Math.round(a.cena)));
-  if (!matchedArtikal) return;
+  const matchedArtikli = _lnArtikli.filter(a => nums.some(n => parseInt(n) === Math.round(a.cena)));
+  if (!matchedArtikli.length) return;
 
   // Dodaj u korpu
   if (!_lnKorpe[kupac.id]) _lnKorpe[kupac.id] = { kupac, stavke: [], racunSent: false };
 
-  // Ne dodaj isti artikal dva puta za istog kupca
-  const vecDodao = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
-  if (vecDodao) return;
+  let nesto_dodato = false;
+  matchedArtikli.forEach(matchedArtikal => {
+    // Ne dodaj isti artikal dva puta za istog kupca
+    const vecDodao = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
+    if (vecDodao) return;
+    _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena });
+    nesto_dodato = true;
+  });
 
-  _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena });
+  if (!nesto_dodato) return;
+
   renderLnKorpe();
-  showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + matchedArtikal.naziv + ' ' + matchedArtikal.cena.toLocaleString() + ' RSD', 3000);
+  const ukupnoNovo = matchedArtikli.reduce((s,a)=>s+a.cena,0);
+  showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + matchedArtikli.length + 'x artikal — ' + ukupnoNovo.toLocaleString() + ' RSD', 3000);
 }
 
 function renderLnKorpe() {
@@ -4076,16 +4106,32 @@ function renderLnKorpe() {
   if (!entries.length) { list.innerHTML = '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px;">Čekam narudžbine...</div>'; return; }
 
   list.innerHTML = entries.map(({ kupac, stavke, racunSent }) => {
-    const ukupno = stavke.reduce((s, x) => s + x.cena, 0);
+    const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
     const ini    = (kupac.tiktokNick||kupac.name||'?').slice(0,2).toUpperCase();
 
-    // Stavke listu
-    const stavkeHtml = stavke.map(s =>
-      '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(148,163,184,0.08);">'
-      + '<span style="color:rgba(255,255,255,0.85);">• ' + s.naziv + '</span>'
-      + '<span style="font-weight:700;color:white;">' + s.cena.toLocaleString() + ' RSD</span>'
-      + '</div>'
-    ).join('');
+    // Stavke lista — sa dugmicima za brisanje i promenu kolicine (samo ako racun jos nije poslat)
+    const stavkeHtml = stavke.map((s, si) => {
+      const kol = s.kolicina || 1;
+      const ukupnoStavka = s.cena * kol;
+      if (racunSent) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(148,163,184,0.08);">'
+          + '<span style="color:rgba(255,255,255,0.85);">• ' + s.naziv + (kol>1?' x'+kol:'') + '</span>'
+          + '<span style="font-weight:700;color:white;">' + ukupnoStavka.toLocaleString() + ' RSD</span>'
+          + '</div>';
+      }
+      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(148,163,184,0.08);">'
+        // Naziv
+        + '<span style="flex:1;color:rgba(255,255,255,0.85);font-size:12px;">• ' + s.naziv + '</span>'
+        // Kolicina kontrola
+        + '<button onclick="lnKolMinus(\'' + kupac.id + '\',' + si + ')" style="width:22px;height:22px;border-radius:6px;border:1px solid rgba(148,163,184,0.2);background:rgba(255,255,255,0.06);color:white;font-size:14px;font-weight:800;cursor:pointer;line-height:1;padding:0;flex-shrink:0;">−</button>'
+        + '<span style="font-size:13px;font-weight:800;color:white;min-width:18px;text-align:center;flex-shrink:0;">' + kol + '</span>'
+        + '<button onclick="lnKolPlus(\'' + kupac.id + '\',' + si + ')" style="width:22px;height:22px;border-radius:6px;border:1px solid rgba(148,163,184,0.2);background:rgba(255,255,255,0.06);color:white;font-size:14px;font-weight:800;cursor:pointer;line-height:1;padding:0;flex-shrink:0;">+</button>'
+        // Cena
+        + '<span style="font-weight:700;color:white;font-size:12px;min-width:60px;text-align:right;flex-shrink:0;">' + ukupnoStavka.toLocaleString() + ' RSD</span>'
+        // Brisanje
+        + '<button onclick="lnObrisiStavku(\'' + kupac.id + '\',' + si + ')" style="width:22px;height:22px;border-radius:6px;border:none;background:rgba(244,63,94,0.15);color:#fda4af;font-size:13px;cursor:pointer;line-height:1;padding:0;flex-shrink:0;">✕</button>'
+      + '</div>';
+    }).join('');
 
     return '<div style="background:' + (racunSent?'rgba(16,185,129,0.06)':'rgba(255,255,255,0.04)') + ';border:1.5px solid ' + (racunSent?'rgba(16,185,129,0.25)':'rgba(148,163,184,0.12)') + ';border-radius:14px;padding:14px;margin-bottom:8px;">'
 
@@ -4101,7 +4147,6 @@ function renderLnKorpe() {
       // Stavke
       + '<div style="background:rgba(0,0,0,0.15);border-radius:10px;padding:10px;margin-bottom:10px;">'
         + stavkeHtml
-        // Endziffer
         + '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:6px;border-top:1px solid rgba(148,163,184,0.15);">'
           + '<span style="font-size:12px;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;">UKUPNO</span>'
           + '<span style="font-size:20px;font-weight:800;color:' + (racunSent?'#6ee7b7':'var(--amber)') + ';letter-spacing:-0.5px;">' + ukupno.toLocaleString() + ' RSD</span>'
@@ -4112,7 +4157,7 @@ function renderLnKorpe() {
       + (racunSent
           ? '<div style="display:flex;align-items:center;gap:8px;color:#6ee7b7;font-size:13px;font-weight:700;"><span>✅</span> Račun poslat</div>'
           : '<div style="display:flex;gap:6px;">'
-              + '<button onclick="posaljiLnRacun(\'' + kupac.id + '\')" style="flex:1;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:10px;padding:11px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:DM Sans,sans-serif;">📤 Pošalji Račun</button>'
+              + '<div style="flex:1;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:9px;text-align:center;font-size:11px;color:#fcd34d;font-weight:700;">⏳ Čeka kraj Livea</div>'
               + '<button onclick="obrisiLnKorpu(\'' + kupac.id + '\')" style="background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:11px 14px;font-size:14px;cursor:pointer;" title="Obriši">🗑</button>'
             + '</div>'
         )
@@ -4125,9 +4170,12 @@ async function posaljiLnRacun(kupacId) {
   if (!korpa || korpa.racunSent || !korpa.stavke.length) return;
   const { kupac, stavke } = korpa;
 
-  const ukupno = stavke.reduce((s, x) => s + x.cena, 0);
-  // Opis = sve stavke sa cenama
-  const opis   = stavke.map(s => s.naziv + ' ' + s.cena.toLocaleString() + ' RSD').join(', ');
+  const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
+  // Opis = sve stavke sa cenama — jedna jedina racuna za sve
+  const opis   = stavke.map(s => {
+    const kol = s.kolicina || 1;
+    return (kol > 1 ? kol + 'x ' : '') + s.naziv + ' ' + (s.cena * kol).toLocaleString() + ' RSD';
+  }).join(', ');
 
   const { db, collection, addDoc } = window._fb;
   const broj = Math.floor(1000 + Math.random()*9000);
@@ -4137,7 +4185,7 @@ async function posaljiLnRacun(kupacId) {
     kupacId,   kupacName: kupac.name||'',
     iznos:     ukupno,
     opis,
-    stavke,    // sve stavke čuvamo
+    stavke,    // sve stavke čuvamo — jedna racuna za sve
     status:    'novo',
     paketStatus:'prep',
     datum:     new Date().toISOString().slice(0,10),
@@ -4155,6 +4203,7 @@ async function posaljiLnRacun(kupacId) {
   });
 
   korpa.racunSent = true;
+  _lnRacunGesendet.add(kupacId);
   renderLnKorpe();
   showToast('✅ Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + ukupno.toLocaleString() + ' RSD');
 }
@@ -4168,6 +4217,42 @@ async function posaljiSveLnRacune() {
 
 function obrisiLnKorpu(kupacId) {
   delete _lnKorpe[kupacId];
+  renderLnKorpe();
+}
+
+// Obriši jednu stavku iz korpe kupca
+function lnObrisiStavku(kupacId, stavkaIdx) {
+  const korpa = _lnKorpe[kupacId];
+  if (!korpa) return;
+  korpa.stavke.splice(stavkaIdx, 1);
+  if (korpa.stavke.length === 0) {
+    delete _lnKorpe[kupacId]; // Ako nema više stavki — ukloni celu korpu
+  }
+  renderLnKorpe();
+  showToast('🗑️ Artikal uklonjen');
+}
+
+// Povećaj količinu stavke
+function lnKolPlus(kupacId, stavkaIdx) {
+  const korpa = _lnKorpe[kupacId];
+  if (!korpa) return;
+  const s = korpa.stavke[stavkaIdx];
+  s.kolicina = (s.kolicina || 1) + 1;
+  renderLnKorpe();
+}
+
+// Smanji količinu stavke (min 1, na 0 briše)
+function lnKolMinus(kupacId, stavkaIdx) {
+  const korpa = _lnKorpe[kupacId];
+  if (!korpa) return;
+  const s = korpa.stavke[stavkaIdx];
+  const novaKol = (s.kolicina || 1) - 1;
+  if (novaKol <= 0) {
+    korpa.stavke.splice(stavkaIdx, 1);
+    if (korpa.stavke.length === 0) delete _lnKorpe[kupacId];
+  } else {
+    s.kolicina = novaKol;
+  }
   renderLnKorpe();
 }
 
@@ -4196,15 +4281,20 @@ function startLiveChatFeed() {
     limit(50)
   );
 
+  // KRITIČNO: Zapamti vreme starta — ignorisi stare poruke za narudzbine
+  const _feedStartTime = Date.now();
+  let _initialLoadDone = false;
+
   _liveChatUnsub = onSnapshot(q, snap => {
     console.log('Chat snapshot — docs:', snap.size, 'changes:', snap.docChanges().length);
 
     if (snap.empty) {
       feed.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px;">Čekam komentare...</div>';
+      _initialLoadDone = true;
       return;
     }
 
-    // Prikaži sve poruke odmah
+    // Prikaži sve poruke u feed-u (samo display)
     feed.innerHTML = '';
     snap.docs.forEach(docSnap => {
       const d = docSnap.data();
@@ -4215,14 +4305,30 @@ function startLiveChatFeed() {
       feed.appendChild(card);
     });
 
-    // Prati nove poruke
+    // Za narudzbine — obradi SAMO poruke koje su stigle POSLE starta livea
     snap.docChanges().forEach(change => {
       if (change.type === 'added') {
-        checkChatForOrder(change.doc.data());
         const cntEl = document.getElementById('live-chat-count');
         if (cntEl) cntEl.textContent = snap.size;
+
+        if (_initialLoadDone) {
+          // Ovo je sigurno nova poruka — obradi za narudzbinu
+          checkChatForOrder(change.doc.data());
+        } else {
+          // Tokom inicijalnog load-a — provjeri timestamp da li je stvarno nova
+          const d = change.doc.data();
+          let msgMs = 0;
+          if (d.timestamp && d.timestamp.toMillis) msgMs = d.timestamp.toMillis();
+          else if (d.timestamp && d.timestamp.seconds) msgMs = d.timestamp.seconds * 1000;
+          if (msgMs > _feedStartTime - 5000) {
+            // Poruka je max 5 sekundi stara — smatraj novom
+            checkChatForOrder(d);
+          }
+        }
       }
     });
+
+    if (!_initialLoadDone) _initialLoadDone = true;
 
   }, err => {
     console.error('Chat feed ERROR:', err.code, err.message);
