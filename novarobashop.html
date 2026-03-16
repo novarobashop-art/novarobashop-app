@@ -1413,9 +1413,15 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div class="k-logo">Nova<span>roba</span>shop</div>
       <div class="k-header-sub" id="k-header-sub">Moj nalog</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="kNavTab('faq')" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Pomoć">❓</button>
-      <div class="k-avatar" id="k-avatar">K</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;" onclick="openKupacSettings()">
+      <div style="position:relative;">
+        <div class="k-avatar" id="k-avatar">K</div>
+        <!-- Zahnrad overlay -->
+        <div style="position:absolute;bottom:-3px;right:-3px;width:18px;height:18px;background:#3b82f6;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:10px;">⚙️</div>
+        <!-- Red badge if data missing -->
+        <div id="k-settings-badge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ef4444;border-radius:50%;border:2px solid white;box-shadow:0 0 6px rgba(239,68,68,0.6);"></div>
+      </div>
+      <div style="font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Podešavanja</div>
     </div>
   </div>
 
@@ -1675,45 +1681,112 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="settings-modal">
-  <div class="modal-box">
+<!-- KUPAC SETTINGS MODAL -->
+<div class="modal-overlay" id="kupac-settings-modal">
+  <div class="modal-box" style="padding-bottom:32px;">
+
+    <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <div style="font-size:18px;font-weight:800;">⚙️ Podešavanja</div>
-      <button onclick="closeSettings()" style="background:rgba(255,255,255,0.08);border:none;color:white;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer;">✕</button>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:white;">⚙️ Podešavanja</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px;">Tvoj nalog i lični podaci</div>
+      </div>
+      <button onclick="closeKupacSettings()" style="background:rgba(255,255,255,0.08);border:none;color:white;border-radius:10px;padding:8px 14px;font-size:14px;cursor:pointer;">✕</button>
     </div>
-    <div class="form-section">
-      <div class="form-section-title">👤 Profil</div>
+
+    <!-- Missing data warning -->
+    <div id="ks-warning" style="display:none;background:rgba(239,68,68,0.08);border:1.5px solid rgba(239,68,68,0.25);border-radius:14px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:800;color:#fda4af;margin-bottom:6px;">⚠️ Nedostaju podaci!</div>
+      <div id="ks-warning-list" style="font-size:12px;color:#fca5a5;line-height:1.8;"></div>
+    </div>
+
+    <!-- SECTION 1: Lični podaci -->
+    <div class="form-section" style="margin-bottom:12px;">
+      <div class="form-section-title" style="color:var(--teal);">👤 Lični podaci</div>
+
       <label class="inp-label">Ime i prezime</label>
-      <input type="text" class="inp-dark" id="set-name" placeholder="Vaše ime..." />
+      <input type="text" class="inp-dark" id="ks-name" placeholder="Marko Petrović" />
+
       <label class="inp-label">Email adresa</label>
-      <input type="email" class="inp-dark" id="set-email" style="opacity:0.6;" readonly />
-      <label class="inp-label">Vaš TikTok Username</label>
+      <input type="email" class="inp-dark" id="ks-email" style="opacity:0.5;" readonly />
+
+      <label class="inp-label">📞 Broj telefona</label>
       <div style="position:relative;">
-        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--teal);font-weight:700;font-size:16px;">@</span>
-        <input type="text" class="inp-dark" id="set-tiktok" placeholder="vaš.tiktok" style="padding-left:32px;" />
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;">🇷🇸</span>
+        <input type="tel" class="inp-dark" id="ks-telefon" placeholder="+381 60 123 4567" style="padding-left:38px;" />
+      </div>
+      <div style="font-size:11px;color:var(--txt3);margin-top:-8px;margin-bottom:12px;">Koristi se za dostavu i kontakt od strane admina</div>
+    </div>
+
+    <!-- SECTION 2: TikTok -->
+    <div class="form-section" style="margin-bottom:12px;border:1.5px solid rgba(20,184,166,0.2);">
+      <div class="form-section-title" style="color:var(--teal);">📱 TikTok podatke</div>
+
+      <!-- Why important explanation -->
+      <div style="background:rgba(20,184,166,0.07);border:1px solid rgba(20,184,166,0.2);border-radius:12px;padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:4px;">⚡ Zašto je TikTok važan?</div>
+        <div style="font-size:11px;color:var(--txt2);line-height:1.6;">
+          Admin te prepoznaje na Live streamu po TikTok imenu.<br>
+          Ako promeniš TikTok ime — <b style="color:white;">odmah ažuriraj ovde</b>, inače te admin neće prepoznati! 🔴
+        </div>
       </div>
 
+      <label class="inp-label">TikTok Username (korisničko ime)</label>
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--teal);font-weight:700;font-size:16px;">@</span>
+        <input type="text" class="inp-dark" id="ks-tiktok-ime" placeholder="vaše.tiktok.ime" style="padding-left:32px;" />
+      </div>
+      <div style="font-size:11px;color:var(--txt3);margin-top:-8px;margin-bottom:12px;">Npr. @marko.novosad — ovo se vidi u TikTok profilu</div>
+
+      <label class="inp-label">TikTok Nickname (ime u Live chatu)</label>
+      <input type="text" class="inp-dark" id="ks-tiktok-nick" placeholder="Marko 🛍️" />
+      <div style="font-size:11px;color:var(--txt3);margin-top:-8px;margin-bottom:0;">Ime koje se vidi kada komentarišeš na Live-u</div>
     </div>
-    <div class="form-section">
-      <div class="form-section-title" style="color:var(--gold);">🏦 Podaci za uplatu</div>
-      <label class="inp-label">Broj bankovnog računa</label>
-      <input type="text" class="inp-dark" id="set-bank-num" placeholder="325 9300706409307 32" />
-      <label class="inp-label">Ime vlasnika računa</label>
-      <input type="text" class="inp-dark" id="set-bank-name" placeholder="Marko Petrović, Novi Sad" />
-      <label class="inp-label">PostNet broj</label>
-      <input type="text" class="inp-dark" id="set-postnet-num" placeholder="0612068881" />
-      <label class="inp-label">Ime za PostNet</label>
-      <input type="text" class="inp-dark" id="set-postnet-name" placeholder="Marko Petrović" />
+
+    <!-- SECTION 3: Adresa (Umzug) -->
+    <div class="form-section" style="margin-bottom:12px;border:1.5px solid rgba(245,158,11,0.18);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="form-section-title" style="color:var(--amber);margin-bottom:0;">📍 Adresa dostave</div>
+        <div style="font-size:10px;color:var(--txt3);background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:3px 8px;">Promenio/la adresu? Ažuriraj!</div>
+      </div>
+
+      <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);border-radius:12px;padding:12px;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:3px;">📦 Važno za dostavu paketa!</div>
+        <div style="font-size:11px;color:var(--txt2);line-height:1.5;">Ako si se preselio/la, odmah ažuriraj adresu da paket dođe na pravu adresu.</div>
+      </div>
+
+      <label class="inp-label">Ulica i broj</label>
+      <input type="text" class="inp-dark" id="ks-ulica" placeholder="Bulevar Oslobođenja 12" />
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label class="inp-label">Poštanski broj</label>
+          <input type="text" class="inp-dark" id="ks-ptt" placeholder="21000" style="margin-bottom:0;" />
+        </div>
+        <div>
+          <label class="inp-label">Grad</label>
+          <input type="text" class="inp-dark" id="ks-grad" placeholder="Novi Sad" style="margin-bottom:0;" />
+        </div>
+      </div>
+      <div style="height:12px;"></div>
+
+      <label class="inp-label">Selo / Opština</label>
+      <input type="text" class="inp-dark" id="ks-selo" placeholder="Futog" />
     </div>
-    <div class="form-section">
-      <div class="form-section-title" style="color:var(--gray);">🔑 Promena lozinke</div>
+
+    <!-- SECTION 4: Lozinka -->
+    <div class="form-section" style="margin-bottom:16px;">
+      <div class="form-section-title" style="color:var(--txt3);">🔑 Promena lozinke</div>
       <label class="inp-label">Nova lozinka (opciono)</label>
-      <input type="password" class="inp-dark" id="set-new-pass" placeholder="Min. 6 karaktera..." />
+      <input type="password" class="inp-dark" id="ks-new-pass" placeholder="Min. 6 karaktera..." />
+      <div style="font-size:11px;color:var(--txt3);margin-top:-8px;">Ostavi prazno ako ne želiš da menjaš lozinku</div>
     </div>
-    <button class="btn-gold" onclick="saveSettings()">✓ Sačuvaj izmene</button>
-    <div style="height:8px;"></div>
-    <button onclick="doLogout()" style="width:100%;background:rgba(230,57,70,0.1);color:#FF6B76;border:1px solid rgba(230,57,70,0.25);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🚪 Odjavi se</button>
+
+    <!-- Save button -->
+    <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
+      ✓ Sačuvaj sve izmene
+    </button>
+    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🚪 Odjavi se</button>
   </div>
 </div>
 
@@ -3585,6 +3658,7 @@ function startLiveChatFeed() {
 
 // ===== SETTINGS =====
 async function openSettings() {
+  // Admin settings — keep for admin screen
   const u = window._currentUser;
   document.getElementById('set-name').value = u.name || '';
   document.getElementById('set-email').value = u.email || '';
@@ -3600,32 +3674,133 @@ async function openSettings() {
   }
   document.getElementById('settings-modal').classList.add('show');
 }
-
 function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
 
-async function saveSettings() {
-  const name = document.getElementById('set-name').value.trim();
-  const tiktokAdmin = document.getElementById('set-tiktok').value.trim().replace('@','').toLowerCase();
-  const bankNum = document.getElementById('set-bank-num').value.trim();
-  const bankName = document.getElementById('set-bank-name').value.trim();
-  const postnetNum = document.getElementById('set-postnet-num').value.trim();
-  const postnetName = document.getElementById('set-postnet-name').value.trim();
-  const newPass = document.getElementById('set-new-pass').value;
-  const { db, doc, updateDoc, auth } = window._fb;
-  await updateDoc(doc(db, 'users', window._currentUser.uid), { name, tiktokAdmin, bankNum, bankName, postnetNum, postnetName });
-  window._currentUser.name = name;
-  window._currentUser.tiktokAdmin = tiktokAdmin;
-  document.getElementById('a-avatar').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('a-header-sub').textContent = name || 'Admin Portal';
-  if (newPass && newPass.length >= 6) {
-    try {
-      const { updatePassword } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-      await updatePassword(auth.currentUser, newPass);
-      showToast('✅ Lozinka promenjena!');
-    } catch(e) { showToast('⚠️ Za promenu lozinke morate se ponovo prijaviti.'); }
+// ── KUPAC SETTINGS ──
+async function openKupacSettings() {
+  const u = window._currentUser;
+  if (!u) return;
+  const { db, doc, getDoc } = window._fb;
+  const snap = await getDoc(doc(db, 'users', u.uid));
+  const d = snap.exists() ? snap.data() : {};
+
+  // Fill all fields
+  document.getElementById('ks-name').value     = d.name || u.name || '';
+  document.getElementById('ks-email').value    = u.email || '';
+  document.getElementById('ks-telefon').value  = d.telefon || '';
+  document.getElementById('ks-tiktok-ime').value = d.tiktokIme || '';
+  document.getElementById('ks-tiktok-nick').value= d.tiktokNick || '';
+  document.getElementById('ks-ulica').value    = d.ulica || '';
+  document.getElementById('ks-ptt').value      = d.ptt || '';
+  document.getElementById('ks-grad').value     = d.grad || '';
+  document.getElementById('ks-selo').value     = d.selo || '';
+  document.getElementById('ks-new-pass').value = '';
+
+  // Check missing data and show warning
+  const missing = [];
+  if (!d.tiktokIme)  missing.push('📱 TikTok korisničko ime nije uneseno');
+  if (!d.tiktokNick) missing.push('💬 TikTok nickname nije unet');
+  if (!d.telefon)    missing.push('📞 Broj telefona nije unet');
+  if (!d.ulica)      missing.push('📍 Adresa dostave nije uneta');
+  if (!d.grad)       missing.push('🏙️ Grad nije unet');
+
+  const warn = document.getElementById('ks-warning');
+  const badge = document.getElementById('k-settings-badge');
+  if (missing.length) {
+    warn.style.display = 'block';
+    document.getElementById('ks-warning-list').innerHTML = missing.map(m => '• ' + m).join('<br>');
+    if (badge) badge.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+    if (badge) badge.style.display = 'none';
   }
-  closeSettings();
-  showToast('✅ Podešavanja sačuvana!');
+
+  document.getElementById('kupac-settings-modal').classList.add('show');
+}
+
+function closeKupacSettings() {
+  document.getElementById('kupac-settings-modal').classList.remove('show');
+}
+
+async function saveKupacSettings() {
+  const btn = document.getElementById('ks-save-btn');
+  btn.disabled = true; btn.textContent = 'Čuvanje...';
+
+  const name      = document.getElementById('ks-name').value.trim();
+  const telefon   = document.getElementById('ks-telefon').value.trim();
+  const tiktokIme = document.getElementById('ks-tiktok-ime').value.trim().replace('@','').toLowerCase();
+  const tiktokNick= document.getElementById('ks-tiktok-nick').value.trim();
+  const ulica     = document.getElementById('ks-ulica').value.trim();
+  const ptt       = document.getElementById('ks-ptt').value.trim();
+  const grad      = document.getElementById('ks-grad').value.trim();
+  const selo      = document.getElementById('ks-selo').value.trim();
+  const newPass   = document.getElementById('ks-new-pass').value;
+
+  try {
+    const { db, doc, updateDoc, auth } = window._fb;
+    await updateDoc(doc(db, 'users', window._currentUser.uid), {
+      name, telefon, tiktokIme, tiktokNick, ulica, ptt, grad, selo
+    });
+
+    // Update local user object
+    Object.assign(window._currentUser, { name, telefon, tiktokIme, tiktokNick, ulica, ptt, grad, selo });
+
+    // Update avatar initials
+    const initials = (name||'K').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('k-avatar').textContent = initials;
+    document.getElementById('k-header-sub').textContent = tiktokIme ? '@'+tiktokIme : name || 'Moj nalog';
+
+    // Update home screen
+    const hn = document.getElementById('k-home-name');
+    const ht = document.getElementById('k-home-tiktok');
+    if(hn) hn.textContent = name || 'Moj nalog';
+    if(ht) ht.textContent = tiktokIme ? '@'+tiktokIme : '';
+
+    // Password change
+    if (newPass && newPass.length >= 6) {
+      try {
+        const { updatePassword } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+        await updatePassword(auth.currentUser, newPass);
+        showToast('✅ Lozinka promenjena!');
+      } catch(e) { showToast('⚠️ Za promenu lozinke ponovo se prijavite.'); }
+    }
+
+    // Hide badge if all data is now filled
+    if (name && telefon && tiktokIme && tiktokNick && ulica && grad) {
+      const badge = document.getElementById('k-settings-badge');
+      if (badge) badge.style.display = 'none';
+    }
+
+    closeKupacSettings();
+    showToast('✅ Podaci sačuvani!');
+  } catch(e) {
+    showToast('❌ Greška: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = '✓ Sačuvaj sve izmene';
+}
+
+// Check missing data badge on load
+function checkKupacDataBadge() {
+  const u = window._currentUser;
+  if (!u) return;
+  const missing = !u.tiktokIme || !u.telefon || !u.ulica;
+  const badge = document.getElementById('k-settings-badge');
+  if (badge) badge.style.display = missing ? 'block' : 'none';
+}
+
+// Auto-open settings on first login if data missing
+function checkFirstLoginSettings() {
+  const u = window._currentUser;
+  if (!u) return;
+  const key = 'nvrs_settings_seen_' + u.uid;
+  const hasMissing = !u.tiktokIme || !u.telefon || !u.ulica;
+  if (hasMissing && !localStorage.getItem(key)) {
+    localStorage.setItem(key, '1');
+    setTimeout(() => {
+      showToast('👆 Popuni svoje podatke u Podešavanjima!', 4000);
+      setTimeout(openKupacSettings, 1500);
+    }, 2000);
+  }
 }
 
 // ===== KUPAC DATA =====
@@ -3642,6 +3817,11 @@ async function loadKupacData() {
   const ht = document.getElementById('k-home-tiktok');
   if(hn) hn.textContent = u.name || u.tiktokNick || 'Moj nalog';
   if(ht) ht.textContent = u.tiktokIme ? '@'+u.tiktokIme : u.email||'';
+
+  // Check missing data badge
+  checkKupacDataBadge();
+  // Auto-open settings on first login if data missing
+  checkFirstLoginSettings();
 
   const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
 
@@ -4528,6 +4708,7 @@ async function sendPushToUser(userId, title, body) {
 // Close modal on overlay click
 document.addEventListener('click', e => {
   if (e.target && e.target.id === 'settings-modal') closeSettings();
+  if (e.target && e.target.id === 'kupac-settings-modal') closeKupacSettings();
 });
 
 document.addEventListener('keydown', e => {
