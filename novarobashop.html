@@ -1375,12 +1375,13 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
           <div style="padding:10px;flex-shrink:0;border-bottom:1px solid var(--brd2);">
             <!-- Naziv -->
             <input type="text" id="ln-naziv" class="inp-dark" placeholder="naziv artikla..." style="margin-bottom:6px;font-size:13px;" />
-            <!-- Cena + dugme -->
+            <!-- Cena + Kolicina + dugme -->
             <div style="display:flex;gap:6px;">
               <input type="number" id="ln-cena" class="inp-dark" placeholder="cena RSD" style="flex:1;margin-bottom:0;font-size:15px;font-weight:800;" />
+              <input type="number" id="ln-kolicina" class="inp-dark" value="1" min="1" max="99" placeholder="kom" style="width:54px;margin-bottom:0;font-size:15px;font-weight:800;text-align:center;" title="Količina (standard: 1)" />
               <button onclick="dodajLnArtikal()" style="background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:10px;padding:0 18px;color:#160900;font-size:20px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
             </div>
-            <div style="font-size:10px;color:var(--txt3);margin-top:6px;">↵ Enter = dodaj · Kupac piše cenu u chat</div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:6px;">↵ Enter = dodaj · kom = količina (standard: 1)</div>
           </div>
 
           <!-- Lista artikala -->
@@ -3730,23 +3731,31 @@ let _lnKorpe   = {};  // { kupacId: { kupac, stavke:[{naziv,cena}], racunSent } 
 
 // Admin dodaje artikal sa cenom
 function dodajLnArtikal() {
-  const naziv = document.getElementById('ln-naziv').value.trim();
-  const cena  = parseFloat(document.getElementById('ln-cena').value) || 0;
+  const naziv    = document.getElementById('ln-naziv').value.trim();
+  const cena     = parseFloat(document.getElementById('ln-cena').value) || 0;
+  const kolicina = parseInt(document.getElementById('ln-kolicina').value) || 1;
   if (!naziv) { showToast('⚠️ Unesite naziv'); return; }
   if (!cena)  { showToast('⚠️ Unesite cenu'); return; }
-  _lnArtikli.push({ naziv, cena });
-  document.getElementById('ln-naziv').value = '';
-  document.getElementById('ln-cena').value  = '';
+
+  // Dodaj jednu stavku po komadu (da se svaki kom posebno vidi)
+  for (let i = 0; i < kolicina; i++) {
+    _lnArtikli.push({ naziv: kolicina > 1 ? naziv + ' (kom '+(i+1)+'/'+kolicina+')' : naziv, cena });
+  }
+
+  document.getElementById('ln-naziv').value    = '';
+  document.getElementById('ln-cena').value     = '';
+  document.getElementById('ln-kolicina').value = '1'; // reset na 1
   document.getElementById('ln-naziv').focus();
   renderLnArtikli();
   document.getElementById('ln-aktivan-lbl').textContent = _lnArtikli.length + ' artikl' + (_lnArtikli.length===1?'':'a') + ' aktivno';
   document.getElementById('ln-aktivan-lbl').style.color = '#6ee7b7';
-  showToast('✅ ' + naziv + ' — ' + cena.toLocaleString() + ' RSD dodano');
+  showToast('✅ ' + kolicina + 'x ' + naziv + ' — ' + (cena*kolicina).toLocaleString() + ' RSD dodano');
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.activeElement?.id === 'ln-cena') dodajLnArtikal();
-  if (e.key === 'Enter' && document.activeElement?.id === 'ln-naziv') document.getElementById('ln-cena')?.focus();
+  if (e.key === 'Enter' && document.activeElement?.id === 'ln-cena')     dodajLnArtikal();
+  if (e.key === 'Enter' && document.activeElement?.id === 'ln-kolicina') dodajLnArtikal();
+  if (e.key === 'Enter' && document.activeElement?.id === 'ln-naziv')    document.getElementById('ln-cena')?.focus();
 });
 
 function renderLnArtikli() {
