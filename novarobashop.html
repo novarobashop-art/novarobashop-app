@@ -973,7 +973,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <label class="inp-label">Lozinka</label>
     <input type="password" class="inp" id="login-pass" placeholder="••••••••" />
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Prijavite se</button>
-    <div class="forgot-link" onclick="doForgot()">Zaboravili ste lozinku? <span>Resetujte ovde</span></div>
+    <button onclick="doForgot()" style="width:100%;background:rgba(20,184,166,0.07);border:1.5px solid rgba(20,184,166,0.2);border-radius:12px;padding:11px;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';margin-top:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,184,166,0.13)'" onmouseout="this.style.background='rgba(20,184,166,0.07)'">
+      🔑 Zaboravili ste lozinku? Kliknite ovde
+    </button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">ili</span><div class="divider-line"></div></div>
     <button id="google-btn" class="btn-google" onclick="doGoogleLogin()">
       <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -1411,22 +1413,95 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div class="k-logo">Nova<span>roba</span>shop</div>
       <div class="k-header-sub" id="k-header-sub">Moj nalog</div>
     </div>
-    <div class="k-avatar" id="k-avatar">K</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="kNavTab('faq')" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Pomoć">❓</button>
+      <div class="k-avatar" id="k-avatar">K</div>
+    </div>
   </div>
 
   <!-- Admin izbor bar -->
-  <div style="background:white;border-bottom:1px solid #eef1f8;padding:10px 16px;display:flex;align-items:center;gap:10px;">
-    <div style="font-size:12px;font-weight:700;color:var(--gray);white-space:nowrap;">👤 Admin:</div>
-    <select id="k-global-admin-sel" style="flex:1;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:8px 12px;font-size:14px;font-family:'DM Sans';outline:none;color:var(--dark);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
+  <div style="background:white;border-bottom:1px solid #e2eaf8;padding:10px 16px;display:flex;align-items:center;gap:10px;">
+    <div style="font-size:12px;font-weight:700;color:var(--txt3);white-space:nowrap;">👤 Admin:</div>
+    <select id="k-global-admin-sel" style="flex:1;background:#F4F6FA;border:1.5px solid #e0e8ff;border-radius:10px;padding:8px 12px;font-size:14px;font-family:'DM Sans';outline:none;color:#0f172a;font-weight:600;" onchange="onGlobalAdminChange(this.value)">
       <option value="">Izaberite admina...</option>
     </select>
   </div>
 
   <input type="file" id="uplatnica-input" accept="image/*" style="display:none;" onchange="uploadUplatnica(event)" />
 
+  <!-- DASHBOARD TAB — DEFAULT -->
+  <div id="ktab-home" style="padding:16px;">
+    <!-- Pozdrav -->
+    <div style="background:linear-gradient(135deg,#0b1322,#0f1a2e);border:1px solid rgba(20,184,166,0.18);border-radius:20px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(20,184,166,0.06);"></div>
+      <div style="font-size:11px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">👋 Dobrodošli</div>
+      <div style="font-size:20px;font-weight:800;" id="k-home-name">Moj Nalog</div>
+      <div style="font-size:12px;color:var(--txt2);margin-top:3px;" id="k-home-tiktok">@—</div>
+    </div>
+
+    <!-- Urgentni Countdown (prikazan samo ako ima otvorenu računu) -->
+    <div id="k-countdown-box" style="display:none;border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;" id="k-countdown-label">⏰ Rok plaćanja</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
+        <div style="font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1;" id="k-countdown-days">—</div>
+        <div style="font-size:14px;font-weight:700;" id="k-countdown-unit">dana</div>
+      </div>
+      <div style="font-size:13px;opacity:0.8;" id="k-countdown-sub">Račun čeka plaćanje</div>
+      <div id="k-countdown-iznos" style="font-size:22px;font-weight:800;margin-top:8px;"></div>
+      <button id="k-countdown-btn" onclick="kNavTab('racuni')" style="width:100%;margin-top:12px;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans';">
+        📎 Idi na Račun
+      </button>
+    </div>
+
+    <!-- Brzi pregled (4 karte) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div onclick="kNavTab('racuni')" style="background:rgba(244,63,94,0.07);border:1.5px solid rgba(244,63,94,0.2);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:24px;margin-bottom:4px;">🔴</div>
+        <div style="font-size:22px;font-weight:800;color:#fda4af;" id="kh-stat-novo">0</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Novi Računi</div>
+      </div>
+      <div onclick="kNavTab('ceka')" style="background:rgba(245,158,11,0.07);border:1.5px solid rgba(245,158,11,0.2);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:24px;margin-bottom:4px;">🟡</div>
+        <div style="font-size:22px;font-weight:800;color:#fcd34d;" id="kh-stat-ceka">0</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Čeka Potvrdu</div>
+      </div>
+      <div onclick="kNavTab('poslato')" style="background:rgba(20,184,166,0.07);border:1.5px solid rgba(20,184,166,0.2);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:24px;margin-bottom:4px;">📦</div>
+        <div style="font-size:22px;font-weight:800;color:#5eead4;" id="kh-stat-poslato">0</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Poslato</div>
+      </div>
+      <div onclick="kNavTab('dugovi')" style="background:rgba(59,130,246,0.07);border:1.5px solid rgba(59,130,246,0.2);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:24px;margin-bottom:4px;">💳</div>
+        <div style="font-size:22px;font-weight:800;color:#93c5fd;" id="kh-stat-dugovi">0 RSD</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Otvoreno</div>
+      </div>
+    </div>
+
+    <!-- WhatsApp / Telegram kontakt admina -->
+    <div id="k-kontakt-box" style="display:none;background:white;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 14px rgba(15,23,42,0.07);">
+      <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">📱 Kontaktiraj Admina</div>
+      <div style="display:flex;gap:8px;">
+        <button id="k-whatsapp-btn" onclick="openWhatsApp()" style="flex:1;background:#25D366;color:white;border:none;border-radius:12px;padding:13px 8px;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 14px rgba(37,211,102,0.3);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button id="k-telegram-btn" onclick="openTelegram()" style="flex:1;background:#2AABEE;color:white;border:none;border-radius:12px;padding:13px 8px;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 14px rgba(42,171,238,0.3);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </button>
+      </div>
+    </div>
+
+    <!-- Poslednja aktivnost -->
+    <div style="background:white;border-radius:18px;padding:16px;box-shadow:0 2px 14px rgba(15,23,42,0.07);">
+      <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">🕐 Poslednja aktivnost</div>
+      <div id="k-home-activity"><div style="text-align:center;color:#aaa;padding:16px;font-size:13px;">Nema aktivnosti</div></div>
+    </div>
+  </div>
+
   <!-- Tab content -->
-  <div id="ktab-racuni" style="padding:16px;">
-    <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">🔴 Novi Računi</div>
+  <div id="ktab-racuni" style="padding:16px;display:none;">
+    <div style="font-size:13px;font-weight:700;color:var(--rose);margin-bottom:12px;">🔴 Novi Računi</div>
     <div id="k-racuni-list"></div>
   </div>
   <div id="ktab-ceka" style="padding:16px;display:none;">
@@ -1519,7 +1594,6 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-dugovi" style="padding:16px;display:none;">
     <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:4px;">💳 Otvorene Obaveze</div>
     <div style="font-size:12px;color:var(--gray);margin-bottom:16px;">Vaši neplaćeni računi i rok plaćanja</div>
-    <!-- Ukupno duguje -->
     <div id="k-dugovi-summary" style="background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1.5px solid #fca5a5;border-radius:18px;padding:18px;margin-bottom:16px;display:none;">
       <div style="font-size:11px;color:#ef4444;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px;">⚠️ Ukupno dugujete</div>
       <div style="font-size:32px;font-weight:800;color:#dc2626;letter-spacing:-1px;" id="k-dugovi-total">—</div>
@@ -1528,40 +1602,55 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div id="k-dugovi-list"><div style="text-align:center;color:#aaa;padding:40px 0;font-size:13px;">Sve je plaćeno! ✅</div></div>
   </div>
 
-  <div class="k-bottom-nav" style="overflow-x:auto;">
-    <div class="k-nav-item active" id="knav-racuni" onclick="kNavTab('racuni')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
-      <div class="k-nav-icon">🔴</div>
-      <div class="k-nav-lbl" id="knav-lbl-racuni" style="color:var(--red);">Računi</div>
+  <!-- FAQ TAB -->
+  <div id="ktab-faq" style="padding:16px;display:none;">
+    <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">❓ Često Postavljana Pitanja</div>
+    <div style="font-size:12px;color:#64748b;margin-bottom:16px;">Kliknite na pitanje za odgovor</div>
+
+    <div id="faq-list">
+      <!-- FAQ items rendered by initFaq() -->
     </div>
-    <div class="k-nav-item" id="knav-ceka" onclick="kNavTab('ceka')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+  </div>
+
+  <div class="k-bottom-nav" style="overflow-x:auto;">
+    <div class="k-nav-item active" id="knav-home" onclick="kNavTab('home')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+      <div class="k-nav-icon">🏠</div>
+      <div class="k-nav-lbl" id="knav-lbl-home" style="color:var(--blue);">Home</div>
+    </div>
+    <div class="k-nav-item" id="knav-racuni" onclick="kNavTab('racuni')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+      <div class="k-nav-icon">🔴</div>
+      <div id="k-racuni-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--rose);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;"></div>
+      <div class="k-nav-lbl" id="knav-lbl-racuni" style="color:#aaa;">Računi</div>
+    </div>
+    <div class="k-nav-item" id="knav-ceka" onclick="kNavTab('ceka')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟡</div>
       <div class="k-nav-lbl" id="knav-lbl-ceka" style="color:#aaa;">Čeka</div>
     </div>
-    <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟢</div>
-      <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:#aaa;">Arhiva</div>
+      <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:#aaa;">Plaćeno</div>
     </div>
-    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">📦</div>
       <div class="k-nav-lbl" id="knav-lbl-poslato" style="color:#aaa;">Poslato</div>
     </div>
-    <div class="k-nav-item" id="knav-istorija" onclick="kNavTab('istorija')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
-      <div class="k-nav-icon">🗂️</div>
-      <div class="k-nav-lbl" id="knav-lbl-istorija" style="color:#aaa;">Istorija</div>
-    </div>
-    <div class="k-nav-item" id="knav-dugovi" onclick="kNavTab('dugovi')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+    <div class="k-nav-item" id="knav-dugovi" onclick="kNavTab('dugovi')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
       <div class="k-nav-icon">💳</div>
-      <div id="k-dugovi-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;">!</div>
+      <div id="k-dugovi-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--rose);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;">!</div>
       <div class="k-nav-lbl" id="knav-lbl-dugovi" style="color:#aaa;">Dugovi</div>
     </div>
-    <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+    <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
       <div class="k-nav-icon">🔔</div>
-      <div id="k-notif-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;"></div>
+      <div id="k-notif-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--rose);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;"></div>
       <div class="k-nav-lbl" id="knav-lbl-notif" style="color:#aaa;">Notif</div>
     </div>
-    <div class="k-nav-item" id="knav-podrska" onclick="kNavTab('podrska')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-podrska" onclick="kNavTab('podrska')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">💬</div>
       <div class="k-nav-lbl" id="knav-lbl-podrska" style="color:#aaa;">Podrška</div>
+    </div>
+    <div class="k-nav-item" id="knav-faq" onclick="kNavTab('faq')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+      <div class="k-nav-icon">❓</div>
+      <div class="k-nav-lbl" id="knav-lbl-faq" style="color:#aaa;">Pomoć</div>
     </div>
   </div>
 </div>
@@ -1639,6 +1728,47 @@ function showToast(msg, dur=3000) {
   setTimeout(() => t.classList.remove('show'), dur);
 }
 
+// ===== FAQ =====
+const _FAQS = [
+  { q:"📦 Kako da platim račun?", a:"1. Idi na tab Računi<br>2. Klikni na račun koji trebaš da platiš<br>3. Pogledaj podatke za uplatu<br>4. Uplati iznos u banci ili pošti<br>5. Slikaj potvrdu o uplati<br>6. Klikni Kamera ili Galerija i pošalji sliku adminu" },
+  { q:"📷 Kako da pošaljem uplatnicu?", a:"Nakon što uplatiš:<br>1. Otvori tab Računi<br>2. Klikni na otvorenu računu<br>3. Klikni Kamera — odmah fotografiši potvrdu<br>   ili Galerija — izaberi sliku iz telefona<br>4. Sačekaj da admin potvrdi plaćanje" },
+  { q:"⏰ Koliko vremena imam za plaćanje?", a:"Imaš <b>4 dana</b> od kreiranja računa.<br>Dan 1-2: Normalno<br>Dan 3: Upozorenje<br>Dan 4: Poslednje upozorenje<br>Dan 5+: Nalog može biti blokiran<br><br>Na Home strani uvek vidiš countdown koliko dana ti je ostalo." },
+  { q:"🟡 Šta znači Čeka Potvrdu?", a:"Poslao/la si uplatnicu i čekaš da admin potvrdi uplatu.<br><br>Obično traje <b>1-24 sata</b>. Kad admin potvrdi, račun postaje Plaćeno automatski." },
+  { q:"📦 Šta znači Poslato?", a:"Admin je potvrdio da je paket poslat!<br>Sačekaj dostavu na kućnu adresu.<br><br>Ako postoji problem sa dostavom, kontaktiraj admina direktno." },
+  { q:"🔒 Nalog mi je blokiran — šta da radim?", a:"Nalog se blokira ako ima neplaćenih računa duže od 4 dana.<br><br>Rešenje:<br>1. Plati otvorene račune što pre<br>2. Pošalji uplatnicu adminu<br>3. Kontaktiraj admina (WhatsApp/Telegram na Home)<br>4. Admin odblokuje nalog čim potvrdi uplatu" },
+  { q:"📱 Kako da kontaktiram admina?", a:"Idi na Home tab — tamo su dugmići WhatsApp i Telegram za direktan kontakt.<br><br>Ili idi na tab Podrška i pošalji poruku direktno kroz app." },
+  { q:"🔑 Kako da promenim lozinku?", a:"1. Na login ekranu klikni Zaboravili ste lozinku?<br>2. Unesite email adresu<br>3. Dobićete email sa linkom za reset<br>4. Kliknite link i unesite novu lozinku<br><br>Ako koristiš Google prijavu, lozinka se ne koristi." },
+  { q:"🆕 Kako da se registrujem?", a:"1. Na login ekranu klikni Nastavi sa Google<br>2. Izaberi Google nalog<br>3. Popuni podatke: ime, adresa, TikTok username<br>4. Klikni Završi registraciju<br><br>TikTok username je važan — tako te admin prepoznaje na Live-u!" },
+];
+
+function initFaq() {
+  const el = document.getElementById('faq-list');
+  if (!el || el.children.length > 0) return;
+  el.innerHTML = _FAQS.map((f,i) =>
+    '<div style="background:white;border-radius:16px;margin-bottom:8px;overflow:hidden;box-shadow:0 2px 10px rgba(15,23,42,0.06);">' +
+      '<button onclick="toggleFaq(' + i + ')" style="width:100%;background:none;border:none;padding:15px 16px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:DM Sans,sans-serif;">' +
+        '<span style="font-size:14px;font-weight:700;color:#0f172a;">' + f.q + '</span>' +
+        '<span id="faq-icon-' + i + '" style="font-size:16px;flex-shrink:0;color:#94a3b8;transition:transform 0.2s;">▼</span>' +
+      '</button>' +
+      '<div id="faq-ans-' + i + '" style="display:none;padding:0 16px 14px;font-size:13px;color:#374151;line-height:1.7;border-top:1px solid #f1f5f9;">' + f.a + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function toggleFaq(i) {
+  var ans = document.getElementById('faq-ans-' + i);
+  var ico = document.getElementById('faq-icon-' + i);
+  var isOpen = ans.style.display !== 'none';
+  document.querySelectorAll('[id^="faq-ans-"]').forEach(function(el){ el.style.display='none'; });
+  document.querySelectorAll('[id^="faq-icon-"]').forEach(function(el){ el.style.transform=''; el.style.color='#94a3b8'; });
+  if (!isOpen) {
+    ans.style.display = 'block';
+    ans.style.paddingTop = '12px';
+    ico.style.transform = 'rotate(180deg)';
+    ico.style.color = '#3b82f6';
+  }
+}
+
 // Safety: if loading hangs AND no user logged in, show login after 15s
 // Safety timeout - nicht unterbrechen wenn Redirect läuft
 setTimeout(() => {
@@ -1668,6 +1798,8 @@ function _showPortalByRole(role) {
   } else if (role === 'kupac') {
     document.getElementById('kupac-screen').style.display = 'block';
     loadKupacData();
+    // Start on home tab
+    setTimeout(() => kNavTab('home'), 100);
   }
   // Push notification permission
   setTimeout(initPushNotifications, 2000);
@@ -3505,6 +3637,11 @@ async function loadKupacData() {
   const initials = (u.name||'K').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('k-avatar').textContent = initials;
   document.getElementById('k-header-sub').textContent = (u.tiktokIme ? '@'+u.tiktokIme : u.name) || 'Moj nalog';
+  // Home screen name
+  const hn = document.getElementById('k-home-name');
+  const ht = document.getElementById('k-home-tiktok');
+  if(hn) hn.textContent = u.name || u.tiktokNick || 'Moj nalog';
+  if(ht) ht.textContent = u.tiktokIme ? '@'+u.tiktokIme : u.email||'';
 
   const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
 
@@ -3523,6 +3660,12 @@ async function loadKupacData() {
     const otvoreni = _allKupacRacuni.filter(r=>r.status==='novo'||r.status==='ceka');
     const badgeEl = document.getElementById('k-dugovi-badge');
     if(badgeEl){ if(otvoreni.length>0){badgeEl.style.display='flex';badgeEl.textContent=otvoreni.length;}else badgeEl.style.display='none'; }
+    // Update racuni badge
+    const noviBadge = document.getElementById('k-racuni-badge');
+    const noviCount = _allKupacRacuni.filter(r=>r.status==='novo').length;
+    if(noviBadge){ if(noviCount>0){noviBadge.style.display='flex';noviBadge.textContent=noviCount;}else noviBadge.style.display='none'; }
+    // Refresh home if open
+    renderKHome();
   });
 
   // Realtime notifikacije za kupca
@@ -3603,6 +3746,8 @@ function onGlobalAdminChange(adminId) {
     const box = document.getElementById('k-selected-bank');
     if (box) box.style.display = 'none';
   }
+  // Refresh home screen with new admin's contact info
+  setTimeout(renderKHome, 50);
 }
 
 function checkKupacOverdue(racuni) {
@@ -3713,21 +3858,139 @@ function renderKPoslato(racuni) {
 }
 
 function kNavTab(name) {
-  ['racuni','ceka','arhiva','poslato','notif','podrska','istorija','dugovi'].forEach(n => {
+  ['home','racuni','ceka','arhiva','poslato','notif','podrska','istorija','dugovi','faq'].forEach(n => {
     const tab = document.getElementById('ktab-' + n);
     if(tab) tab.style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
     if (lbl) lbl.style.color = '#aaa';
   });
-  document.getElementById('ktab-' + name).style.display = 'block';
-  const colors = { racuni:'var(--red)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626' };
+  const tab = document.getElementById('ktab-' + name);
+  if(tab) tab.style.display = 'block';
+  const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name]||'var(--blue)';
   if (name === 'notif') markAllNotifRead();
   if (name === 'istorija') { const r=window._kAllRacuni||[]; renderKIstorija(r); }
   if (name === 'dugovi')   { const r=window._kAllRacuni||[]; renderKDugovi(r); }
+  if (name === 'home')     renderKHome();
+  if (name === 'faq')      initFaq();
 }
 
+function openWhatsApp() {
+  const admin = _adminList.find(a => a.id === document.getElementById('k-global-admin-sel')?.value);
+  const num = admin?.whatsapp || admin?.telefon || '';
+  if (!num) { showToast('⚠️ Admin nema unet WhatsApp broj'); return; }
+  const clean = num.replace(/\D/g,'');
+  window.open('https://wa.me/' + clean, '_blank');
+}
+function openTelegram() {
+  const admin = _adminList.find(a => a.id === document.getElementById('k-global-admin-sel')?.value);
+  const tg = admin?.telegram || '';
+  if (!tg) { showToast('⚠️ Admin nema unet Telegram'); return; }
+  window.open('https://t.me/' + tg.replace('@',''), '_blank');
+}
+
+function renderKHome() {
+  const u = window._currentUser;
+  if (!u) return;
+  // Header info
+  const nameEl = document.getElementById('k-home-name');
+  const tiktokEl = document.getElementById('k-home-tiktok');
+  if(nameEl) nameEl.textContent = u.name || u.tiktokNick || 'Moj nalog';
+  if(tiktokEl) tiktokEl.textContent = u.tiktokIme ? '@'+u.tiktokIme : u.email||'';
+
+  const racuni = window._kAllRacuni || [];
+  const novo   = racuni.filter(r=>r.status==='novo').length;
+  const ceka   = racuni.filter(r=>r.status==='ceka').length;
+  const poslato= racuni.filter(r=>r.paketStatus==='ship').length;
+  const dug    = racuni.filter(r=>r.status==='novo'||r.status==='ceka').reduce((s,r)=>s+(r.iznos||0),0);
+
+  const el_n = document.getElementById('kh-stat-novo');
+  const el_c = document.getElementById('kh-stat-ceka');
+  const el_p = document.getElementById('kh-stat-poslato');
+  const el_d = document.getElementById('kh-stat-dugovi');
+  if(el_n) el_n.textContent = novo;
+  if(el_c) el_c.textContent = ceka;
+  if(el_p) el_p.textContent = poslato;
+  if(el_d) el_d.textContent = dug > 0 ? dug.toLocaleString()+' RSD' : '0 RSD';
+
+  // Countdown — find oldest unpaid racun
+  const unpaid = racuni.filter(r=>r.status==='novo'&&r.datum).sort((a,b)=>a.datum>b.datum?1:-1);
+  const cdBox = document.getElementById('k-countdown-box');
+  if(cdBox) {
+    if (unpaid.length) {
+      const oldest = unpaid[0];
+      const today  = new Date(); today.setHours(0,0,0,0);
+      const rok    = new Date(oldest.datum); rok.setDate(rok.getDate()+4);
+      const diff   = Math.ceil((rok - today)/(1000*60*60*24));
+      const kasni  = diff < 0;
+      const danas  = diff === 0;
+      const urgent = diff <= 1;
+
+      const bg  = kasni ? 'linear-gradient(135deg,#fef2f2,#fff1f2)' : urgent ? 'linear-gradient(135deg,#fff7ed,#fffbeb)' : 'linear-gradient(135deg,#f0fdf4,#ecfdf5)';
+      const brd = kasni ? '#fca5a5' : urgent ? '#fde68a' : '#bbf7d0';
+      const clr = kasni ? '#dc2626' : urgent ? '#d97706' : '#16a34a';
+      const lbl = kasni ? `⚠️ Kasniš ${Math.abs(diff)} dana!` : danas ? '🔥 Rok je DANAS!' : `⏰ Rok za plaćanje`;
+      const sub = kasni ? 'Nalog može biti blokiran!' : danas ? 'Uplati danas da izbegneš blokadu' : `Imaš još ${diff} ${diff===1?'dan':'dana'}`;
+      const btnBg = kasni ? '#dc2626' : urgent ? '#d97706' : '#16a34a';
+
+      cdBox.style.cssText = `display:block;border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid ${brd};background:${bg};`;
+      document.getElementById('k-countdown-label').style.color = clr;
+      document.getElementById('k-countdown-label').textContent = lbl;
+      document.getElementById('k-countdown-days').style.color  = clr;
+      document.getElementById('k-countdown-days').textContent  = kasni ? Math.abs(diff) : diff;
+      document.getElementById('k-countdown-unit').style.color  = clr;
+      document.getElementById('k-countdown-unit').textContent  = Math.abs(diff)===1?'dan':'dana';
+      document.getElementById('k-countdown-sub').style.color   = clr;
+      document.getElementById('k-countdown-sub').textContent   = sub;
+      document.getElementById('k-countdown-iznos').textContent = (oldest.iznos||0).toLocaleString()+' RSD';
+      document.getElementById('k-countdown-iznos').style.color = clr;
+      const btn = document.getElementById('k-countdown-btn');
+      btn.style.background = btnBg;
+      btn.style.color = 'white';
+    } else {
+      cdBox.style.display = 'none';
+    }
+  }
+
+  // WhatsApp/Telegram box
+  const adminId = document.getElementById('k-global-admin-sel')?.value;
+  const admin   = _adminList.find(a=>a.id===adminId);
+  const kontakt = document.getElementById('k-kontakt-box');
+  if(kontakt) {
+    const hasWa = admin?.whatsapp || admin?.telefon;
+    const hasTg = admin?.telegram;
+    if(hasWa || hasTg) {
+      kontakt.style.display='block';
+      if(!hasWa) document.getElementById('k-whatsapp-btn').style.display='none';
+      if(!hasTg) document.getElementById('k-telegram-btn').style.display='none';
+    } else {
+      kontakt.style.display='none';
+    }
+  }
+
+  // Recent activity (last 5 racuni)
+  const actEl = document.getElementById('k-home-activity');
+  if(actEl) {
+    const recent = [...racuni].sort((a,b)=>(b.createdAt||b.datum||'')>(a.createdAt||a.datum||'')?1:-1).slice(0,4);
+    if(!recent.length){actEl.innerHTML='<div style="text-align:center;color:#aaa;padding:12px;font-size:13px;">Nema aktivnosti</div>';return;}
+    actEl.innerHTML = recent.map(r=>{
+      const st = r.paketStatus==='ship'?{c:'#16a34a',l:'📦 Poslato'}:r.status==='placeno'?{c:'#16a34a',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:r.status==='storno'?{c:'#6b7280',l:'❌ Storno'}:{c:'#dc2626',l:'🔴 Novo'};
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#0f172a;">Račun #${r.broj||r.id.slice(-4)}</div>
+          <div style="font-size:11px;color:#64748b;">${(r.datum||'').slice(0,10)} · ${r.opis||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:800;color:#0f172a;">${(r.iznos||0).toLocaleString()} RSD</div>
+          <div style="font-size:11px;font-weight:700;color:${st.c};">${st.l}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// Call renderKHome after racuni load — see renderKHome() above
 function openUplatnica(racunId, mode) {
   _currentUplatnicaRacunId = racunId;
   const input = document.getElementById('uplatnica-input');
