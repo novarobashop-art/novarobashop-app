@@ -1348,6 +1348,59 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         </div>
       </div>
 
+      <!-- ═══ AUKCIJA PANEL ═══ -->
+      <div style="background:rgba(244,63,94,0.07);border:2px solid rgba(244,63,94,0.22);border-radius:18px;padding:16px;margin-bottom:12px;">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:800;color:#fda4af;text-transform:uppercase;letter-spacing:1px;">🔨 Aukcija / Narudžbina</div>
+          <div id="auk-status" style="font-size:10px;color:var(--txt3);">nije aktivna</div>
+        </div>
+
+        <!-- Artikli lista -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Artikli (dodaj tokom Livea)</div>
+          <div id="auk-artikli-list" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="auk-naziv" class="inp-dark" placeholder="Naziv artikla..." style="flex:1;margin-bottom:0;" />
+            <button onclick="dodajArtikal()" style="background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:0 14px;font-size:18px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
+          </div>
+        </div>
+
+        <!-- Startna cena -->
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
+          <div style="flex:1;">
+            <div style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Startna cena (RSD)</div>
+            <input type="number" id="auk-start" class="inp-dark" placeholder="1000" style="margin-bottom:0;font-size:18px;font-weight:800;" />
+          </div>
+          <button onclick="startirajAukciju()" id="auk-btn" style="flex:1;background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:12px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 4px 16px rgba(244,63,94,0.35);">
+            🔨 Startuj
+          </button>
+        </div>
+
+        <!-- Trenutno Najviše -->
+        <div id="auk-top-box" style="display:none;background:rgba(245,158,11,0.1);border:2px solid rgba(245,158,11,0.35);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">🏆 Trenutno najviše</div>
+          <div style="font-size:36px;font-weight:800;color:var(--amber);letter-spacing:-2px;line-height:1;" id="auk-top-iznos">—</div>
+          <div style="font-size:16px;font-weight:700;color:white;margin-top:6px;" id="auk-top-kupac">—</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px;" id="auk-top-tiktok">—</div>
+        </div>
+      </div>
+
+      <!-- ═══ SVI PONUĐAČI ═══ -->
+      <div id="auk-ponude-box" style="display:none;background:rgba(255,255,255,0.03);border:1px solid var(--brd);border-radius:18px;padding:14px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;">
+            📊 Sve ponude
+            <span id="auk-ponude-count" style="background:rgba(148,163,184,0.15);border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px;">0</span>
+          </div>
+          <button onclick="zakljuciAukciju()" id="auk-zaklj-btn" style="background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:10px;padding:8px 16px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 4px 12px rgba(20,184,166,0.3);">
+            ✅ Zaključi &amp; Pošalji Račun
+          </button>
+        </div>
+        <div id="auk-ponude-list"></div>
+      </div>
+
       <!-- SEARCH -->
       <div style="font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">🔍 Pretraži gledaoce</div>
       <input type="text" class="live-search" id="live-search" placeholder="Ukucajte TikTok @username ili nickname..." oninput="doLiveSearch(this.value)" />
@@ -3682,6 +3735,196 @@ async function toggleLive() {
   }
 }
 
+// ═══════════════════════════════════════════════════
+// 🔨 AUKCIJA SYSTEM
+// ═══════════════════════════════════════════════════
+let _aukAktivna  = false;
+let _aukArtikli  = [];   // [{naziv}]
+let _aukPonude   = {};   // { kupacId: { kupac, iznos, vreme } }
+let _aukWinner   = null; // { kupac, iznos }
+
+// Dodaj artikal u listu
+function dodajArtikal() {
+  const inp = document.getElementById('auk-naziv');
+  const naziv = inp.value.trim();
+  if (!naziv) return;
+  _aukArtikli.push(naziv);
+  inp.value = '';
+  renderArtikli();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement?.id === 'auk-naziv') dodajArtikal();
+});
+
+function renderArtikli() {
+  const el = document.getElementById('auk-artikli-list');
+  if (!_aukArtikli.length) { el.innerHTML = ''; return; }
+  el.innerHTML = _aukArtikli.map((n,i) =>
+    '<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 10px;margin-bottom:5px;">'
+    + '<span style="font-size:12px;font-weight:700;color:white;flex:1;">' + n + '</span>'
+    + '<button onclick="_aukArtikli.splice('+i+',1);renderArtikli();" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>'
+    + '</div>'
+  ).join('');
+}
+
+function startirajAukciju() {
+  const start = parseFloat(document.getElementById('auk-start').value) || 0;
+  if (!_aukArtikli.length) { showToast('⚠️ Dodajte bar jedan artikal'); return; }
+  if (!start) { showToast('⚠️ Unesite startnu cenu'); return; }
+
+  _aukAktivna = true;
+  _aukPonude  = {};
+  _aukWinner  = null;
+
+  document.getElementById('auk-top-box').style.display    = 'block';
+  document.getElementById('auk-ponude-box').style.display = 'block';
+  document.getElementById('auk-top-iznos').textContent    = start.toLocaleString() + ' RSD';
+  document.getElementById('auk-top-kupac').textContent    = 'Čekam ponude...';
+  document.getElementById('auk-top-tiktok').textContent   = '';
+  document.getElementById('auk-status').textContent       = '🔴 AKTIVNA';
+  document.getElementById('auk-status').style.color       = '#fda4af';
+  document.getElementById('auk-btn').textContent          = '🔄 Resetuj';
+  document.getElementById('auk-btn').onclick              = resetujAukciju;
+  renderPonude();
+  showToast('🔨 Aukcija startovana! Min. cena: ' + start.toLocaleString() + ' RSD');
+}
+
+function resetujAukciju() {
+  if (!confirm('Resetovati aukciju? Sve ponude će biti obrisane.')) return;
+  _aukAktivna = false; _aukPonude = {}; _aukWinner = null;
+  document.getElementById('auk-top-box').style.display    = 'none';
+  document.getElementById('auk-ponude-box').style.display = 'none';
+  document.getElementById('auk-status').textContent       = 'nije aktivna';
+  document.getElementById('auk-status').style.color       = 'var(--txt3)';
+  document.getElementById('auk-btn').textContent          = '🔨 Startuj';
+  document.getElementById('auk-btn').onclick              = startirajAukciju;
+}
+
+// Provjeri svaki chat komentar za broj (ponudu)
+function checkChatForOrder(chatItem) {
+  if (!_aukAktivna) return;
+
+  // Izvuci broj iz komentara
+  const raw  = (chatItem.comment || '').replace(/\s/g,'').replace(/\./g,'').replace(',','.');
+  const nums = raw.match(/\d+/g);
+  if (!nums) return;
+
+  const iznos = Math.max(...nums.map(n => parseInt(n)));
+  if (!iznos || iznos < 100) return; // ignoriši manje od 100
+
+  // Samo registrovani kupci
+  const tiktokId = (chatItem.tiktokId||'').toLowerCase().replace('@','');
+  const kupac = (window._allKupciGlobal||[]).find(k =>
+    (k.tiktokIme||'').toLowerCase() === tiktokId ||
+    (k.tiktokNick||'').toLowerCase() === tiktokId
+  );
+  if (!kupac) return;
+
+  // Provjeri da li je ovo veće od prethodne ponude ovog kupca
+  const prev = _aukPonude[kupac.id];
+  if (prev && iznos <= prev.iznos) return;
+
+  _aukPonude[kupac.id] = { kupac, iznos, vreme: new Date() };
+
+  // Update winner (highest bid)
+  const sve    = Object.values(_aukPonude);
+  const winner = sve.reduce((max, p) => p.iznos > max.iznos ? p : max, sve[0]);
+  _aukWinner   = winner;
+
+  // Update top box
+  document.getElementById('auk-top-iznos').textContent  = winner.iznos.toLocaleString() + ' RSD';
+  document.getElementById('auk-top-kupac').textContent  = winner.kupac.tiktokNick || winner.kupac.name || '—';
+  document.getElementById('auk-top-tiktok').textContent = '@' + (winner.kupac.tiktokIme||'—');
+
+  renderPonude();
+
+  if (prev) showToast('📈 ' + (kupac.tiktokNick||kupac.name) + ' podigao: ' + iznos.toLocaleString() + ' RSD', 2500);
+  else      showToast('🔨 ' + (kupac.tiktokNick||kupac.name) + ': ' + iznos.toLocaleString() + ' RSD', 2500);
+}
+
+function renderPonude() {
+  const list  = document.getElementById('auk-ponude-list');
+  const count = document.getElementById('auk-ponude-count');
+  const sve   = Object.values(_aukPonude).sort((a,b) => b.iznos - a.iznos);
+  count.textContent = sve.length;
+
+  if (!sve.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px;">Čekam ponude iz chata...</div>';
+    return;
+  }
+
+  list.innerHTML = sve.map(({ kupac, iznos, vreme }, idx) => {
+    const isWinner = idx === 0;
+    const ini      = (kupac.tiktokNick||kupac.name||'?').slice(0,2).toUpperCase();
+    const mins     = Math.floor((new Date()-vreme)/60000);
+    const tStr     = mins < 1 ? 'upravo' : mins+'min';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:' + (isWinner?'rgba(245,158,11,0.1)':'rgba(255,255,255,0.03)') + ';border:1.5px solid ' + (isWinner?'rgba(245,158,11,0.4)':'rgba(148,163,184,0.1)') + ';border-radius:12px;margin-bottom:6px;">'
+      + '<div style="font-size:16px;font-weight:800;color:' + (isWinner?'var(--amber)':'var(--txt3)') + ';min-width:22px;">' + (idx===0?'🏆':idx+1) + '</div>'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:' + (isWinner?'rgba(245,158,11,0.2)':'rgba(148,163,184,0.1)') + ';color:' + (isWinner?'var(--amber)':'var(--txt2)') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;">' + ini + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-size:13px;font-weight:800;color:' + (isWinner?'white':'rgba(255,255,255,0.8)') + ';">' + (kupac.tiktokNick||kupac.name||'—') + '</div>'
+        + '<div style="font-size:11px;color:var(--txt3);">@' + (kupac.tiktokIme||'—') + ' · ' + tStr + '</div>'
+      + '</div>'
+      + '<div style="font-size:' + (isWinner?'20':'15') + 'px;font-weight:800;color:' + (isWinner?'var(--amber)':'var(--txt2)') + ';">' + iznos.toLocaleString() + ' RSD</div>'
+    + '</div>';
+  }).join('');
+}
+
+async function zakljuciAukciju() {
+  if (!_aukWinner) { showToast('⚠️ Nema ponuda još'); return; }
+  const { kupac, iznos } = _aukWinner;
+  const opisArtikli = _aukArtikli.join(', ') || 'Aukcija';
+
+  if (!confirm('Zaključiti aukciju?\n\nPobednik: ' + (kupac.tiktokNick||kupac.name) + '\nPonuda: ' + iznos.toLocaleString() + ' RSD\nArtikli: ' + opisArtikli)) return;
+
+  const { db, collection, addDoc } = window._fb;
+  const broj = Math.floor(1000 + Math.random()*9000);
+
+  await addDoc(collection(db,'racuni'), {
+    adminId: window._currentUser.uid,
+    kupacId: kupac.id,
+    kupacName: kupac.name||'',
+    iznos,
+    opis: opisArtikli,
+    stavke: _aukArtikli.map(n => ({ naziv: n, cena: iznos })),
+    status: 'novo', paketStatus: 'prep',
+    datum: new Date().toISOString().slice(0,10),
+    broj, createdAt: new Date().toISOString(),
+    sourceAukcija: true,
+    svePonude: Object.values(_aukPonude).map(p => ({
+      kupacId: p.kupac.id, ime: p.kupac.tiktokNick||p.kupac.name, iznos: p.iznos
+    }))
+  });
+
+  await addDoc(collection(db,'notifikacije'), {
+    userId: kupac.id, tip: 'nova_racun',
+    poruka: '🏆 Pobedili ste aukciju!\n' + opisArtikli + '\nVaša ponuda: ' + iznos.toLocaleString() + ' RSD',
+    vreme: new Date().toISOString(), procitano: false
+  });
+
+  // Obavesti gubitnike
+  const gubitnici = Object.values(_aukPonude).filter(p => p.kupac.id !== kupac.id);
+  for (const g of gubitnici) {
+    await addDoc(collection(db,'notifikacije'), {
+      userId: g.kupac.id, tip: 'info',
+      poruka: '😔 Nisi pobedio aukciju za: ' + opisArtikli + '. Pobedila ponuda: ' + iznos.toLocaleString() + ' RSD',
+      vreme: new Date().toISOString(), procitano: false
+    });
+  }
+
+  // Stop auction
+  _aukAktivna = false;
+  document.getElementById('auk-status').textContent = '✅ Zaključena';
+  document.getElementById('auk-status').style.color = '#6ee7b7';
+  document.getElementById('auk-zaklj-btn').style.display = 'none';
+
+  showToast('✅ Aukcija zaključena! Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' – ' + iznos.toLocaleString() + ' RSD', 5000);
+}
+
+// Staro — više nije potrebno ali ostavljamo prazno zbog kompatibilnosti
+function updateApStatus() {}
+function aktivirajProizvod() {}
+
 function startLiveChatFeed() {
   const { db, collection, query, where, orderBy, onSnapshot } = window._fb;
   const feed = document.getElementById('live-chat-feed');
@@ -3692,6 +3935,8 @@ function startLiveChatFeed() {
     snap.docChanges().forEach(change => {
       if (change.type === 'added') {
         const d = change.doc.data();
+        // Provjeri da li kupac naručuje aktivni proizvod
+        checkChatForOrder(d);
         const color = d.statusColor === 'green' ? '#00c896' : d.statusColor === 'orange' ? '#FFB800' : '#ff4d4d';
         const icon = d.statusColor === 'green' ? '✅' : d.statusColor === 'orange' ? '⚠️' : '❌';
         const label = d.statusColor === 'green' ? 'Registrovan' : d.statusColor === 'orange' ? 'Kasni' : 'Nije registrovan';
