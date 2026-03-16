@@ -1767,9 +1767,18 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="font-size:11px;color:var(--txt3);margin-top:-8px;">Ostavi prazno ako ne želiš da menjaš lozinku</div>
     </div>
 
+    <!-- Info box — approval required -->
+    <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;">
+      <div style="font-size:20px;flex-shrink:0;">🔐</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#93c5fd;margin-bottom:3px;">Zahtev za odobrenje</div>
+        <div style="font-size:12px;color:var(--txt2);line-height:1.5;">Izmene podataka mora odobriti <b style="color:white;">Haupt</b>. Poslaćemo mu zahtev — čim odobri, podaci će biti sačuvani. 📨</div>
+      </div>
+    </div>
+
     <!-- Save button -->
     <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
-      ✓ Sačuvaj sve izmene
+      📨 Pošalji zahtev za izmenu
     </button>
     <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🚪 Odjavi se</button>
   </div>
@@ -3709,7 +3718,10 @@ function closeKupacSettings() {
 
 async function saveKupacSettings() {
   const btn = document.getElementById('ks-save-btn');
-  btn.disabled = true; btn.textContent = 'Čuvanje...';
+  btn.disabled = true; btn.textContent = 'Slanje zahteva...';
+
+  const u = window._currentUser;
+  if (!u) { btn.disabled=false; btn.textContent='✓ Pošalji zahtev'; return; }
 
   const name      = document.getElementById('ks-name').value.trim();
   const telefon   = document.getElementById('ks-telefon').value.trim();
@@ -3721,27 +3733,55 @@ async function saveKupacSettings() {
   const selo      = document.getElementById('ks-selo').value.trim();
   const newPass   = document.getElementById('ks-new-pass').value;
 
+  // Build diff — only send fields that actually changed
+  const current = u;
+  const changes = {};
+  const changeLabels = [];
+  if (name      && name      !== (current.name||''))       { changes.name=name;           changeLabels.push('Ime: ' + name); }
+  if (telefon   && telefon   !== (current.telefon||''))    { changes.telefon=telefon;     changeLabels.push('Telefon: ' + telefon); }
+  if (tiktokIme && tiktokIme !== (current.tiktokIme||''))  { changes.tiktokIme=tiktokIme; changeLabels.push('TikTok ime: @' + tiktokIme); }
+  if (tiktokNick&& tiktokNick!== (current.tiktokNick||'')) { changes.tiktokNick=tiktokNick;changeLabels.push('TikTok nick: ' + tiktokNick); }
+  if (ulica     && ulica     !== (current.ulica||''))      { changes.ulica=ulica;         changeLabels.push('Ulica: ' + ulica); }
+  if (ptt       && ptt       !== (current.ptt||''))        { changes.ptt=ptt;             changeLabels.push('PTT: ' + ptt); }
+  if (grad      && grad      !== (current.grad||''))       { changes.grad=grad;           changeLabels.push('Grad: ' + grad); }
+  if (selo      && selo      !== (current.selo||''))       { changes.selo=selo;           changeLabels.push('Selo: ' + selo); }
+
+  // Also allow first-time fill (empty fields)
+  if (!current.name      && name)       { changes.name=name;           if(!changeLabels.find(l=>l.startsWith('Ime'))) changeLabels.push('Ime: '+name); }
+  if (!current.telefon   && telefon)    { changes.telefon=telefon;     if(!changeLabels.find(l=>l.startsWith('Tel'))) changeLabels.push('Telefon: '+telefon); }
+  if (!current.tiktokIme && tiktokIme)  { changes.tiktokIme=tiktokIme; if(!changeLabels.find(l=>l.startsWith('TikTok ime'))) changeLabels.push('TikTok ime: @'+tiktokIme); }
+  if (!current.tiktokNick&& tiktokNick) { changes.tiktokNick=tiktokNick;if(!changeLabels.find(l=>l.startsWith('TikTok nick'))) changeLabels.push('TikTok nick: '+tiktokNick); }
+  if (!current.ulica     && ulica)      { changes.ulica=ulica;         if(!changeLabels.find(l=>l.startsWith('Ulica'))) changeLabels.push('Ulica: '+ulica); }
+  if (!current.ptt       && ptt)        { changes.ptt=ptt;             if(!changeLabels.find(l=>l.startsWith('PTT'))) changeLabels.push('PTT: '+ptt); }
+  if (!current.grad      && grad)       { changes.grad=grad;           if(!changeLabels.find(l=>l.startsWith('Grad'))) changeLabels.push('Grad: '+grad); }
+  if (!current.selo      && selo)       { changes.selo=selo;           if(!changeLabels.find(l=>l.startsWith('Selo'))) changeLabels.push('Selo: '+selo); }
+
+  if (Object.keys(changes).length === 0 && !newPass) {
+    showToast('ℹ️ Nema promena za čuvanje');
+    btn.disabled=false; btn.textContent='✓ Pošalji zahtev za izmenu';
+    return;
+  }
+
   try {
-    const { db, doc, updateDoc, auth } = window._fb;
-    await updateDoc(doc(db, 'users', window._currentUser.uid), {
-      name, telefon, tiktokIme, tiktokNick, ulica, ptt, grad, selo
-    });
+    const { db, collection, addDoc, auth } = window._fb;
 
-    // Update local user object
-    Object.assign(window._currentUser, { name, telefon, tiktokIme, tiktokNick, ulica, ptt, grad, selo });
+    // Send request to Haupt
+    if (Object.keys(changes).length > 0) {
+      await addDoc(collection(db, 'haupt_notifikacije'), {
+        tip: 'izmena_podataka',
+        kupacId: u.uid,
+        kupacName: u.name || u.email,
+        kupacTiktok: u.tiktokIme || '',
+        izmene: changes,
+        izmeneLabels: changeLabels,
+        poruka: '✏️ Kupac ' + (u.tiktokIme ? '@'+u.tiktokIme : u.name||u.email) + ' želi da izmeni podatke:\n' + changeLabels.join(', '),
+        vreme: new Date().toISOString(),
+        procitano: false,
+        status: 'ceka' // ceka = pending, odobren = approved, odbijen = rejected
+      });
+    }
 
-    // Update avatar initials
-    const initials = (name||'K').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    document.getElementById('k-avatar').textContent = initials;
-    document.getElementById('k-header-sub').textContent = tiktokIme ? '@'+tiktokIme : name || 'Moj nalog';
-
-    // Update home screen
-    const hn = document.getElementById('k-home-name');
-    const ht = document.getElementById('k-home-tiktok');
-    if(hn) hn.textContent = name || 'Moj nalog';
-    if(ht) ht.textContent = tiktokIme ? '@'+tiktokIme : '';
-
-    // Password change
+    // Password change — this goes through immediately (no approval needed)
     if (newPass && newPass.length >= 6) {
       try {
         const { updatePassword } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
@@ -3750,18 +3790,12 @@ async function saveKupacSettings() {
       } catch(e) { showToast('⚠️ Za promenu lozinke ponovo se prijavite.'); }
     }
 
-    // Hide badge if all data is now filled
-    if (name && telefon && tiktokIme && tiktokNick && ulica && grad) {
-      const badge = document.getElementById('k-settings-badge');
-      if (badge) badge.style.display = 'none';
-    }
-
     closeKupacSettings();
-    showToast('✅ Podaci sačuvani!');
+    showToast('📨 Zahtev poslat Hauptu! Čekaj odobrenje.', 4000);
   } catch(e) {
     showToast('❌ Greška: ' + e.message);
   }
-  btn.disabled = false; btn.textContent = '✓ Sačuvaj sve izmene';
+  btn.disabled = false; btn.textContent = '✓ Pošalji zahtev za izmenu';
 }
 
 // Check missing data badge on load
