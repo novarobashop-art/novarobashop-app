@@ -3973,7 +3973,7 @@ let _lnArtikli = [];  // [{ naziv, cena }] — aktivni artikli koje admin dodaje
 let _lnKorpe   = {};  // { kupacId: { kupac, stavke:[{naziv,cena}], racunSent } }
 let _lnRacunGesendet = new Set(); // kupacId-evi koji su VEC dobili racun ovog livea — ne mogu vise naručiti
 
-// Admin dodaje artikal sa cenom
+// Admin dodaje artikal sa cenom i ukupnom kolicinom na stanju
 function dodajLnArtikal() {
   const naziv    = document.getElementById('ln-naziv').value.trim();
   const cena     = parseFloat(document.getElementById('ln-cena').value) || 0;
@@ -3981,19 +3981,17 @@ function dodajLnArtikal() {
   if (!naziv) { showToast('⚠️ Unesite naziv'); return; }
   if (!cena)  { showToast('⚠️ Unesite cenu'); return; }
 
-  // Dodaj jednu stavku po komadu (da se svaki kom posebno vidi)
-  for (let i = 0; i < kolicina; i++) {
-    _lnArtikli.push({ naziv: kolicina > 1 ? naziv + ' (kom '+(i+1)+'/'+kolicina+')' : naziv, cena });
-  }
+  // Jedan artikal sa kolicinom na stanju — kupac pise "3x 100" da uzme 3 komada
+  _lnArtikli.push({ naziv, cena, stanje: kolicina });
 
   document.getElementById('ln-naziv').value    = '';
   document.getElementById('ln-cena').value     = '';
-  document.getElementById('ln-kolicina').value = '1'; // reset na 1
+  document.getElementById('ln-kolicina').value = '1';
   document.getElementById('ln-naziv').focus();
   renderLnArtikli();
   document.getElementById('ln-aktivan-lbl').textContent = _lnArtikli.length + ' artikl' + (_lnArtikli.length===1?'':'a') + ' aktivno';
   document.getElementById('ln-aktivan-lbl').style.color = '#6ee7b7';
-  showToast('✅ ' + kolicina + 'x ' + naziv + ' — ' + (cena*kolicina).toLocaleString() + ' RSD dodano');
+  showToast('✅ ' + naziv + ' — ' + cena.toLocaleString() + ' RSD × ' + kolicina + ' kom');
 }
 
 document.addEventListener('keydown', e => {
@@ -4005,14 +4003,23 @@ document.addEventListener('keydown', e => {
 function renderLnArtikli() {
   const el = document.getElementById('ln-artikli-list');
   if (!_lnArtikli.length) { el.innerHTML = ''; return; }
-  el.innerHTML = _lnArtikli.map((a, i) =>
-    '<div style="display:flex;align-items:center;gap:8px;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:8px;padding:6px 10px;margin-bottom:5px;">'
-    + '<span style="font-size:12px;color:var(--teal);">📌</span>'
-    + '<span style="font-size:12px;font-weight:700;color:white;flex:1;">' + a.naziv + '</span>'
-    + '<span style="font-size:12px;font-weight:800;color:var(--amber);">' + a.cena.toLocaleString() + ' RSD</span>'
-    + '<button onclick="_lnArtikli.splice('+i+',1);renderLnArtikli();" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>'
-    + '</div>'
-  ).join('');
+  el.innerHTML = _lnArtikli.map((a, i) => {
+    // Koliko je vec rezervisano od svih kupaca
+    const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
+      if (k.racunSent) return sum;
+      const s = k.stavke.find(x => x.naziv === a.naziv && x.cena === a.cena);
+      return sum + (s ? (s.kolicina||1) : 0);
+    }, 0);
+    const dostupno = (a.stanje||1) - rezervisano;
+    const boja = dostupno <= 0 ? '#fda4af' : dostupno <= 3 ? '#fcd34d' : '#6ee7b7';
+    return '<div style="display:flex;align-items:center;gap:8px;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:8px;padding:6px 10px;margin-bottom:5px;">'
+      + '<span style="font-size:12px;color:var(--teal);">📌</span>'
+      + '<span style="font-size:12px;font-weight:700;color:white;flex:1;">' + a.naziv + '</span>'
+      + '<span style="font-size:11px;font-weight:800;color:' + boja + ';background:rgba(255,255,255,0.06);border-radius:6px;padding:2px 7px;flex-shrink:0;">' + dostupno + '/' + (a.stanje||1) + '</span>'
+      + '<span style="font-size:12px;font-weight:800;color:var(--amber);flex-shrink:0;">' + a.cena.toLocaleString() + ' RSD</span>'
+      + '<button onclick="_lnArtikli.splice('+i+',1);renderLnArtikli();" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>'
+      + '</div>';
+  }).join('');
 }
 
 // Svaki chat komentar — provjeri mode
@@ -4069,32 +4076,73 @@ function checkNarudzba(chatItem) {
   if (_lnRacunGesendet.has(kupac.id)) return;
   if (_lnKorpe[kupac.id]?.racunSent) return;
 
-  // Izvuci broj iz komentara
-  const raw  = (chatItem.comment||'').replace(/\s/g,'').replace(/\./g,'');
-  const nums = raw.match(/\d+/g);
-  if (!nums) return;
+  const raw = (chatItem.comment||'').trim();
 
-  // Provjeri da li broj odgovara nekoj ceni artikla
-  const matchedArtikli = _lnArtikli.filter(a => nums.some(n => parseInt(n) === Math.round(a.cena)));
-  if (!matchedArtikli.length) return;
+  // Pokusaj da parsuje format "3x 100" ili "3 x 100" ili "3X100" ili samo "100"
+  // Regex: opcioni (broj + x) + razmak + cena
+  const match = raw.replace(/\s/g,'').match(/^(\d+)[xX](\d+)$/);
+  let trazenaKolicina = 1;
+  let trazenaCena     = 0;
+
+  if (match) {
+    // Format "3x100"
+    trazenaKolicina = parseInt(match[1]);
+    trazenaCena     = parseInt(match[2]);
+  } else {
+    // Format samo "100" — uzima 1 komad
+    const nums = raw.replace(/\./g,'').match(/^\d+$/);
+    if (!nums) return;
+    trazenaCena = parseInt(nums[0]);
+    trazenaKolicina = 1;
+  }
+
+  if (!trazenaCena || trazenaKolicina < 1) return;
+
+  // Pronadji artikal sa tom cenom
+  const matchedArtikal = _lnArtikli.find(a => Math.round(a.cena) === trazenaCena);
+  if (!matchedArtikal) return;
+
+  // Provjeri koliko je STVARNO ostalo (stanje minus sve vec rezervisano od drugih kupaca)
+  const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
+    if (k.racunSent) return sum;
+    const s = k.stavke.find(x => x.naziv === matchedArtikal.naziv && x.cena === matchedArtikal.cena);
+    return sum + (s ? (s.kolicina||1) : 0);
+  }, 0);
+  const dostupno = (matchedArtikal.stanje || 1) - rezervisano;
+
+  if (dostupno <= 0) {
+    showToast('❌ ' + matchedArtikal.naziv + ' — rasprodato!', 3000);
+    return;
+  }
+
+  const finalKolicina = Math.min(trazenaKolicina, dostupno);
 
   // Dodaj u korpu
   if (!_lnKorpe[kupac.id]) _lnKorpe[kupac.id] = { kupac, stavke: [], racunSent: false };
 
-  let nesto_dodato = false;
-  matchedArtikli.forEach(matchedArtikal => {
-    // Ne dodaj isti artikal dva puta za istog kupca
-    const vecDodao = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
-    if (vecDodao) return;
-    _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena });
-    nesto_dodato = true;
-  });
-
-  if (!nesto_dodato) return;
+  // Ako vec postoji ovaj artikal — samo azuriraj kolicinu
+  const existing = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
+  if (existing) {
+    // Koliko jos moze da doda (dostupno + ono sto vec ima rezervisano = ukupno za njega)
+    const dostupnoZaNjega = dostupno; // dostupno je vec bez njegove rezervacije? Ne — uracunava i njegovu
+    // Racunamo tacno: koliko ukupno sme ovaj kupac
+    const njegovaRez = existing.kolicina || 1;
+    const ukupnoSme = njegovaRez + dostupno;
+    const novaKol = Math.min(existing.kolicina + finalKolicina, ukupnoSme);
+    if (novaKol === existing.kolicina) {
+      showToast('⚠️ ' + (kupac.tiktokNick||kupac.name) + ' — nema više na stanju!', 3000);
+      return;
+    }
+    existing.kolicina = novaKol;
+  } else {
+    _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena, kolicina: finalKolicina });
+  }
 
   renderLnKorpe();
-  const ukupnoNovo = matchedArtikli.reduce((s,a)=>s+a.cena,0);
-  showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + matchedArtikli.length + 'x artikal — ' + ukupnoNovo.toLocaleString() + ' RSD', 3000);
+  renderLnArtikli(); // Osvezi stanje u listi artikala
+  const ukupno = finalKolicina * matchedArtikal.cena;
+  const upozorenje = finalKolicina < trazenaKolicina ? ' (samo ' + finalKolicina + ' ostalo!)' : '';
+  showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + finalKolicina + 'x ' + matchedArtikal.naziv + ' — ' + ukupno.toLocaleString() + ' RSD' + upozorenje, 3000);
 }
 
 function renderLnKorpe() {
@@ -4225,10 +4273,9 @@ function lnObrisiStavku(kupacId, stavkaIdx) {
   const korpa = _lnKorpe[kupacId];
   if (!korpa) return;
   korpa.stavke.splice(stavkaIdx, 1);
-  if (korpa.stavke.length === 0) {
-    delete _lnKorpe[kupacId]; // Ako nema više stavki — ukloni celu korpu
-  }
+  if (korpa.stavke.length === 0) delete _lnKorpe[kupacId];
   renderLnKorpe();
+  renderLnArtikli(); // Osvezi dostupno stanje
   showToast('🗑️ Artikal uklonjen');
 }
 
@@ -4237,8 +4284,20 @@ function lnKolPlus(kupacId, stavkaIdx) {
   const korpa = _lnKorpe[kupacId];
   if (!korpa) return;
   const s = korpa.stavke[stavkaIdx];
+  // Provjeri dostupno stanje
+  const artikal = _lnArtikli.find(a => a.naziv === s.naziv && a.cena === s.cena);
+  if (artikal) {
+    const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
+      if (k.racunSent) return sum;
+      const x = k.stavke.find(x => x.naziv === s.naziv && x.cena === s.cena);
+      return sum + (x ? (x.kolicina||1) : 0);
+    }, 0);
+    const dostupno = (artikal.stanje||1) - rezervisano;
+    if (dostupno <= 0) { showToast('⚠️ Nema više na stanju!'); return; }
+  }
   s.kolicina = (s.kolicina || 1) + 1;
   renderLnKorpe();
+  renderLnArtikli();
 }
 
 // Smanji količinu stavke (min 1, na 0 briše)
@@ -4254,6 +4313,7 @@ function lnKolMinus(kupacId, stavkaIdx) {
     s.kolicina = novaKol;
   }
   renderLnKorpe();
+  renderLnArtikli(); // Osvezi dostupno stanje
 }
 
 // Stare funkcije — stub da ne puca
