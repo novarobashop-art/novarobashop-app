@@ -4181,25 +4181,37 @@ function renderPonude() {}
 function zakljuciAukciju() { showToast('ℹ️ Koristi novi Live Narudžbine sistem'); }
 
 function startLiveChatFeed() {
-  const { db, collection, query, where, onSnapshot, limit } = window._fb;
+  const { db, collection, query, where, onSnapshot, orderBy, limit } = window._fb;
   const feed = document.getElementById('live-chat-feed');
-  feed.innerHTML = '';
+  feed.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:10px;">⏳ Učitavam chat...</div>';
   const adminId = window._currentUser.uid;
-  const q = query(collection(db, 'live_chat'), where('adminId','==',adminId), limit(100));
+
+  // Uzmi poruke iz poslednjih 3 sata
+  const threeHoursAgo = new Date(Date.now() - 3*60*60*1000);
+
+  const q = query(
+    collection(db, 'live_chat'),
+    where('adminId','==',adminId),
+    where('timestamp','>=', threeHoursAgo),
+    limit(200)
+  );
+
   _liveChatUnsub = onSnapshot(q, snap => {
+    if (snap.empty) {
+      feed.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px;">Čekam komentare sa TikToka...</div>';
+      return;
+    }
     snap.docChanges().forEach(change => {
       if (change.type === 'added') {
         const d = change.doc.data();
-        // Provjeri da li kupac naručuje aktivni proizvod
         checkChatForOrder(d);
-        // Update chat counter
         const cntEl = document.getElementById('live-chat-count');
         if (cntEl) cntEl.textContent = (parseInt(cntEl.textContent)||0) + 1;
         const color = d.statusColor === 'green' ? '#00c896' : d.statusColor === 'orange' ? '#FFB800' : '#ff4d4d';
-        const icon = d.statusColor === 'green' ? '✅' : d.statusColor === 'orange' ? '⚠️' : '❌';
+        const icon  = d.statusColor === 'green' ? '✅' : d.statusColor === 'orange' ? '⚠️' : '❌';
         const label = d.statusColor === 'green' ? 'Registrovan' : d.statusColor === 'orange' ? 'Kasni' : 'Nije registrovan';
         const card = document.createElement('div');
-        card.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};`;
+        card.style.cssText = `display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};animation:sli 0.3s ease;`;
         card.innerHTML = `
           <div style="width:8px;height:8px;border-radius:50%;background:${color};margin-top:5px;flex-shrink:0;box-shadow:0 0 6px ${color};"></div>
           <div style="flex:1;min-width:0;">
@@ -4210,10 +4222,29 @@ function startLiveChatFeed() {
             </div>
             <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:3px;">${d.comment}</div>
           </div>`;
+        // Remove placeholder
+        const placeholder = feed.querySelector('[data-placeholder]');
+        if (placeholder) placeholder.remove();
         feed.insertBefore(card, feed.firstChild);
-        // Max 50 poruka
-        while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+        while (feed.children.length > 100) feed.removeChild(feed.lastChild);
       }
+    });
+  }, err => {
+    console.error('Chat feed error:', err);
+    // Fallback bez timestamp filtera
+    const q2 = query(collection(db,'live_chat'), where('adminId','==',adminId), limit(50));
+    _liveChatUnsub = onSnapshot(q2, snap2 => {
+      snap2.docChanges().forEach(change => {
+        if (change.type !== 'added') return;
+        const d = change.doc.data();
+        checkChatForOrder(d);
+        const color = d.statusColor==='green'?'#00c896':d.statusColor==='orange'?'#FFB800':'#ff4d4d';
+        const card = document.createElement('div');
+        card.style.cssText = `display:flex;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};`;
+        card.innerHTML = `<span style="font-weight:800;font-size:12px;color:${color};">@${d.tiktokId}</span><span style="font-size:12px;color:rgba(255,255,255,0.8);">${d.comment}</span>`;
+        feed.insertBefore(card, feed.firstChild);
+        while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+      });
     });
   });
 }
