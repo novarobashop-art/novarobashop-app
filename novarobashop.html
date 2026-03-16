@@ -4549,13 +4549,15 @@ function startLiveChatFeed() {
       const color = d.statusColor === 'green' ? '#00c896' : d.statusColor === 'orange' ? '#FFB800' : '#ff4d4d';
       // Pronadji kupca da dobijemo nick
       const kupac = (window._allKupciGlobal||[]).find(k => (k.tiktokIme||'').toLowerCase() === (d.tiktokId||'').toLowerCase());
-      const nick = kupac ? (kupac.tiktokNick||'') : (d.kupacName||'');
+      const nick = kupac ? (kupac.tiktokNick||'') : (d.tiktokNick||d.kupacName||'');
       const card = document.createElement('div');
-      card.style.cssText = `display:flex;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};margin-bottom:4px;`;
+      card.style.cssText = `display:flex;gap:8px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};margin-bottom:4px;`;
       card.innerHTML = `<div style="flex:1;min-width:0;">
-        <span style="font-weight:800;font-size:12px;color:${color};">@${d.tiktokId||'?'}</span>
-        ${nick ? `<span style="font-size:10px;color:rgba(255,255,255,0.4);margin-left:5px;">${nick}</span>` : ''}
-        <span style="font-size:12px;color:rgba(255,255,255,0.85);margin-left:4px;">${d.comment||''}</span>
+        <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+          <span style="font-weight:800;font-size:12px;color:${color};white-space:nowrap;">@${d.tiktokId||'?'}</span>
+          ${nick ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);white-space:nowrap;">${nick}</span>` : ''}
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-top:1px;">${d.comment||''}</div>
       </div>`;
       feed.appendChild(card);
     });

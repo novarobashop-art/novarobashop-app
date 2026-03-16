@@ -59,6 +59,7 @@ app.post('/start-live', async (req, res) => {
       enableExtendedGiftInfo: false,
       enableWebsocketUpgrade: true,
       requestPollingIntervalMs: 2000,
+      sessionId: process.env.TIKTOK_SESSION_ID || '',
     });
 
     // ── Chat komenntar ──
@@ -69,9 +70,10 @@ app.post('/start-live', async (req, res) => {
         const timestamp  = new Date();
 
         // Provjeri da li je registrovan kupac
-        let statusColor = 'red'; // default: nije registrovan
+        let statusColor = 'red';
         let kupacName   = '';
         let kupacId     = '';
+        let tiktokNick  = '';
 
         if (db) {
           // Traži po tiktokIme
@@ -84,6 +86,7 @@ app.post('/start-live', async (req, res) => {
             const kupac = snap.docs[0].data();
             kupacName = kupac.name || kupac.tiktokNick || '';
             kupacId   = snap.docs[0].id;
+            tiktokNick = kupac.tiktokNick || '';
 
             // Provjeri da li kasni
             const racuniSnap = await db.collection('racuni')
@@ -110,6 +113,7 @@ app.post('/start-live', async (req, res) => {
             tiktokId,
             kupacId,
             kupacName,
+            tiktokNick,
             comment,
             statusColor,
             timestamp: timestamp,
