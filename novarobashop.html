@@ -76,7 +76,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -99,7 +99,7 @@
   const HAUPT_UID = '8MVnqyppnHZFv1dCbB1RYqCjCod2';
 
   const storage = getStorage(app);
-  window._fb = { auth, db, messaging, storage, ref, uploadString, getDownloadURL, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, getToken, onMessage };
+  window._fb = { auth, db, messaging, storage, ref, uploadString, getDownloadURL, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc, limit, getToken, onMessage };
 
   // Registruj Service Worker + Auto Update
   if ('serviceWorker' in navigator) {
