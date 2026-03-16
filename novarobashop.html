@@ -966,9 +966,15 @@ select.inp-dark option { background: #0d1626; }
 }
 .podrska-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
-/* ══════════════════════════════════════════
-   EXTRA — Poruka / Notif cards
-   ══════════════════════════════════════════ */
+/* ── Kalender Buttons ── */
+.kal-btn{padding:6px 13px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.06);color:var(--gray2);font-family:'DM Sans';transition:all 0.15s;}
+.kal-btn:hover{background:rgba(148,163,184,0.12);}
+.kal-active{background:linear-gradient(135deg,var(--teal),var(--teal2))!important;color:white!important;border-color:transparent!important;box-shadow:0 4px 12px rgba(20,184,166,0.25);}
+/* ── Star Rating ── */
+.star-rating{display:flex;gap:4px;}
+.star{font-size:24px;cursor:pointer;transition:transform 0.1s;}
+.star:hover{transform:scale(1.2);}
+
 .poruka-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -1114,6 +1120,9 @@ select.inp-dark option { background: #0d1626; }
     <button class="a-tab" onclick="aTab('placanja',this)">💰 Plaćanja</button>
     <button class="a-tab" onclick="aTab('placeno',this)">✅ Plaćeno</button>
     <button class="a-tab" onclick="aTab('arhiva',this)">📦 Arhiva</button>
+    <button class="a-tab" onclick="aTab('kalender',this)">📅 Kalender</button>
+    <button class="a-tab" onclick="aTab('chart',this)">📈 Grafik</button>
+    <button class="a-tab" onclick="aTab('autoracun',this)">🔁 Auto-Račun</button>
     <button class="a-tab" onclick="aTab('proizvodi',this)">🛍️ Proizvodi</button>
     <button class="a-tab" onclick="aTab('live',this)">🔴 Live</button>
     <button class="a-tab" onclick="aTab('podrska-admin',this)">💬 Podrška</button>
@@ -1272,6 +1281,84 @@ select.inp-dark option { background: #0d1626; }
         <button onclick="document.getElementById('proizvodi-search').value='';filterProizvodi('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-proizvodi-list"><div class="section-empty">Nema proizvoda.</div></div>
+    </div>
+
+    <!-- KALENDER TAB -->
+    <div id="atab-kalender" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">📅 Zahlungskalender</div>
+      <div style="font-size:12px;color:var(--gray2);margin-bottom:16px;">Kupci sa otvorenim računima — rok plaćanja</div>
+      <!-- Filter -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+        <button onclick="filterKalender('all',this)" class="kal-btn kal-active">Sve</button>
+        <button onclick="filterKalender('danas',this)" class="kal-btn">Danas</button>
+        <button onclick="filterKalender('kasni',this)" class="kal-btn">⚠️ Kasni</button>
+        <button onclick="filterKalender('uskoro',this)" class="kal-btn">🔜 Uskoro (3 dana)</button>
+      </div>
+      <div id="a-kalender-list"><div class="section-empty">Učitavanje...</div></div>
+    </div>
+
+    <!-- CHART TAB -->
+    <div id="atab-chart" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px;">📈 Prihodi po Mesecima</div>
+      <!-- Summary row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div style="background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Ovaj mesec</div>
+          <div style="font-size:18px;font-weight:800;color:var(--teal);" id="chart-ovaj">—</div>
+        </div>
+        <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Prošli mesec</div>
+          <div style="font-size:18px;font-weight:800;color:#93c5fd;" id="chart-prosli">—</div>
+        </div>
+        <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Ukupno</div>
+          <div style="font-size:18px;font-weight:800;color:var(--gold);" id="chart-ukupno">—</div>
+        </div>
+      </div>
+      <!-- Bar chart canvas -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Poslednjih 6 meseci (RSD)</div>
+        <div id="a-chart-bars" style="display:flex;align-items:flex-end;gap:8px;height:120px;"></div>
+        <div id="a-chart-labels" style="display:flex;gap:8px;margin-top:6px;"></div>
+      </div>
+      <!-- Kupaci bar chart -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;">
+        <div style="font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Top 5 kupaca ovog meseca</div>
+        <div id="a-chart-top-kupci"></div>
+      </div>
+    </div>
+
+    <!-- AUTO-RAČUN TAB -->
+    <div id="atab-autoracun" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🔁 Auto-Račun</div>
+      <div style="font-size:12px;color:var(--gray2);margin-bottom:16px;">Postavi automatsko ponavljanje računa za kupca</div>
+      <div class="form-section">
+        <div class="form-section-title">➕ Novi Auto-Račun</div>
+        <label class="inp-label">Kupac</label>
+        <div style="position:relative;margin-bottom:12px;">
+          <input type="text" class="inp-dark" id="auto-kupac-search" placeholder="🔍 @tiktok ime..." oninput="searchKupacForAuto(this.value)" autocomplete="off" style="margin-bottom:0;" />
+          <div id="auto-kupac-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0d1626;border:1.5px solid rgba(148,163,184,0.15);border-radius:12px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);"></div>
+        </div>
+        <input type="hidden" id="auto-kupac-id" />
+        <div id="auto-kupac-selected" style="display:none;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--teal);"></div>
+        <label class="inp-label">Iznos (RSD)</label>
+        <input type="number" class="inp-dark" id="auto-iznos" placeholder="1500" />
+        <label class="inp-label">Opis</label>
+        <input type="text" class="inp-dark" id="auto-opis" placeholder="Mesečna pretplata..." />
+        <label class="inp-label">Ponavljanje</label>
+        <select class="inp-dark" id="auto-interval">
+          <option value="7">Svake nedelje (7 dana)</option>
+          <option value="14">Svake 2 nedelje</option>
+          <option value="30" selected>Mesečno (30 dana)</option>
+          <option value="60">Svaka 2 meseca</option>
+        </select>
+        <label class="inp-label">Počni od datuma</label>
+        <input type="date" class="inp-dark" id="auto-start" />
+        <button class="btn-teal" onclick="saveAutoRacun()">✓ Sačuvaj Auto-Račun</button>
+      </div>
+      <!-- Lista aktivnih auto-računa -->
+      <div style="font-size:12px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Aktivni Auto-Računi</div>
+      <div id="a-autoracun-list"><div class="section-empty">Nema auto-računa.</div></div>
     </div>
 
     <!-- LIVE TAB -->
@@ -1442,29 +1529,73 @@ select.inp-dark option { background: #0d1626; }
     <div id="k-notif-list"><div style="text-align:center;color:#aaa;padding:40px 0;font-size:13px;">Nema obaveštenja</div></div>
   </div>
 
-  <div class="k-bottom-nav">
-    <div class="k-nav-item active" id="knav-racuni" onclick="kNavTab('racuni')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+  <!-- BESTELLVERLAUF TAB -->
+  <div id="ktab-istorija" style="padding:16px;display:none;">
+    <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:4px;">🗂️ Istorija Narudžbina</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:16px;">Sve vaše narudžbine od prvog dana</div>
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:#16a34a;" id="kis-ukupno">—</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Ukupno</div>
+      </div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:#2563eb;" id="kis-poslato">—</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Poslato</div>
+      </div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:#d97706;" id="kis-rsd">—</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-top:2px;">RSD ukupno</div>
+      </div>
+    </div>
+    <div id="k-istorija-list"><div style="text-align:center;color:#aaa;padding:40px 0;font-size:13px;">Nema narudžbina.</div></div>
+  </div>
+
+  <!-- SCHULDEN / ZAHLUNGSERINNERUNG TAB -->
+  <div id="ktab-dugovi" style="padding:16px;display:none;">
+    <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:4px;">💳 Otvorene Obaveze</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:16px;">Vaši neplaćeni računi i rok plaćanja</div>
+    <!-- Ukupno duguje -->
+    <div id="k-dugovi-summary" style="background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1.5px solid #fca5a5;border-radius:18px;padding:18px;margin-bottom:16px;display:none;">
+      <div style="font-size:11px;color:#ef4444;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px;">⚠️ Ukupno dugujete</div>
+      <div style="font-size:32px;font-weight:800;color:#dc2626;letter-spacing:-1px;" id="k-dugovi-total">—</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px;" id="k-dugovi-sub">— otvorenih računa</div>
+    </div>
+    <div id="k-dugovi-list"><div style="text-align:center;color:#aaa;padding:40px 0;font-size:13px;">Sve je plaćeno! ✅</div></div>
+  </div>
+
+  <div class="k-bottom-nav" style="overflow-x:auto;">
+    <div class="k-nav-item active" id="knav-racuni" onclick="kNavTab('racuni')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🔴</div>
       <div class="k-nav-lbl" id="knav-lbl-racuni" style="color:var(--red);">Računi</div>
     </div>
-    <div class="k-nav-item" id="knav-ceka" onclick="kNavTab('ceka')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-ceka" onclick="kNavTab('ceka')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟡</div>
       <div class="k-nav-lbl" id="knav-lbl-ceka" style="color:#aaa;">Čeka</div>
     </div>
-    <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟢</div>
       <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:#aaa;">Arhiva</div>
     </div>
-    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">📦</div>
       <div class="k-nav-lbl" id="knav-lbl-poslato" style="color:#aaa;">Poslato</div>
     </div>
-    <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
-      <div class="k-nav-icon">🔔</div>
-      <div id="k-notif-badge" style="display:none;position:absolute;top:6px;right:18px;background:var(--red);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;"></div>
-      <div class="k-nav-lbl" id="knav-lbl-notif" style="color:#aaa;">Obaveštenja</div>
+    <div class="k-nav-item" id="knav-istorija" onclick="kNavTab('istorija')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+      <div class="k-nav-icon">🗂️</div>
+      <div class="k-nav-lbl" id="knav-lbl-istorija" style="color:#aaa;">Istorija</div>
     </div>
-    <div class="k-nav-item" id="knav-podrska" onclick="kNavTab('podrska')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+    <div class="k-nav-item" id="knav-dugovi" onclick="kNavTab('dugovi')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+      <div class="k-nav-icon">💳</div>
+      <div id="k-dugovi-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;">!</div>
+      <div class="k-nav-lbl" id="knav-lbl-dugovi" style="color:#aaa;">Dugovi</div>
+    </div>
+    <div class="k-nav-item" id="knav-notif" onclick="kNavTab('notif')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+      <div class="k-nav-icon">🔔</div>
+      <div id="k-notif-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;"></div>
+      <div class="k-nav-lbl" id="knav-lbl-notif" style="color:#aaa;">Notif</div>
+    </div>
+    <div class="k-nav-item" id="knav-podrska" onclick="kNavTab('podrska')" style="flex:1;min-width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">💬</div>
       <div class="k-nav-lbl" id="knav-lbl-podrska" style="color:#aaa;">Podrška</div>
     </div>
@@ -1768,6 +1899,9 @@ async function loadAdminData() {
     renderAPlaceno(_allRacuni);
     renderAArhiva(_allRacuni);
     checkOverdueRacuni(_allRacuni);
+    // refresh open tabs
+    if(document.getElementById('atab-kalender')?.style.display==='block') renderKalender(_kalFilter||'all');
+    if(document.getElementById('atab-chart')?.style.display==='block') renderChart();
   });
 
   // Realtime notifikacije za admina
@@ -2304,6 +2438,381 @@ async function deleteProizvod(id) {
   showToast('🗑️ Proizvod obrisan');
 }
 
+// ════════════════════════════════════════
+// 📅 KALENDER — Zahlungskalender
+// ════════════════════════════════════════
+let _kalFilter = 'all';
+function filterKalender(f, btn) {
+  _kalFilter = f;
+  document.querySelectorAll('.kal-btn').forEach(b => b.classList.remove('kal-active'));
+  if (btn) btn.classList.add('kal-active');
+  renderKalender(f);
+}
+
+function renderKalender(f) {
+  const el = document.getElementById('a-kalender-list');
+  const racuni = (_allRacuni||[]).filter(r => r.status === 'novo' || r.status === 'ceka');
+  const kupci  = _allKupci || [];
+  const today  = new Date(); today.setHours(0,0,0,0);
+
+  let items = racuni.map(r => {
+    const k = kupci.find(x => x.id === r.kupacId);
+    const datum = r.datum ? new Date(r.datum) : null;
+    const rokDatum = datum ? new Date(datum.getTime() + 4*24*60*60*1000) : null; // rok = datum + 4 dana
+    const diffDays = rokDatum ? Math.ceil((rokDatum - today) / (1000*60*60*24)) : null;
+    return { r, k, rokDatum, diffDays };
+  }).sort((a,b) => (a.diffDays??999) - (b.diffDays??999));
+
+  if (f === 'danas') items = items.filter(x => x.diffDays !== null && x.diffDays <= 0);
+  else if (f === 'kasni') items = items.filter(x => x.diffDays !== null && x.diffDays < 0);
+  else if (f === 'uskoro') items = items.filter(x => x.diffDays !== null && x.diffDays >= 0 && x.diffDays <= 3);
+
+  if (!items.length) { el.innerHTML = '<div class="section-empty">Nema računa za ovaj filter.</div>'; return; }
+
+  el.innerHTML = items.map(({r, k, rokDatum, diffDays}) => {
+    const tiktok = k ? '@'+(k.tiktokIme||'—') : (r.kupacName||'—');
+    const ime    = k ? (k.name||'—') : '—';
+    const kasni  = diffDays !== null && diffDays < 0;
+    const danas  = diffDays !== null && diffDays === 0;
+    const boja   = kasni ? '#ef4444' : danas ? '#f97316' : diffDays <= 3 ? '#f59e0b' : '#94a3b8';
+    const label  = kasni ? `⚠️ Kasni ${Math.abs(diffDays)} dana` : danas ? '🔥 Danas!' : diffDays !== null ? `${diffDays} dana` : '—';
+    return `<div style="background:var(--card);border:1px solid ${kasni?'rgba(239,68,68,0.3)':danas?'rgba(249,115,22,0.3)':'var(--border)'};border-radius:18px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
+      <div style="width:48px;height:48px;border-radius:12px;background:rgba(${kasni?'239,68,68':'245,158,11'},0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${kasni?'🚨':'📅'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:800;color:var(--teal);">${tiktok}</div>
+        <div style="font-size:11px;color:var(--gray2);">${ime} · #${r.broj||r.id.slice(-4)}</div>
+        <div style="font-size:11px;color:var(--gray2);margin-top:2px;">Rok: ${rokDatum?rokDatum.toISOString().slice(0,10):'—'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:16px;font-weight:800;color:white;">${(r.iznos||0).toLocaleString()} RSD</div>
+        <div style="font-size:11px;font-weight:700;color:${boja};margin-top:2px;">${label}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// 📈 CHART — Einnahmen pro Monat
+// ════════════════════════════════════════
+function renderChart() {
+  const racuni = _allRacuni || [];
+  const kupci  = _allKupci  || [];
+  const now    = new Date();
+
+  // Letzten 6 Monate
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ key: d.toISOString().slice(0,7), label: d.toLocaleString('sr-Latn', {month:'short', year:'2-digit'}), total: 0 });
+  }
+
+  racuni.filter(r => r.status==='placeno'||r.paketStatus==='ship').forEach(r => {
+    const mo = (r.datum||'').slice(0,7);
+    const m = months.find(x => x.key === mo);
+    if (m) m.total += (r.iznos||0);
+  });
+
+  const curMo  = now.toISOString().slice(0,7);
+  const prevMo = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString().slice(0,7);
+  const curTotal  = months.find(x => x.key===curMo)?.total  || 0;
+  const prevTotal = months.find(x => x.key===prevMo)?.total || 0;
+  const ukupno    = months.reduce((s,m) => s+m.total, 0);
+
+  document.getElementById('chart-ovaj').textContent   = curTotal.toLocaleString()  + ' RSD';
+  document.getElementById('chart-prosli').textContent = prevTotal.toLocaleString() + ' RSD';
+  document.getElementById('chart-ukupno').textContent = ukupno.toLocaleString()    + ' RSD';
+
+  // Bar chart
+  const maxVal = Math.max(...months.map(m => m.total), 1);
+  const barsEl   = document.getElementById('a-chart-bars');
+  const labelsEl = document.getElementById('a-chart-labels');
+  barsEl.innerHTML = months.map((m,i) => {
+    const h = Math.max(8, Math.round((m.total / maxVal) * 110));
+    const isCur = m.key === curMo;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-size:9px;color:var(--gray2);font-weight:700;">${m.total>0?m.total.toLocaleString():''}</div>
+      <div style="width:100%;height:${h}px;background:${isCur?'linear-gradient(180deg,var(--teal),var(--teal2))':'rgba(148,163,184,0.25)'};border-radius:6px 6px 0 0;transition:height 0.4s;${isCur?'box-shadow:0 4px 12px rgba(20,184,166,0.3);':''}"></div>
+    </div>`;
+  }).join('');
+  labelsEl.innerHTML = months.map(m => `<div style="flex:1;text-align:center;font-size:10px;color:var(--gray2);font-weight:600;">${m.label}</div>`).join('');
+
+  // Top kupci ovog meseca
+  const topEl = document.getElementById('a-chart-top-kupci');
+  const kupacMo = {};
+  racuni.filter(r => (r.datum||'').slice(0,7)===curMo && (r.status==='placeno'||r.paketStatus==='ship'))
+    .forEach(r => { kupacMo[r.kupacId] = (kupacMo[r.kupacId]||0) + (r.iznos||0); });
+  const top5 = Object.entries(kupacMo).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([id,iznos]) => ({ k: kupci.find(x=>x.id===id), iznos })).filter(x=>x.k);
+  if (!top5.length) { topEl.innerHTML = '<div class="section-empty" style="padding:20px;">Nema plaćanja ovog meseca.</div>'; return; }
+  const maxK = top5[0].iznos;
+  topEl.innerHTML = top5.map(({k,iznos}) => {
+    const w = Math.round((iznos/maxK)*100);
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);">@${k.tiktokIme||'—'} <span style="color:var(--gray2);font-weight:400;font-size:11px;">${k.name||''}</span></div>
+        <div style="font-size:13px;font-weight:800;">${iznos.toLocaleString()} RSD</div>
+      </div>
+      <div style="height:6px;background:rgba(148,163,184,0.12);border-radius:6px;">
+        <div style="height:6px;width:${w}%;background:linear-gradient(90deg,var(--teal),var(--teal2));border-radius:6px;transition:width 0.5s;"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// 🔁 AUTO-RAČUN
+// ════════════════════════════════════════
+function searchKupacForAuto(val) {
+  const dd = document.getElementById('auto-kupac-dropdown');
+  if (!val || val.length < 1) { dd.style.display='none'; return; }
+  const s = val.replace('@','').toLowerCase();
+  const results = (_allKupci||[]).filter(k =>
+    (k.tiktokIme||'').toLowerCase().includes(s) ||
+    (k.name||'').toLowerCase().includes(s)
+  ).slice(0,8);
+  if (!results.length) { dd.style.display='none'; return; }
+  dd.style.display='block';
+  dd.innerHTML = results.map(k => `
+    <div onclick="selectKupacForAuto('${k.id}','${(k.name||'').replace(/'/g,"\\'")}','${k.tiktokIme||''}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;"
+      onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''">
+      <span style="color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</span>
+      <span style="color:white;margin-left:8px;">${k.name||''}</span>
+    </div>`).join('');
+}
+function selectKupacForAuto(id, name, tiktok) {
+  document.getElementById('auto-kupac-id').value = id;
+  document.getElementById('auto-kupac-search').value = '@'+tiktok;
+  document.getElementById('auto-kupac-dropdown').style.display='none';
+  const sel = document.getElementById('auto-kupac-selected');
+  sel.style.display='block'; sel.textContent='✅ '+name+' (@'+tiktok+')';
+}
+
+async function saveAutoRacun() {
+  const kupacId = document.getElementById('auto-kupac-id').value;
+  const iznos   = parseFloat(document.getElementById('auto-iznos').value);
+  const opis    = document.getElementById('auto-opis').value.trim();
+  const interval= parseInt(document.getElementById('auto-interval').value);
+  const start   = document.getElementById('auto-start').value;
+  if (!kupacId||!iznos) { showToast('⚠️ Izaberi kupca i unesi iznos'); return; }
+  const { db, collection, addDoc } = window._fb;
+  await addDoc(collection(db,'auto_racuni'), {
+    adminId: window._currentUser.uid,
+    kupacId, iznos, opis, interval,
+    nextDate: start || new Date().toISOString().slice(0,10),
+    aktivan: true, createdAt: new Date().toISOString()
+  });
+  showToast('✅ Auto-račun sačuvan!');
+  document.getElementById('auto-iznos').value='';
+  document.getElementById('auto-opis').value='';
+  document.getElementById('auto-kupac-id').value='';
+  document.getElementById('auto-kupac-search').value='';
+  document.getElementById('auto-kupac-selected').style.display='none';
+}
+
+async function loadAutoRacuni() {
+  if (window._autoRacuniListener) return;
+  const { db, collection, onSnapshot, query, where } = window._fb;
+  window._autoRacuniListener = onSnapshot(
+    query(collection(db,'auto_racuni'), where('adminId','==',window._currentUser.uid)),
+    snap => {
+      const list = [];
+      snap.forEach(d => list.push({id:d.id,...d.data()}));
+      renderAutoRacuni(list);
+    }
+  );
+}
+
+function renderAutoRacuni(list) {
+  const el = document.getElementById('a-autoracun-list');
+  if (!list.length) { el.innerHTML='<div class="section-empty">Nema auto-računa.</div>'; return; }
+  const kupci = _allKupci||[];
+  el.innerHTML = list.map(a => {
+    const k = kupci.find(x=>x.id===a.kupacId);
+    const tiktok = k ? '@'+(k.tiktokIme||'—') : '—';
+    const intervalLabel = a.interval==7?'nedeljno':a.interval==14?'svake 2 nedelje':a.interval==30?'mesečno':'svaka 2 mes.';
+    return `<div style="background:var(--card);border:1px solid ${a.aktivan?'rgba(20,184,166,0.25)':'var(--border)'};border-radius:18px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--teal);">${tiktok}</div>
+          <div style="font-size:11px;color:var(--gray2);">${a.opis||'—'} · ${intervalLabel}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px;font-weight:800;">${(a.iznos||0).toLocaleString()} RSD</div>
+          <div style="font-size:10px;color:var(--gray2);">Sledeći: ${a.nextDate||'—'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="triggerAutoRacun('${a.id}')" style="flex:1;background:rgba(20,184,166,0.12);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">▶️ Pošalji sada</button>
+        <button onclick="toggleAutoRacun('${a.id}',${!a.aktivan})" style="flex:1;background:rgba(${a.aktivan?'239,68,68':'34,197,94'},0.1);color:${a.aktivan?'#fca5a5':'#86efac'};border:1px solid rgba(${a.aktivan?'239,68,68':'34,197,94'},0.2);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">${a.aktivan?'⏸ Pauziraj':'▶ Aktiviraj'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function triggerAutoRacun(autoId) {
+  const { db, collection, addDoc, doc, getDoc, updateDoc } = window._fb;
+  const snap = await getDoc(doc(db,'auto_racuni',autoId));
+  if (!snap.exists()) return;
+  const a = snap.data();
+  const today = new Date().toISOString().slice(0,10);
+  const broj = Math.floor(1000+Math.random()*9000);
+  await addDoc(collection(db,'racuni'),{
+    adminId: window._currentUser.uid, kupacId: a.kupacId,
+    kupacName: (_allKupci||[]).find(k=>k.id===a.kupacId)?.name||'',
+    iznos: a.iznos, opis: a.opis, status:'novo', paketStatus:'prep',
+    datum: today, broj, createdAt: new Date().toISOString(), autoRacunId: autoId
+  });
+  // Update nextDate
+  const next = new Date(); next.setDate(next.getDate()+a.interval);
+  await updateDoc(doc(db,'auto_racuni',autoId),{nextDate: next.toISOString().slice(0,10)});
+  showToast('✅ Račun kreiran!');
+}
+async function toggleAutoRacun(autoId, aktivan) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db,'auto_racuni',autoId),{aktivan});
+  showToast(aktivan?'▶ Auto-račun aktiviran':'⏸ Auto-račun pauziran');
+}
+
+// ════════════════════════════════════════
+// 🗂️ KUPAC — Istorija narudžbina
+// ════════════════════════════════════════
+function renderKIstorija(racuni) {
+  // Called from loadKupacData after racuni load
+  const poslato  = racuni.filter(r=>r.paketStatus==='ship');
+  const placeno  = racuni.filter(r=>r.status==='placeno'||r.status==='storno'||r.paketStatus==='ship');
+  const ukupnRsd = racuni.reduce((s,r)=>s+(r.iznos||0),0);
+  const el = document.getElementById('k-istorija-list');
+  const kisUk = document.getElementById('kis-ukupno');
+  const kisPos = document.getElementById('kis-poslato');
+  const kisRsd = document.getElementById('kis-rsd');
+  if(kisUk) kisUk.textContent = racuni.length;
+  if(kisPos) kisPos.textContent = poslato.length;
+  if(kisRsd) kisRsd.textContent = ukupnRsd.toLocaleString();
+  if(!el) return;
+  const allSorted = [...racuni].sort((a,b)=>(b.createdAt||b.datum||'')>(a.createdAt||a.datum||'')?1:-1);
+  if(!allSorted.length){el.innerHTML='<div style="text-align:center;color:#aaa;padding:40px;font-size:13px;">Nema narudžbina.</div>';return;}
+  el.innerHTML = allSorted.map(r => {
+    const st = r.paketStatus==='ship'?{c:'#2563eb',l:'📦 Poslato'}:r.status==='placeno'?{c:'#16a34a',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:r.status==='storno'?{c:'#6b7280',l:'❌ Storno'}:{c:'#dc2626',l:'🔴 Novo'};
+    const canRate = (r.paketStatus==='ship') && !r.ocena;
+    return `<div class="k-racun-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <div style="font-weight:800;font-size:14px;">#${r.broj||r.id.slice(-4)}</div>
+          <div style="font-size:11px;color:#6b7280;">${(r.datum||'').slice(0,10)} · ${r.opis||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:17px;font-weight:800;">${(r.iznos||0).toLocaleString()} RSD</div>
+          <div style="font-size:11px;font-weight:700;color:${st.c};">${st.l}</div>
+        </div>
+      </div>
+      ${r.ocena ? `<div style="font-size:13px;color:#d97706;">★ Vaša ocena: ${'⭐'.repeat(r.ocena)} (${r.ocena}/5)</div>` : ''}
+      ${canRate ? `<button onclick="openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">⭐ Ostavi ocenu</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// 💳 KUPAC — Dugovi / Offene Schulden
+// ════════════════════════════════════════
+function renderKDugovi(racuni) {
+  const otvoreni = racuni.filter(r=>r.status==='novo'||r.status==='ceka');
+  const ukupno   = otvoreni.reduce((s,r)=>s+(r.iznos||0),0);
+  const el   = document.getElementById('k-dugovi-list');
+  const sumEl= document.getElementById('k-dugovi-summary');
+  const totEl= document.getElementById('k-dugovi-total');
+  const subEl= document.getElementById('k-dugovi-sub');
+  const badgeEl = document.getElementById('k-dugovi-badge');
+  if(!el) return;
+  // Badge in nav
+  if(badgeEl){
+    if(otvoreni.length>0){badgeEl.style.display='flex';badgeEl.textContent=otvoreni.length;}
+    else badgeEl.style.display='none';
+  }
+  if(!otvoreni.length){
+    if(sumEl) sumEl.style.display='none';
+    el.innerHTML='<div style="text-align:center;padding:40px;font-size:24px;">✅<br><div style="font-size:14px;color:#6b7280;margin-top:8px;">Sve je plaćeno!</div></div>';
+    return;
+  }
+  if(sumEl){ sumEl.style.display='block'; }
+  if(totEl) totEl.textContent = ukupno.toLocaleString()+' RSD';
+  if(subEl) subEl.textContent = otvoreni.length+' otvorenih računa';
+  const today = new Date(); today.setHours(0,0,0,0);
+  el.innerHTML = otvoreni.sort((a,b)=>(a.datum||'')>(b.datum||'')?1:-1).map(r=>{
+    const datum = r.datum ? new Date(r.datum) : null;
+    const rok   = datum  ? new Date(datum.getTime()+4*24*60*60*1000) : null;
+    const diff  = rok    ? Math.ceil((rok-today)/(1000*60*60*24)) : null;
+    const kasni = diff!==null && diff<0;
+    const urgent= diff!==null && diff<=1;
+    return `<div style="background:${kasni?'#fef2f2':urgent?'#fff7ed':'#f0fdf4'};border:1.5px solid ${kasni?'#fca5a5':urgent?'#fde68a':'#bbf7d0'};border-radius:16px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div>
+          <div style="font-weight:800;font-size:14px;">${r.opis||'Račun #'+r.broj}</div>
+          <div style="font-size:11px;color:#6b7280;">Kreiran: ${(r.datum||'').slice(0,10)}</div>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:${kasni?'#dc2626':urgent?'#d97706':'#16a34a'};">${(r.iznos||0).toLocaleString()} RSD</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:12px;font-weight:700;color:${kasni?'#dc2626':urgent?'#d97706':'#16a34a'};">${kasni?`⚠️ Kasni ${Math.abs(diff)} dana`:diff===0?'🔥 Rok danas!':diff!==null?`⏰ Rok za ${diff} dana`:'—'}</div>
+        ${r.status==='novo'?`<button onclick="document.getElementById('uplatnica-input').setAttribute('data-racun-id','${r.id}');document.getElementById('uplatnica-input').click()" style="background:#2563eb;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📎 Uplati</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// ⭐ OCENA / BEWERTUNG MODAL
+// ════════════════════════════════════════
+let _ratingRacunId = null;
+let _ratingValue   = 0;
+
+function openRatingModal(racunId) {
+  _ratingRacunId = racunId;
+  _ratingValue   = 0;
+  let old = document.getElementById('rating-modal-overlay');
+  if(old) old.remove();
+  const overlay = document.createElement('div');
+  overlay.id='rating-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  overlay.innerHTML=`
+    <div style="background:white;border-radius:24px 24px 0 0;padding:28px;width:100%;max-width:480px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:4px;">⭐ Ostavi Ocenu</div>
+        <div style="font-size:13px;color:#6b7280;">Kako si zadovoljan svojom narudžbinom?</div>
+      </div>
+      <div class="star-rating" style="justify-content:center;margin-bottom:20px;" id="star-row">
+        ${[1,2,3,4,5].map(i=>`<span class="star" onclick="setRating(${i})" id="star-${i}" style="font-size:36px;cursor:pointer;transition:transform 0.1s;">☆</span>`).join('')}
+      </div>
+      <textarea id="rating-komentar" placeholder="Komentar (opciono)..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;font-family:'DM Sans';resize:none;outline:none;margin-bottom:14px;" rows="3"></textarea>
+      <button onclick="submitRating()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:14px;color:#1a0e00;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';">✓ Pošalji Ocenu</button>
+      <button onclick="document.getElementById('rating-modal-overlay').remove()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:14px;margin-top:8px;cursor:pointer;font-family:'DM Sans';">Otkaži</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function setRating(val) {
+  _ratingValue = val;
+  [1,2,3,4,5].forEach(i => {
+    const s = document.getElementById('star-'+i);
+    if(s) s.textContent = i<=val ? '⭐' : '☆';
+  });
+}
+
+async function submitRating() {
+  if(!_ratingValue){ showToast('⚠️ Izaberi ocenu (1-5)'); return; }
+  const komentar = document.getElementById('rating-komentar')?.value.trim()||'';
+  const { db, doc, updateDoc, collection, addDoc } = window._fb;
+  await updateDoc(doc(db,'racuni',_ratingRacunId),{ocena:_ratingValue, komentar, ocenaVreme:new Date().toISOString()});
+  // Save to reviews collection
+  await addDoc(collection(db,'ocene'),{
+    racunId:_ratingRacunId, kupacId:window._currentUser.uid,
+    kupacTiktok:window._currentUser.tiktokIme||'',
+    ocena:_ratingValue, komentar, vreme:new Date().toISOString()
+  });
+  document.getElementById('rating-modal-overlay')?.remove();
+  showToast('⭐ Hvala na oceni!');
+}
+
 function getAPStatusStyle(status) {
   if (status === 'hitno') return 'background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);';
   if (status === 'proverava') return 'background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);';
@@ -2404,7 +2913,7 @@ function toggleAPoruka(safeId) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','dashboard','racuni','placanja','placeno','arhiva','proizvodi','live','podrska-admin'].forEach(n => {
+  ['kupci','dashboard','racuni','placanja','placeno','arhiva','kalender','chart','autoracun','proizvodi','live','podrska-admin'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
@@ -2412,6 +2921,9 @@ function aTab(name, el) {
   if (name === 'live') renderLiveGrid(window._allKupciGlobal || []);
   if (name === 'dashboard') renderDashboard();
   if (name === 'proizvodi') loadProizvodi();
+  if (name === 'kalender') renderKalender('all');
+  if (name === 'chart') renderChart();
+  if (name === 'autoracun') loadAutoRacuni();
 }
 
 function populateKupacSelect(kupci) {
@@ -3036,12 +3548,17 @@ async function loadKupacData() {
   onSnapshot(query(collection(db, 'racuni'), where('kupacId', '==', u.uid)), snap => {
     _allKupacRacuni = [];
     snap.forEach(d => _allKupacRacuni.push({id:d.id,...d.data()}));
+    window._kAllRacuni = _allKupacRacuni;
     // filtriraj po izabranom adminu
     const sel = document.getElementById('k-global-admin-sel');
     const adminId = sel ? sel.value : '';
     filterKupacByAdmin(adminId);
     checkKupacOverdue(_allKupacRacuni);
     sendMahnungen(_allKupacRacuni);
+    // Update dugovi badge silently
+    const otvoreni = _allKupacRacuni.filter(r=>r.status==='novo'||r.status==='ceka');
+    const badgeEl = document.getElementById('k-dugovi-badge');
+    if(badgeEl){ if(otvoreni.length>0){badgeEl.style.display='flex';badgeEl.textContent=otvoreni.length;}else badgeEl.style.display='none'; }
   });
 
   // Realtime notifikacije za kupca
@@ -3232,17 +3749,19 @@ function renderKPoslato(racuni) {
 }
 
 function kNavTab(name) {
-  ['racuni','ceka','arhiva','poslato','notif','podrska'].forEach(n => {
-    document.getElementById('ktab-' + n).style.display = 'none';
+  ['racuni','ceka','arhiva','poslato','notif','podrska','istorija','dugovi'].forEach(n => {
+    const tab = document.getElementById('ktab-' + n);
+    if(tab) tab.style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
     if (lbl) lbl.style.color = '#aaa';
   });
   document.getElementById('ktab-' + name).style.display = 'block';
-  const colors = { racuni:'var(--red)', ceka:'#9B7200', arhiva:'#1A8B4D', poslato:'#4ECDC4', notif:'var(--blue)', podrska:'var(--blue)' };
+  const colors = { racuni:'var(--red)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626' };
   const lbl = document.getElementById('knav-lbl-' + name);
-  if (lbl) lbl.style.color = colors[name];
-  // Označi sve kao pročitano kad otvori notif tab
+  if (lbl) lbl.style.color = colors[name]||'var(--blue)';
   if (name === 'notif') markAllNotifRead();
+  if (name === 'istorija') { const r=window._kAllRacuni||[]; renderKIstorija(r); }
+  if (name === 'dugovi')   { const r=window._kAllRacuni||[]; renderKDugovi(r); }
 }
 
 function openUplatnica(racunId, mode) {
