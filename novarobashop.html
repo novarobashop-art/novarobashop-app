@@ -57,10 +57,6 @@
         if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       });
     });
-    // Ocisti sve cacheve
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
   }
   async function checkUpdate() {
     try {
