@@ -3796,12 +3796,10 @@ async function toggleLive() {
     btn.style.display = 'none';
     bar.style.display = 'flex';
 
-    // Reset sve za novi live
+    // Reset korpe i gesendet — artikli ostaju (admin ih dodaje pre ili tokom livea)
     _lnKorpe = {};
-    _lnArtikli = [];
     _lnRacunGesendet = new Set();
     renderLnKorpe();
-    renderLnArtikli();
 
     startLiveRealtime();
 
@@ -3865,12 +3863,10 @@ async function toggleLive() {
       showToast('⏹️ Live završen');
     }
 
-    // Reset korpe za sledeći live
+    // Reset korpe za sledeći live — artikli ostaju za ponovnu upotrebu
     _lnKorpe = {};
-    _lnArtikli = [];
     _lnRacunGesendet = new Set();
     renderLnKorpe();
-    renderLnArtikli();
   }
 }
 
