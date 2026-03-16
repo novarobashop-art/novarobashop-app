@@ -49,6 +49,19 @@
 })();
 // === AUTO UPDATE CHECK ===
 (function() {
+  // Odmah deregistruj stare SW-ove koji blokiraju update
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => {
+        reg.update();
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      });
+    });
+    // Ocisti sve cacheve
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+  }
   async function checkUpdate() {
     try {
       const res = await fetch(location.pathname + '?_t=' + Date.now(), { cache: 'no-store' });
