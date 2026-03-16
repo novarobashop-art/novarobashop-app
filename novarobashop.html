@@ -3853,9 +3853,13 @@ async function toggleLive() {
 
     // ── AUTOMATSKI POŠALJI SVE RAČUNE kad se Live završi ──
     const pending = Object.values(_lnKorpe).filter(k => !k.racunSent && k.stavke.length > 0);
+    console.log('Live završen — pending računi:', pending.length, pending.map(k => k.kupac?.name));
     if (pending.length > 0) {
       showToast('📤 Šaljem račune za ' + pending.length + ' kupac(a)...', 4000);
-      for (const k of pending) await posaljiLnRacun(k.kupac.id);
+      for (const k of pending) {
+        console.log('Šaljem račun za:', k.kupac?.name, k.kupac?.id);
+        await posaljiLnRacun(k.kupac.id);
+      }
       showToast('✅ Live završen! ' + pending.length + ' račun(a) poslato!', 4000);
     } else {
       showToast('⏹️ Live završen');
@@ -4250,45 +4254,55 @@ function renderLnKorpe() {
 
 async function posaljiLnRacun(kupacId) {
   const korpa = _lnKorpe[kupacId];
-  if (!korpa || korpa.racunSent || !korpa.stavke.length) return;
+  if (!korpa || korpa.racunSent || !korpa.stavke.length) {
+    console.warn('posaljiLnRacun skip:', kupacId, { korpa: !!korpa, sent: korpa?.racunSent, stavke: korpa?.stavke?.length });
+    return;
+  }
   const { kupac, stavke } = korpa;
+  console.log('posaljiLnRacun START:', kupacId, kupac?.name, stavke?.length, 'stavki');
 
-  const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
-  // Opis = sve stavke sa cenama — jedna jedina racuna za sve
-  const opis   = stavke.map(s => {
-    const kol = s.kolicina || 1;
-    return (kol > 1 ? kol + 'x ' : '') + s.naziv + ' ' + (s.cena * kol).toLocaleString() + ' RSD';
-  }).join(', ');
+  try {
+    const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
+    const opis   = stavke.map(s => {
+      const kol = s.kolicina || 1;
+      return (kol > 1 ? kol + 'x ' : '') + s.naziv + ' ' + (s.cena * kol).toLocaleString() + ' RSD';
+    }).join(', ');
 
-  const { db, collection, addDoc } = window._fb;
-  const broj = Math.floor(1000 + Math.random()*9000);
+    const { db, collection, addDoc } = window._fb;
+    const broj = Math.floor(1000 + Math.random()*9000);
 
-  await addDoc(collection(db,'racuni'), {
-    adminId:   window._currentUser.uid,
-    kupacId,   kupacName: kupac.name||'',
-    iznos:     ukupno,
-    opis,
-    stavke,    // sve stavke čuvamo — jedna racuna za sve
-    status:    'novo',
-    paketStatus:'prep',
-    datum:     new Date().toISOString().slice(0,10),
-    broj,
-    createdAt: new Date().toISOString(),
-    sourceLive: true
-  });
+    await addDoc(collection(db,'racuni'), {
+      adminId:   window._currentUser.uid,
+      kupacId,   kupacName: kupac.name||'',
+      iznos:     ukupno,
+      opis,
+      stavke,
+      status:    'novo',
+      paketStatus:'prep',
+      datum:     new Date().toISOString().slice(0,10),
+      broj,
+      createdAt: new Date().toISOString(),
+      sourceLive: true
+    });
+    console.log('posaljiLnRacun racun saved ✅', broj);
 
-  await addDoc(collection(db,'notifikacije'), {
-    userId:    kupacId,
-    tip:       'nova_racun',
-    poruka:    '🧾 Nova računa sa Livea\nUkupno: ' + ukupno.toLocaleString() + ' RSD\n' + stavke.map(s=>'• '+s.naziv+' '+s.cena.toLocaleString()+' RSD').join('\n'),
-    vreme:     new Date().toISOString(),
-    procitano: false
-  });
+    await addDoc(collection(db,'notifikacije'), {
+      userId:    kupacId,
+      tip:       'nova_racun',
+      poruka:    '🧾 Nova računa sa Livea\nUkupno: ' + ukupno.toLocaleString() + ' RSD\n' + stavke.map(s=>'• '+s.naziv+' '+s.cena.toLocaleString()+' RSD').join('\n'),
+      vreme:     new Date().toISOString(),
+      procitano: false
+    });
+    console.log('posaljiLnRacun notif saved ✅');
 
-  korpa.racunSent = true;
-  _lnRacunGesendet.add(kupacId);
-  renderLnKorpe();
-  showToast('✅ Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + ukupno.toLocaleString() + ' RSD');
+    korpa.racunSent = true;
+    _lnRacunGesendet.add(kupacId);
+    renderLnKorpe();
+    showToast('✅ Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + ukupno.toLocaleString() + ' RSD');
+  } catch(e) {
+    console.error('posaljiLnRacun ERROR:', e);
+    showToast('❌ Greška pri slanju računa: ' + e.message, 5000);
+  }
 }
 
 async function posaljiSveLnRacune() {
