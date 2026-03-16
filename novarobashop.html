@@ -515,10 +515,12 @@ select.inp-dark option{background:#0d1c2e;}
 
   <div class="a-tabs">
     <button class="a-tab active" onclick="aTab('kupci',this)">👥 Kupci</button>
+    <button class="a-tab" onclick="aTab('dashboard',this)">📊 Statistike</button>
     <button class="a-tab" onclick="aTab('racuni',this)">🧾 Računi</button>
     <button class="a-tab" onclick="aTab('placanja',this)">💰 Plaćanja</button>
     <button class="a-tab" onclick="aTab('placeno',this)">✅ Plaćeno</button>
     <button class="a-tab" onclick="aTab('arhiva',this)">📦 Arhiva</button>
+    <button class="a-tab" onclick="aTab('proizvodi',this)">🛍️ Proizvodi</button>
     <button class="a-tab" onclick="aTab('live',this)">🔴 Live</button>
     <button class="a-tab" onclick="aTab('podrska-admin',this)">💬 Podrška</button>
   </div>
@@ -532,8 +534,55 @@ select.inp-dark option{background:#0d1c2e;}
       <div id="a-kupci-list"></div>
     </div>
 
+    <!-- DASHBOARD TAB -->
+    <div id="atab-dashboard" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px;">📊 Statistike</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:rgba(30,184,160,0.1);border:1px solid rgba(30,184,160,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:var(--teal);" id="dash-kupci">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Kupci</div>
+        </div>
+        <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:var(--gold);" id="dash-racuni">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno Računa</div>
+        </div>
+        <div style="background:rgba(45,190,108,0.1);border:1px solid rgba(45,190,108,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:var(--green);" id="dash-ukupno-rsd">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno RSD</div>
+        </div>
+        <div style="background:rgba(46,107,230,0.1);border:1px solid rgba(46,107,230,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#6B9FFF;" id="dash-placeno-rsd">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Naplaćeno RSD</div>
+        </div>
+        <div style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:var(--red);" id="dash-blokirani">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Blokirani</div>
+        </div>
+        <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:var(--orange);" id="dash-ceka">—</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Čeka Plaćanje</div>
+        </div>
+      </div>
+      <!-- Top kupci po iznosu -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">🏆 Top Kupci po Iznosu</div>
+        <div id="dash-top-kupci"><div class="section-empty">Učitavanje...</div></div>
+      </div>
+      <!-- Nedavni računi -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">🕐 Nedavni Računi</div>
+        <div id="dash-nedavni"><div class="section-empty">Učitavanje...</div></div>
+      </div>
+    </div>
+
     <!-- RAČUNI TAB -->
     <div id="atab-racuni" style="display:none;">
+      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 12px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="racuni-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterRacuni(this.value)"
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans',sans-serif;padding:11px 0;" />
+        <button onclick="document.getElementById('racuni-search').value='';filterRacuni('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
       <div class="form-section">
         <div class="form-section-title">➕ Nova Račun</div>
         <label class="inp-label">Kupac (pretraži po TikTok imenu)</label>
@@ -562,17 +611,73 @@ select.inp-dark option{background:#0d1c2e;}
 
     <!-- PLAĆANJA TAB -->
     <div id="atab-placanja" style="display:none;">
+      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 12px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="placanja-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlacanja(this.value)"
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans',sans-serif;padding:11px 0;" />
+        <button onclick="document.getElementById('placanja-search').value='';filterPlacanja('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
       <div id="a-placanja-list"></div>
     </div>
 
     <!-- PLAĆENO TAB -->
     <div id="atab-placeno" style="display:none;">
+      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 12px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="placeno-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlaceno(this.value)"
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans',sans-serif;padding:11px 0;" />
+        <button onclick="document.getElementById('placeno-search').value='';filterPlaceno('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
       <div id="a-placeno-list"></div>
     </div>
 
     <!-- ARHIVA TAB (Poslato) -->
     <div id="atab-arhiva" style="display:none;">
+      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 12px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="arhiva-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterArhiva(this.value)"
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans',sans-serif;padding:11px 0;" />
+        <button onclick="document.getElementById('arhiva-search').value='';filterArhiva('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
       <div id="a-arhiva-list"></div>
+    </div>
+
+    <!-- PROIZVODI TAB -->
+    <div id="atab-proizvodi" style="display:none;">
+      <!-- Dodaj/Uredi Proizvod forma -->
+      <div class="form-section" id="proizvod-form-section">
+        <div class="form-section-title" id="proizvod-form-title">➕ Novi Proizvod</div>
+        <input type="hidden" id="proizvod-edit-id" />
+        <label class="inp-label">Naziv proizvoda *</label>
+        <input type="text" class="inp-dark" id="proizvod-naziv" placeholder="npr. Majica, Haljina..." />
+        <label class="inp-label">Cena (RSD) *</label>
+        <input type="number" class="inp-dark" id="proizvod-cena" placeholder="1500" />
+        <label class="inp-label">Opis</label>
+        <textarea class="inp-dark" id="proizvod-opis" placeholder="Kratak opis..." rows="2" style="resize:none;"></textarea>
+        <label class="inp-label">Kategorija</label>
+        <input type="text" class="inp-dark" id="proizvod-kategorija" placeholder="npr. Odeća, Obuća..." />
+        <label class="inp-label">Količina na stanju</label>
+        <input type="number" class="inp-dark" id="proizvod-kolicina" placeholder="10" />
+        <label class="inp-label">Foto proizvoda</label>
+        <input type="file" id="proizvod-foto-inp" accept="image/*" style="display:none;" onchange="previewProizvodFoto(event)" />
+        <div id="proizvod-foto-preview" style="display:none;margin-bottom:8px;">
+          <img id="proizvod-foto-img" onclick="openImgViewer(this.src)" style="max-height:100px;max-width:160px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
+          <button onclick="clearProizvodFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Ukloni foto</button>
+        </div>
+        <button onclick="document.getElementById('proizvod-foto-inp').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#aaa;cursor:pointer;font-family:'DM Sans';margin-bottom:12px;">🖼️ Dodaj Foto</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-teal" id="proizvod-save-btn" onclick="saveProizvod()" style="flex:1;">✓ Sačuvaj Proizvod</button>
+          <button id="proizvod-cancel-btn" onclick="cancelEditProizvod()" style="display:none;flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px;color:#aaa;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Otkaži</button>
+        </div>
+      </div>
+      <!-- Pretraga proizvoda -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 12px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="proizvodi-search" placeholder="Pretraži proizvode..." oninput="filterProizvodi(this.value)"
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'DM Sans',sans-serif;padding:11px 0;" />
+        <button onclick="document.getElementById('proizvodi-search').value='';filterProizvodi('')" style="background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div id="a-proizvodi-list"><div class="section-empty">Nema proizvoda.</div></div>
     </div>
 
     <!-- LIVE TAB -->
@@ -1342,6 +1447,269 @@ function filterAdminPoruke(val) {
   ));
 }
 
+// ===== FILTER FUNCTIONS za Računi, Plaćanja, Plaćeno, Arhiva =====
+function _matchRacun(r, s) {
+  const kupac = (_allKupci||[]).find(k => k.id === r.kupacId);
+  const tiktok = kupac ? (kupac.tiktokIme||'') : '';
+  const tiktokNick = kupac ? (kupac.tiktokNick||'') : '';
+  const ime = kupac ? (kupac.name||'') : (r.kupacName||'');
+  return tiktok.toLowerCase().includes(s) ||
+    tiktokNick.toLowerCase().includes(s) ||
+    ime.toLowerCase().includes(s) ||
+    String(r.broj||'').includes(s) ||
+    (r.opis||'').toLowerCase().includes(s);
+}
+
+function filterRacuni(val) {
+  const s = val.replace('@','').toLowerCase();
+  const aktivni = _allRacuni.filter(r => r.status === 'novo' || r.status === 'ceka');
+  const filtered = s ? aktivni.filter(r => _matchRacun(r, s)) : aktivni;
+  const el = document.getElementById('a-racuni-list');
+  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = filtered.map(r => adminRacunCard(r)).join('');
+}
+
+function filterPlacanja(val) {
+  const s = val.replace('@','').toLowerCase();
+  const ceka = _allRacuni.filter(r => r.status === 'ceka');
+  const filtered = s ? ceka.filter(r => _matchRacun(r, s)) : ceka;
+  renderAPlacanja(filtered);
+}
+
+function filterPlaceno(val) {
+  const s = val.replace('@','').toLowerCase();
+  const placeni = _allRacuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship');
+  const filtered = s ? placeni.filter(r => _matchRacun(r, s)) : placeni;
+  const el = document.getElementById('a-placeno-list');
+  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:#4ECDC4;font-weight:700;margin-bottom:10px;">✅ Potvrđeno plaćanje – čeka slanje (${filtered.length})</div>`
+    + filtered.map(r => adminRacunCard(r)).join('');
+}
+
+function filterArhiva(val) {
+  const s = val.replace('@','').toLowerCase();
+  const arhiva = _allRacuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno');
+  const filtered = s ? arhiva.filter(r => _matchRacun(r, s)) : arhiva;
+  const el = document.getElementById('a-arhiva-list');
+  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:10px;">📦 Poslato / Arhiva (${filtered.length})</div>`
+    + filtered.map(r => adminRacunCard(r)).join('');
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const racuni = _allRacuni || [];
+  const kupci = _allKupci || [];
+  const ukupnoRsd = racuni.reduce((s,r) => s + (r.iznos||0), 0);
+  const placenoRsd = racuni.filter(r => r.status==='placeno' || r.paketStatus==='ship').reduce((s,r) => s + (r.iznos||0), 0);
+  const blokirani = kupci.filter(k => k.blocked).length;
+  const ceka = racuni.filter(r => r.status==='ceka').length;
+
+  document.getElementById('dash-kupci').textContent = kupci.length;
+  document.getElementById('dash-racuni').textContent = racuni.length;
+  document.getElementById('dash-ukupno-rsd').textContent = ukupnoRsd.toLocaleString();
+  document.getElementById('dash-placeno-rsd').textContent = placenoRsd.toLocaleString();
+  document.getElementById('dash-blokirani').textContent = blokirani;
+  document.getElementById('dash-ceka').textContent = ceka;
+
+  // Top kupci
+  const kupacTotals = {};
+  racuni.forEach(r => {
+    if (!kupacTotals[r.kupacId]) kupacTotals[r.kupacId] = 0;
+    kupacTotals[r.kupacId] += (r.iznos||0);
+  });
+  const topKupci = Object.entries(kupacTotals)
+    .sort((a,b) => b[1]-a[1]).slice(0,5)
+    .map(([id, iznos]) => {
+      const k = kupci.find(x => x.id === id);
+      return { k, iznos };
+    }).filter(x => x.k);
+  const topEl = document.getElementById('dash-top-kupci');
+  if (!topKupci.length) { topEl.innerHTML = '<div class="section-empty">Nema podataka.</div>'; }
+  else topEl.innerHTML = topKupci.map(({k, iznos}, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,0.15);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@${k.tiktokIme||'—'}</div>
+        <div style="font-size:11px;color:#aaa;">${k.name||'—'}</div>
+      </div>
+      <div style="font-size:14px;font-weight:800;color:var(--gold);white-space:nowrap;">${iznos.toLocaleString()} RSD</div>
+    </div>`).join('');
+
+  // Nedavni računi (poslednih 5)
+  const nedavni = [...racuni].sort((a,b) => (b.createdAt||b.datum||'') > (a.createdAt||a.datum||'') ? 1 : -1).slice(0,5);
+  const nedavniEl = document.getElementById('dash-nedavni');
+  if (!nedavni.length) { nedavniEl.innerHTML = '<div class="section-empty">Nema računa.</div>'; }
+  else nedavniEl.innerHTML = nedavni.map(r => {
+    const k = kupci.find(x => x.id === r.kupacId);
+    const tiktok = k ? '@'+(k.tiktokIme||'—') : (r.kupacName||'—');
+    const statusColor = r.status==='placeno' ? '#2DBE6C' : r.status==='ceka' ? '#FFB800' : r.status==='storno' ? '#aaa' : '#FF6B76';
+    const statusLbl = r.status==='placeno'?'PLAĆENO':r.status==='ceka'?'ČEKA':r.status==='storno'?'STORNO':'NOVO';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${tiktok}</div>
+        <div style="font-size:10px;color:#aaa;">#${r.broj||r.id.slice(-4)} · ${(r.datum||'').slice(0,10)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:14px;font-weight:800;color:white;">${(r.iznos||0).toLocaleString()} RSD</div>
+        <div style="font-size:10px;font-weight:700;color:${statusColor};">${statusLbl}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== PROIZVODI =====
+let _allProizvodi = [];
+let _proizvodFotoBase64 = null;
+
+async function loadProizvodi() {
+  const { db, collection, onSnapshot, query, where } = window._fb;
+  if (window._proizvodiListener) return; // already listening
+  window._proizvodiListener = onSnapshot(
+    query(collection(db, 'proizvodi'), where('adminId', '==', window._currentUser.uid)),
+    snap => {
+      _allProizvodi = [];
+      snap.forEach(d => _allProizvodi.push({id:d.id,...d.data()}));
+      renderProizvodi(_allProizvodi);
+    }
+  );
+}
+
+function renderProizvodi(list) {
+  const el = document.getElementById('a-proizvodi-list');
+  if (!list.length) { el.innerHTML = '<div class="section-empty">Nema proizvoda. Dodajte prvi!</div>'; return; }
+  el.innerHTML = list.map(p => `
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
+      ${p.fotoUrl ? `<img src="${p.fotoUrl}" onclick="openImgViewer(this.src)" style="width:60px;height:60px;object-fit:cover;border-radius:10px;border:1.5px solid rgba(255,255,255,0.1);cursor:pointer;flex-shrink:0;" />` :
+        `<div style="width:60px;height:60px;border-radius:10px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🛍️</div>`}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.naziv||'—'}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--gold);margin:2px 0;">${(p.cena||0).toLocaleString()} RSD</div>
+        ${p.kategorija ? `<div style="font-size:11px;color:var(--teal);margin-bottom:2px;">🏷️ ${p.kategorija}</div>` : ''}
+        ${p.opis ? `<div style="font-size:12px;color:#aaa;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.opis}</div>` : ''}
+        ${p.kolicina !== undefined ? `<div style="font-size:11px;color:${p.kolicina>0?'#2DBE6C':'#E63946'};">📦 Stanje: ${p.kolicina}</div>` : ''}
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button onclick="editProizvod('${p.id}')" style="flex:1;background:rgba(46,107,230,0.15);color:#6B9FFF;border:1px solid rgba(46,107,230,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✏️ Uredi</button>
+          <button onclick="deleteProizvod('${p.id}')" style="background:rgba(230,57,70,0.1);color:#FF6B76;border:1px solid rgba(230,57,70,0.2);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;">🗑️</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterProizvodi(val) {
+  if (!val) { renderProizvodi(_allProizvodi); return; }
+  const s = val.toLowerCase();
+  renderProizvodi(_allProizvodi.filter(p =>
+    (p.naziv||'').toLowerCase().includes(s) ||
+    (p.kategorija||'').toLowerCase().includes(s) ||
+    (p.opis||'').toLowerCase().includes(s)
+  ));
+}
+
+function previewProizvodFoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const compressed = await compressImage(e.target.result, 800, 0.75);
+    _proizvodFotoBase64 = compressed;
+    document.getElementById('proizvod-foto-img').src = compressed;
+    document.getElementById('proizvod-foto-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearProizvodFoto() {
+  _proizvodFotoBase64 = null;
+  document.getElementById('proizvod-foto-preview').style.display = 'none';
+  document.getElementById('proizvod-foto-inp').value = '';
+}
+
+function cancelEditProizvod() {
+  document.getElementById('proizvod-edit-id').value = '';
+  document.getElementById('proizvod-naziv').value = '';
+  document.getElementById('proizvod-cena').value = '';
+  document.getElementById('proizvod-opis').value = '';
+  document.getElementById('proizvod-kategorija').value = '';
+  document.getElementById('proizvod-kolicina').value = '';
+  clearProizvodFoto();
+  document.getElementById('proizvod-form-title').textContent = '➕ Novi Proizvod';
+  document.getElementById('proizvod-save-btn').textContent = '✓ Sačuvaj Proizvod';
+  document.getElementById('proizvod-cancel-btn').style.display = 'none';
+}
+
+function editProizvod(id) {
+  const p = _allProizvodi.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('proizvod-edit-id').value = id;
+  document.getElementById('proizvod-naziv').value = p.naziv||'';
+  document.getElementById('proizvod-cena').value = p.cena||'';
+  document.getElementById('proizvod-opis').value = p.opis||'';
+  document.getElementById('proizvod-kategorija').value = p.kategorija||'';
+  document.getElementById('proizvod-kolicina').value = p.kolicina!==undefined ? p.kolicina : '';
+  if (p.fotoUrl) {
+    document.getElementById('proizvod-foto-img').src = p.fotoUrl;
+    document.getElementById('proizvod-foto-preview').style.display = 'block';
+  } else {
+    clearProizvodFoto();
+  }
+  document.getElementById('proizvod-form-title').textContent = '✏️ Uredi Proizvod';
+  document.getElementById('proizvod-save-btn').textContent = '✓ Sačuvaj Izmene';
+  document.getElementById('proizvod-cancel-btn').style.display = 'block';
+  document.getElementById('proizvod-form-section').scrollIntoView({behavior:'smooth'});
+}
+
+async function saveProizvod() {
+  const naziv = document.getElementById('proizvod-naziv').value.trim();
+  const cena = parseFloat(document.getElementById('proizvod-cena').value);
+  const opis = document.getElementById('proizvod-opis').value.trim();
+  const kategorija = document.getElementById('proizvod-kategorija').value.trim();
+  const kolicina = parseInt(document.getElementById('proizvod-kolicina').value) || 0;
+  const editId = document.getElementById('proizvod-edit-id').value;
+
+  if (!naziv || !cena) { showToast('⚠️ Naziv i cena su obavezni'); return; }
+
+  const btn = document.getElementById('proizvod-save-btn');
+  btn.disabled = true; btn.textContent = 'Čuvanje...';
+
+  try {
+    const { db, collection, addDoc, doc, updateDoc } = window._fb;
+    let fotoUrl = editId ? (_allProizvodi.find(p=>p.id===editId)||{}).fotoUrl || null : null;
+
+    if (_proizvodFotoBase64) {
+      showToast('⏳ Šaljem sliku...', 15000);
+      const path = 'proizvodi/' + window._currentUser.uid + '/' + Date.now() + '.jpg';
+      fotoUrl = await uploadFotoToStorage(_proizvodFotoBase64, path);
+    }
+
+    const data = { naziv, cena, opis, kategorija, kolicina, fotoUrl,
+      adminId: window._currentUser.uid,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (editId) {
+      await updateDoc(doc(db, 'proizvodi', editId), data);
+      showToast('✅ Proizvod izmenjen!');
+    } else {
+      data.createdAt = new Date().toISOString();
+      await addDoc(collection(db, 'proizvodi'), data);
+      showToast('✅ Proizvod dodat!');
+    }
+    cancelEditProizvod();
+  } catch(e) {
+    showToast('❌ Greška: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = editId ? '✓ Sačuvaj Izmene' : '✓ Sačuvaj Proizvod';
+}
+
+async function deleteProizvod(id) {
+  if (!confirm('Obrisati ovaj proizvod?')) return;
+  const { db, doc, deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'proizvodi', id));
+  showToast('🗑️ Proizvod obrisan');
+}
+
 function getAPStatusStyle(status) {
   if (status === 'hitno') return 'background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);';
   if (status === 'proverava') return 'background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);';
@@ -1442,12 +1810,14 @@ function toggleAPoruka(safeId) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','racuni','placanja','placeno','arhiva','live','podrska-admin'].forEach(n => {
+  ['kupci','dashboard','racuni','placanja','placeno','arhiva','proizvodi','live','podrska-admin'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
   document.getElementById('atab-' + name).style.display = 'block';
   if (name === 'live') renderLiveGrid(window._allKupciGlobal || []);
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'proizvodi') loadProizvodi();
 }
 
 function populateKupacSelect(kupci) {
