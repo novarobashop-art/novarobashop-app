@@ -1962,7 +1962,21 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- KASSENBON MODAL -->
+<div id="kassenbon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);" onclick="if(event.target===this)closeKassenbon()">
+  <div style="background:white;border-radius:4px;width:100%;max-width:360px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.5);position:relative;">
+    <!-- Torn paper top edge -->
+    <div style="height:18px;background:white;position:relative;overflow:hidden;">
+      <svg viewBox="0 0 360 18" preserveAspectRatio="none" style="width:100%;height:100%;display:block;"><path d="M0,18 C20,4 40,14 60,8 C80,2 100,14 120,8 C140,2 160,14 180,8 C200,2 220,14 240,8 C260,2 280,14 300,8 C320,2 340,14 360,8 L360,18 Z" fill="#f5f5f5"/></svg>
+    </div>
+    <div id="kassenbon-content" style="padding:0 20px 20px;font-family:'Courier New',monospace;"></div>
+    <!-- Torn paper bottom edge -->
+    <div style="height:18px;background:white;position:relative;overflow:hidden;">
+      <svg viewBox="0 0 360 18" preserveAspectRatio="none" style="width:100%;height:100%;display:block;"><path d="M0,0 C20,14 40,4 60,10 C80,16 100,4 120,10 C140,16 160,4 180,10 C200,16 220,4 240,10 C260,16 280,4 300,10 C320,16 340,4 360,10 L360,0 Z" fill="#f5f5f5"/></svg>
+    </div>
+    <button onclick="closeKassenbon()" style="position:absolute;top:22px;right:12px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;color:#555;line-height:1;">✕</button>
+  </div>
+</div>
 
 <script>
 // ===== HELPERS =====
@@ -3046,19 +3060,21 @@ function renderKIstorija(racuni) {
   el.innerHTML = allSorted.map(r => {
     const st = r.paketStatus==='ship'?{c:'#2563eb',l:'📦 Poslato'}:r.status==='placeno'?{c:'#16a34a',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:r.status==='storno'?{c:'#6b7280',l:'❌ Storno'}:{c:'#dc2626',l:'🔴 Novo'};
     const canRate = (r.paketStatus==='ship') && !r.ocena;
-    return `<div class="k-racun-card">
+    return `<div class="k-racun-card" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div>
           <div style="font-weight:800;font-size:14px;">#${r.broj||r.id.slice(-4)}</div>
-          <div style="font-size:11px;color:#6b7280;">${(r.datum||'').slice(0,10)} · ${r.opis||'—'}</div>
+          <div style="font-size:11px;color:#6b7280;">${(r.datum||'').slice(0,10)}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:17px;font-weight:800;">${(r.iznos||0).toLocaleString()} RSD</div>
           <div style="font-size:11px;font-weight:700;color:${st.c};">${st.l}</div>
         </div>
       </div>
-      ${r.ocena ? `<div style="font-size:13px;color:#d97706;">★ Vaša ocena: ${'⭐'.repeat(r.ocena)} (${r.ocena}/5)</div>` : ''}
-      ${canRate ? `<button onclick="openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">⭐ Ostavi ocenu</button>` : ''}
+      ${r.stavke&&r.stavke.length ? `<div style="font-size:11px;color:#6b7280;">${r.stavke.map(s=>(s.kolicina&&s.kolicina>1?s.kolicina+'x ':'')+s.naziv).join(' · ')}</div>` : (r.opis?`<div style="font-size:11px;color:#6b7280;">${r.opis}</div>`:'')}
+      <div style="font-size:10px;color:#bbb;margin-top:6px;font-family:'Courier New',monospace;">Tapni za detalje 🧾</div>
+      ${r.ocena ? `<div style="font-size:13px;color:#d97706;margin-top:4px;">★ Vaša ocena: ${'⭐'.repeat(r.ocena)}</div>` : ''}
+      ${canRate ? `<button onclick="event.stopPropagation();openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">⭐ Ostavi ocenu</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -4316,6 +4332,115 @@ function lnKolMinus(kupacId, stavkaIdx) {
   renderLnArtikli(); // Osvezi dostupno stanje
 }
 
+function closeKassenbon() {
+  document.getElementById('kassenbon-modal').style.display = 'none';
+}
+
+function openKassenbon(racunId) {
+  const r = (window._kAllRacuni||[]).find(x => x.id === racunId);
+  if (!r) return;
+
+  const broj   = r.broj || r.id.slice(-4);
+  const iznos  = (r.iznos||0).toLocaleString();
+  const datum  = r.datum || '';
+  const status = r.status;
+  const ps     = r.paketStatus || 'prep';
+
+  const stLine = ps==='ship'?'📦 POSLATO':status==='placeno'?'✅ PLAĆENO':status==='ceka'?'⏳ ČEKA POTVRDU':status==='storno'?'❌ STORNO':'🔴 NOVO — ČEKA UPLATU';
+
+  // Stavke
+  let stavkeHtml = '';
+  let ukupno = 0;
+  if (r.stavke && r.stavke.length) {
+    r.stavke.forEach(s => {
+      const kol  = s.kolicina || 1;
+      const sub  = s.cena * kol;
+      ukupno    += sub;
+      stavkeHtml += `
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #ddd;font-size:13px;">
+          <div style="flex:1;">
+            <span style="font-weight:700;">${s.naziv}</span>
+            ${kol>1?`<div style="font-size:11px;color:#888;">${kol} × ${s.cena.toLocaleString()} RSD</div>`:''}
+          </div>
+          <div style="font-weight:800;text-align:right;white-space:nowrap;">${sub.toLocaleString()} RSD</div>
+        </div>`;
+    });
+  } else {
+    stavkeHtml = `<div style="padding:6px 0;font-size:13px;color:#555;">${r.opis||'—'}</div>`;
+    ukupno = r.iznos||0;
+  }
+
+  // Admin info za uplatu
+  const adminId = document.getElementById('k-global-admin-sel')?.value;
+  const admin   = (window._adminList||[]).find(a=>a.id===adminId);
+  let uplatnicaHtml = '';
+  if (admin && (admin.bankNum||admin.postnetNum)) {
+    uplatnicaHtml = `
+      <div style="margin-top:14px;border-top:2px dashed #ddd;padding-top:12px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#888;margin-bottom:8px;">PODACI ZA UPLATU</div>
+        ${admin.bankNum?`<div style="font-size:12px;margin-bottom:3px;">🏦 <b>${admin.bankNum}</b>${admin.bankName?' · '+admin.bankName:''}</div>`:''}
+        ${admin.postnetNum?`<div style="font-size:12px;">📮 <b>${admin.postnetNum}</b>${admin.postnetName?' · '+admin.postnetName:''}</div>`:''}
+      </div>`;
+  }
+
+  // Foto
+  let fotoHtml = '';
+  if (r.adminFotoUrl) fotoHtml = `<div style="margin-top:12px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;" /></div>`;
+  if (r.uplatnicaUrl) fotoHtml += `<div style="margin-top:8px;font-size:11px;color:#888;margin-bottom:4px;">📎 Vaša uplatnica:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;" />`;
+
+  // Upload dugme
+  let uploadHtml = '';
+  if (status === 'novo') {
+    uploadHtml = `
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        <button onclick="openUplatnica('${r.id}','camera')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📷 Kamera</button>
+        <button onclick="openUplatnica('${r.id}','gallery')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🖼️ Galerija</button>
+      </div>
+      <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">❌ Storno zahtev</button>`;
+  }
+
+  document.getElementById('kassenbon-content').innerHTML = `
+    <!-- Header -->
+    <div style="text-align:center;padding:10px 0 16px;border-bottom:2px dashed #ddd;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">Nova<span style="color:#d97706;">roba</span>shop</div>
+      <div style="font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:2px;">Potvrda narudžbine</div>
+    </div>
+
+    <!-- Meta -->
+    <div style="display:flex;justify-content:space-between;padding:12px 0 8px;font-size:11px;color:#888;border-bottom:1px dotted #ddd;">
+      <div>Račun: <b style="color:#0f172a;">#${broj}</b></div>
+      <div>${datum}</div>
+    </div>
+
+    <!-- Stavke -->
+    <div style="padding:8px 0;">
+      ${stavkeHtml}
+    </div>
+
+    <!-- Ukupno -->
+    <div style="border-top:2px dashed #ddd;padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:12px;font-weight:800;letter-spacing:2px;color:#555;">UKUPNO</div>
+      <div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-1px;">${(ukupno).toLocaleString()} RSD</div>
+    </div>
+
+    <!-- Status -->
+    <div style="margin-top:12px;text-align:center;font-size:13px;font-weight:800;color:#374151;background:#f9fafb;border-radius:8px;padding:10px;letter-spacing:0.5px;">
+      ${stLine}
+    </div>
+
+    ${uplatnicaHtml}
+    ${fotoHtml}
+    ${uploadHtml}
+
+    <!-- Footer -->
+    <div style="margin-top:16px;text-align:center;font-size:9px;color:#bbb;letter-spacing:1.5px;border-top:1px dotted #eee;padding-top:10px;">
+      HVALA NA KUPOVINI ★ NOVAROBASHOP
+    </div>`;
+
+  const modal = document.getElementById('kassenbon-modal');
+  modal.style.display = 'flex';
+}
+
 // Stare funkcije — stub da ne puca
 function updateApStatus() {}
 function aktivirajProizvod() {}
@@ -4768,14 +4893,28 @@ function kRacunCard(r, showUpload, showArhiva) {
       ${admin.postnetNum ? `<div><span style="color:#888;">PostNet:</span> <b>${admin.postnetNum}</b></div>` : ''}
     </div>` : '';
 
-  let html = `<div class="k-racun-card">
+  let html = `<div class="k-racun-card" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
       <div><div style="font-size:14px;font-weight:800;color:#0A1428;">Račun #${broj}</div>
       <div style="font-size:11px;color:var(--gray2);margin-top:2px;">${r.datum||''}</div></div>
       ${statusBadge}
     </div>`;
-  if (r.opis) html += `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
-  html += `<div style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:8px;">${iznos} RSD</div>`;
+  // Stavke preview — lista artikala
+  if (r.stavke && r.stavke.length) {
+    html += `<div style="margin-bottom:8px;">` + r.stavke.map(s => {
+      const kol = s.kolicina||1;
+      return `<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:2px 0;">`
+        + `<span>${kol>1?kol+'x ':''} ${s.naziv}</span>`
+        + `<span style="font-weight:700;">${(s.cena*(kol)).toLocaleString()} RSD</span>`
+        + `</div>`;
+    }).join('') + `</div>`;
+  } else if (r.opis) {
+    html += `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
+  }
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e5e7eb;padding-top:8px;margin-top:4px;">
+    <div style="font-size:18px;font-weight:800;color:#0f172a;">${iznos} RSD</div>
+    <div style="font-size:11px;color:#888;font-family:'Courier New',monospace;">Tapni za detalje 🧾</div>
+  </div>`;
   if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:var(--gray2);margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
   html += `<div style="display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #F0F2F8;">
     <div class="k-paket-dot ${ps}"></div>
