@@ -2635,6 +2635,7 @@ function renderDashboard() {
       <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,0.15);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${i+1}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:700;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@${k.tiktokIme||'—'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k.tiktokNick||''}</div>
         <div style="font-size:11px;color:#aaa;">${k.name||'—'}</div>
       </div>
       <div style="font-size:14px;font-weight:800;color:var(--gold);white-space:nowrap;">${iznos.toLocaleString()} RSD</div>
@@ -2925,7 +2926,7 @@ function renderChart() {
     const w = Math.round((iznos/maxK)*100);
     return `<div style="margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <div style="font-size:13px;font-weight:700;color:var(--teal);">@${k.tiktokIme||'—'} <span style="color:var(--gray2);font-weight:400;font-size:11px;">${k.name||''}</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal);">@${k.tiktokIme||'—'} <span style="color:var(--gray2);font-weight:400;font-size:11px;">${k.tiktokNick ? '· '+k.tiktokNick : k.name||''}</span></div>
         <div style="font-size:13px;font-weight:800;">${iznos.toLocaleString()} RSD</div>
       </div>
       <div style="height:6px;background:rgba(148,163,184,0.12);border-radius:6px;">
@@ -2953,7 +2954,8 @@ function searchKupacForAuto(val) {
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;"
       onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''">
       <span style="color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</span>
-      <span style="color:white;margin-left:8px;">${k.name||''}</span>
+      <span style="color:white;margin-left:6px;">${k.tiktokNick||''}</span>
+      <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:4px;">${k.name||''}</span>
     </div>`).join('');
 }
 function selectKupacForAuto(id, name, tiktok) {
@@ -3243,7 +3245,7 @@ function renderAdminPoruke(poruke) {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div onclick="toggleAPoruka('${safeId}')" style="cursor:pointer;flex:1;">
           <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;">🛍️ Kupac</div>
-          ${p.odTiktok ? `<div style="font-size:14px;color:var(--teal);font-weight:800;">@${p.odTiktok}</div>` : ''}
+          ${p.odTiktok ? `<div style="font-size:14px;color:var(--teal);font-weight:800;">@${p.odTiktok}${p.odNick ? ` <span style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:400;">· ${p.odNick}</span>` : ''}</div>` : ''}
           ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);">${kpd.tiktokNick||''}</div>` : ''; })()}
           <div id="aporuka-detail-${safeId}" style="display:none;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;margin-top:6px;font-size:11px;">
             ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;"><div><span style="color:#888;">Ime:</span><br><b style="color:white;">${kpd.name||'—'}</b></div><div><span style="color:#888;">Tel:</span><br><b style="color:white;">${kpd.telefon||'—'}</b></div><div><span style="color:#888;">Ulica:</span><br><b style="color:white;">${kpd.ulica||'—'}</b></div><div><span style="color:#888;">PTT/Grad:</span><br><b style="color:white;">${kpd.ptt||'—'} ${kpd.grad||'—'}</b></div><div><span style="color:#888;">Selo:</span><br><b style="color:white;">${kpd.selo||'—'}</b></div></div>` : ''; })()}
@@ -3325,7 +3327,8 @@ function searchKupacForRacun(val) {
       onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''"
     >
       <span style="color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</span>
-      <span style="color:white;margin-left:8px;">${k.name||''}</span>
+      <span style="color:white;margin-left:6px;">${k.tiktokNick||''}</span>
+      <span style="color:rgba(255,255,255,0.4);font-size:11px;margin-left:4px;">${k.name||''}</span>
     </div>`).join('');
 }
 
@@ -4458,6 +4461,15 @@ function openKassenbon(racunId) {
       <div style="font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:2px;">Potvrda narudžbine</div>
     </div>
 
+    <!-- Kupac info -->
+    <div style="padding:10px 0 8px;border-bottom:1px dotted #ddd;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#0f172a;">${window._currentUser?.name||''}</div>
+        <div style="font-size:11px;color:#14b8a6;margin-top:1px;">${window._currentUser?.tiktokIme ? '@'+window._currentUser.tiktokIme : ''}</div>
+      </div>
+      ${window._currentUser?.tiktokNick ? `<div style="font-size:11px;color:#64748b;font-style:italic;">${window._currentUser.tiktokNick}</div>` : ''}
+    </div>
+
     <!-- Meta -->
     <div style="display:flex;justify-content:space-between;padding:12px 0 8px;font-size:11px;color:#888;border-bottom:1px dotted #ddd;">
       <div>Račun: <b style="color:#0f172a;">#${broj}</b></div>
@@ -4535,9 +4547,16 @@ function startLiveChatFeed() {
     snap.docs.forEach(docSnap => {
       const d = docSnap.data();
       const color = d.statusColor === 'green' ? '#00c896' : d.statusColor === 'orange' ? '#FFB800' : '#ff4d4d';
+      // Pronadji kupca da dobijemo nick
+      const kupac = (window._allKupciGlobal||[]).find(k => (k.tiktokIme||'').toLowerCase() === (d.tiktokId||'').toLowerCase());
+      const nick = kupac ? (kupac.tiktokNick||'') : (d.kupacName||'');
       const card = document.createElement('div');
       card.style.cssText = `display:flex;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};margin-bottom:4px;`;
-      card.innerHTML = `<div style="flex:1;min-width:0;"><span style="font-weight:800;font-size:12px;color:${color};">@${d.tiktokId||'?'}</span> <span style="font-size:12px;color:rgba(255,255,255,0.85);">${d.comment||''}</span></div>`;
+      card.innerHTML = `<div style="flex:1;min-width:0;">
+        <span style="font-weight:800;font-size:12px;color:${color};">@${d.tiktokId||'?'}</span>
+        ${nick ? `<span style="font-size:10px;color:rgba(255,255,255,0.4);margin-left:5px;">${nick}</span>` : ''}
+        <span style="font-size:12px;color:rgba(255,255,255,0.85);margin-left:4px;">${d.comment||''}</span>
+      </div>`;
       feed.appendChild(card);
     });
 
@@ -5246,7 +5265,7 @@ function shareRacunAsImage(racunId) {
       <div style="border-top:1px solid #f1f5f9;padding-top:12px;">
         <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Kupac</div>
         <div style="font-size:14px;font-weight:700;color:#0f172a;">${u.name||''}</div>
-        ${u.tiktokIme?`<div style="font-size:12px;color:#14b8a6;">@${u.tiktokIme}</div>`:''}
+        ${u.tiktokIme?`<div style="font-size:12px;color:#14b8a6;">@${u.tiktokIme}${u.tiktokNick ? ' · '+u.tiktokNick : ''}</div>`:''}
       </div>
       ${admin?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px;font-size:11px;color:#94a3b8;text-align:center;">Admin: ${admin.name||''}</div>`:''}
     </div>
@@ -5340,6 +5359,7 @@ async function posaljiPoruku(tip) {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
       odTiktok: window._currentUser.tiktokIme || '',
+      odNick: window._currentUser.tiktokNick || '',
       tip: 'kupac',
       tekst,
       vreme: new Date().toISOString(),
@@ -5362,6 +5382,7 @@ async function posaljiPoruku(tip) {
       od: window._currentUser.uid,
       odIme: window._currentUser.name,
       odTiktok: window._currentUser.tiktokIme || '',
+      odNick: window._currentUser.tiktokNick || '',
       adminId, adminName,
       tekst, foto: fotoAdmUrl,
       vreme: new Date().toISOString(),
@@ -5413,6 +5434,7 @@ async function kupacReplyToAdmin(adminId, safeId) {
     od: u.uid,
     odIme: u.name,
     odTiktok: u.tiktokIme || '',
+    odNick: u.tiktokNick || '',
     adminId: adminId,
     tekst, foto: fotoKUrl,
     vreme: new Date().toISOString(),
