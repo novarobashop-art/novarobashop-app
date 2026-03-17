@@ -3607,20 +3607,19 @@ async function setPaket(racunId, status, btn) {
 
 async function confirmPayment(racunId) {
   const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
-  await updateDoc(doc(db, 'racuni', racunId), { status: 'placeno' });
-  // Obavesti kupca
+  await updateDoc(doc(db, 'racuni', racunId), { status: 'placeno', placenoAt: new Date().toISOString() });
   const racunSnap = await getDoc(doc(db, 'racuni', racunId));
   const r = racunSnap.data();
   await addDoc(collection(db,'notifikacije'), {
     userId: r.kupacId,
     tip: 'placeno',
     racunId,
-    poruka: `✅ Vaša uplata za Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD) je potvrđena!`,
+    poruka: `✅ Tvoja uplata je potvrđena!\n\nRačun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD\n${r.opis ? '📦 '+r.opis : ''}\n\nHvala na kupovini! 🎉`,
     vreme: new Date().toISOString(),
     procitano: false
   });
-  sendPushToUser(r.kupacId, '✅ Uplata Potvrđena!', `Račun #${r.broj} - ${(r.iznos||0).toLocaleString()} RSD potvrđen!`);
-  showToast('✅ Plaćanje potvrđeno!');
+  sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD — Hvala!`);
+  showToast('✅ Plaćanje potvrđeno! Kupac obavešten.');
 }
 
 async function rejectPayment(racunId) {
@@ -5407,15 +5406,16 @@ async function saveNotiz() {
 async function sendShippingNotification(racunId, kupacId, kupacName, opis, iznos) {
   const { db, collection, addDoc } = window._fb;
   const adminName = window._currentUser?.name || 'Admin';
-  // Estimate delivery: 2-5 days
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + 3);
   const dateStr = deliveryDate.toLocaleDateString('sr-Latn', {day:'numeric', month:'long'});
   await addDoc(collection(db,'notifikacije'), {
     userId: kupacId,
     tip: 'paket_poslat',
-    poruka: `📦 Tvoj paket je na putu!\n\nProizvod: ${opis||'Paket'}\nIznos: ${(iznos||0).toLocaleString()} RSD\nOčekivana isporuka: ${dateStr}\n\nAdmin: ${adminName}`,
-    racunId, vreme: new Date().toISOString(), procitano: false
+    racunId,
+    poruka: `📦 Tvoj paket je na putu!\n\n${opis ? '🛍️ '+opis+'\n' : ''}💰 ${(iznos||0).toLocaleString()} RSD\n📅 Očekivana isporuka: ${dateStr}\n\nPrati pošiljku i provjeri adresu u Podešavanjima!`,
+    vreme: new Date().toISOString(),
+    procitano: false
   });
 }
 
@@ -5850,17 +5850,19 @@ async function posaljiUplatu() {
 // ===== NOTIFIKACIJE =====
 
 const NOTIF_ICONS = {
-  nova_racun: '🧾',
-  placeno: '✅',
-  poslato: '📦',
-  live: '🔴',
-  mahnung1: '⚠️',
-  mahnung2: '⚠️',
-  mahnung3: '🚨',
-  nova_uplata: '💰',
-  poruka_od_admina: '📩',
-  poruka_od_haupta: '👑',
-  kupac_blokiran_upozorenje: '🔒',
+  nova_racun:   '🧾',
+  placeno:      '✅',
+  poslato:      '📦',
+  paket_poslat: '📦',
+  live:         '🔴',
+  mahnung1:     '⚠️',
+  mahnung2:     '⚠️',
+  mahnung3:     '🚨',
+  nova_uplata:  '💰',
+  poruka_od_admina:         '📩',
+  poruka_od_haupta:         '👑',
+  kupac_blokiran_upozorenje:'🔒',
+  default:      '🔔',
 };
 
 // ===== FOTO HELPER FÜR NACHRICHTEN =====
@@ -5981,11 +5983,22 @@ function renderKNotif(notifs) {
     const icon = NOTIF_ICONS[n.tip] || NOTIF_ICONS.default;
     const time = (n.vreme||'').slice(0,16).replace('T',' ');
     const unread = !n.procitano;
+
+    // Aktions-Button je nach Typ
+    let actionBtn = '';
+    if (n.tip === 'placeno')
+      actionBtn = `<button onclick="kNavTab('arhiva')" style="margin-top:8px;background:#dcfce7;color:#16a34a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">→ Pogledaj plaćene račune</button>`;
+    else if (n.tip === 'paket_poslat' || n.tip === 'poslato')
+      actionBtn = `<button onclick="kNavTab('poslato')" style="margin-top:8px;background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">→ Pogledaj poslate pakete</button>`;
+    else if (n.tip === 'nova_racun')
+      actionBtn = `<button onclick="kNavTab('racuni')" style="margin-top:8px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">→ Pogledaj novi račun</button>`;
+
     return `<div style="background:${unread?'#EEF4FF':'white'};border:1px solid ${unread?'#c0d0f0':'#eef1f8'};border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
       <div style="font-size:24px;flex-shrink:0;">${icon}</div>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:${unread?'700':'500'};color:#0A1428;">${n.poruka}</div>
+        <div style="font-size:13px;font-weight:${unread?'700':'500'};color:#0A1428;white-space:pre-line;">${n.poruka}</div>
         <div style="font-size:11px;color:#aaa;margin-top:4px;">${time}</div>
+        ${actionBtn}
       </div>
       ${unread ? '<div style="width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:4px;"></div>' : ''}
     </div>`;
