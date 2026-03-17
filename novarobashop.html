@@ -2356,6 +2356,11 @@ async function checkOverdueRacuni(racuni) {
           vreme: new Date().toISOString(),
           procitano: false
         });
+        // Warnung an alle anderen Admins die diesen Kunden kennen
+        await _warnOtherAdminsAboutBlock(
+          r.kupacId, r.kupacName,
+          window._currentUser?.uid || '', window._currentUser?.name || ''
+        );
       } catch(e) {
         console.error('checkOverdueRacuni error for', r.id, e.message);
       }
@@ -3618,8 +3623,43 @@ async function rejectPayment(racunId) {
   showToast('✗ Plaćanje odbijeno');
 }
 
+// Warnt alle anderen Admins die diesen Kunden kennen
+async function _warnOtherAdminsAboutBlock(kupacId, kupacName, vonAdminId, vonAdminName) {
+  try {
+    const { db, collection, query, where, getDocs, addDoc } = window._fb;
+    // Finde alle anderen Admins die eine Rechnung an diesen Kunden haben
+    const racuniSnap = await getDocs(query(
+      collection(db, 'racuni'),
+      where('kupacId', '==', kupacId)
+    ));
+    const andereAdminIds = new Set();
+    racuniSnap.forEach(d => {
+      const aId = d.data().adminId;
+      if (aId && aId !== vonAdminId) andereAdminIds.add(aId);
+    });
+    // Schicke jedem eine Warnung in notifikacije
+    for (const adminId of andereAdminIds) {
+      await addDoc(collection(db, 'notifikacije'), {
+        userId: adminId,
+        tip: 'kupac_blokiran_upozorenje',
+        kupacId,
+        kupacName,
+        vonAdminId,
+        vonAdminName,
+        poruka: `⚠️ Kupac ${kupacName} je blokiran kod admina ${vonAdminName} zbog neplaćene račune.`,
+        vreme: new Date().toISOString(),
+        procitano: false
+      });
+    }
+  } catch(e) {
+    console.error('_warnOtherAdmins error:', e.message);
+  }
+}
+
 async function blockKupac(kupacId) {
   const { db, doc, updateDoc, collection, addDoc } = window._fb;
+  const kupac = (_allKupci||[]).find(k => k.id === kupacId);
+  const kupacName = kupac?.name || kupacId;
   await updateDoc(doc(db, 'users', kupacId), { blocked: true, blockedAt: new Date().toISOString() });
   // Obavesti Haupt
   await addDoc(collection(db, 'haupt_notifikacije'), {
@@ -3631,6 +3671,8 @@ async function blockKupac(kupacId) {
     vreme: new Date().toISOString(),
     procitano: false
   });
+  // Warnung an alle anderen Admins die diesen Kunden kennen
+  await _warnOtherAdminsAboutBlock(kupacId, kupacName, window._currentUser.uid, window._currentUser.name);
   showToast('🔒 Kupac blokiran');
   renderAKupci(_allKupci);
 }
@@ -5774,6 +5816,7 @@ const NOTIF_ICONS = {
   nova_uplata: '💰',
   poruka_od_admina: '📩',
   poruka_od_haupta: '👑',
+  kupac_blokiran_upozorenje: '🔒',
 };
 
 // ===== FOTO HELPER FÜR NACHRICHTEN =====
