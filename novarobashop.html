@@ -5183,7 +5183,14 @@ function renderKHome() {
   if(nameEl) nameEl.textContent = u.name || u.tiktokNick || 'Moj nalog';
   if(tiktokEl) tiktokEl.textContent = u.tiktokIme ? '@'+u.tiktokIme : u.email||'';
 
-  const racuni = window._kAllRacuni || [];
+  const alleRacuni = window._kAllRacuni || [];
+
+  // Nur Rechnungen des aktuell gewählten Admins zeigen
+  const sel = document.getElementById('k-global-admin-sel');
+  const activeAdminId = sel ? sel.value : '';
+  const racuni = activeAdminId
+    ? alleRacuni.filter(r => r.adminId === activeAdminId)
+    : alleRacuni;
   const novo   = racuni.filter(r=>r.status==='novo').length;
   const ceka   = racuni.filter(r=>r.status==='ceka').length;
   const poslato= racuni.filter(r=>r.paketStatus==='ship').length;
