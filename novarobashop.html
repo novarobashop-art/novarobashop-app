@@ -210,11 +210,11 @@ setTimeout(() => {
         if (typeof window.showPortalByRole === 'function') {
           window.showPortalByRole(userData.role);
         } else {
+          let _t1 = 0;
           const t = setInterval(() => {
-            if (typeof window.showPortalByRole === 'function') {
-              clearInterval(t);
-              window.showPortalByRole(userData.role);
-            }
+            _t1++;
+            if (typeof window.showPortalByRole === 'function') { clearInterval(t); window.showPortalByRole(userData.role); }
+            else if (_t1 > 100) { clearInterval(t); console.error('showPortalByRole not found after 5s'); }
           }, 50);
         }
       } else {
@@ -223,10 +223,11 @@ setTimeout(() => {
         if (typeof window.showRegistrationScreen === 'function') {
           window.showRegistrationScreen();
         } else {
+          let _t2 = 0;
           const t2 = setInterval(() => {
-            if (typeof window.showRegistrationScreen === 'function') {
-              clearInterval(t2); window.showRegistrationScreen();
-            }
+            _t2++;
+            if (typeof window.showRegistrationScreen === 'function') { clearInterval(t2); window.showRegistrationScreen(); }
+            else if (_t2 > 100) { clearInterval(t2); console.error('showRegistrationScreen not found after 5s'); }
           }, 50);
         }
       }
@@ -235,10 +236,11 @@ setTimeout(() => {
       if (typeof window.showLoginScreen === 'function') {
         window.showLoginScreen();
       } else {
+        let _t3 = 0;
         const t3 = setInterval(() => {
-          if (typeof window.showLoginScreen === 'function') {
-            clearInterval(t3); window.showLoginScreen();
-          }
+          _t3++;
+          if (typeof window.showLoginScreen === 'function') { clearInterval(t3); window.showLoginScreen(); }
+          else if (_t3 > 100) { clearInterval(t3); console.error('showLoginScreen not found after 5s'); }
         }, 50);
       }
     }
@@ -2323,32 +2325,37 @@ async function loadAdminData() {
   }
 }
 
-function checkOverdueRacuni(racuni) {
+function _diffDays(dateA, dateB) {
+  const a = new Date(dateA); a.setHours(0,0,0,0);
+  const b = new Date(dateB); b.setHours(0,0,0,0);
+  return Math.round((a - b) / (1000 * 60 * 60 * 24));
+}
+async function checkOverdueRacuni(racuni) {
   const today = new Date();
-  racuni.forEach(async r => {
-    if (r.status === 'novo' && r.datum) {
-      const created = new Date(r.datum);
-      const diffDays = Math.floor((today - created) / (1000*60*60*24));
-      if (diffDays >= 4 && !r.blocked) {
-        // Block kupac after 4 days unpaid
-        const { db, doc, updateDoc } = window._fb;
+  const tasks = racuni.map(async r => {
+    if (r.status !== 'novo' || !r.datum || r.blocked) return;
+    const diffDays = _diffDays(today, new Date(r.datum));
+    if (diffDays >= 4) {
+      try {
+        const { db, doc, updateDoc, collection, addDoc } = window._fb;
         await updateDoc(doc(db, 'users', r.kupacId), { blocked: true, blockedAt: new Date().toISOString() });
         await updateDoc(doc(db, 'racuni', r.id), { blocked: true });
-        // Send notification to haupt
-        const { collection, addDoc } = window._fb;
         await addDoc(collection(db, 'haupt_notifikacije'), {
           tip: 'blokiran_kupac',
           kupacId: r.kupacId,
           kupacName: r.kupacName,
-          adminId: window._currentUser.uid,
-          adminName: window._currentUser.name,
+          adminId: window._currentUser?.uid || '',
+          adminName: window._currentUser?.name || '',
           poruka: 'Kupac ' + r.kupacName + ' je automatski blokiran zbog neplacene racune ' + r.broj,
           vreme: new Date().toISOString(),
           procitano: false
         });
+      } catch(e) {
+        console.error('checkOverdueRacuni error for', r.id, e.message);
       }
     }
   });
+  await Promise.all(tasks);
 }
 
 function getKupacStatus(kupac, racuni) {
@@ -2356,7 +2363,7 @@ function getKupacStatus(kupac, racuni) {
   const kupacRacuni = racuni.filter(r => r.kupacId === kupac.id && r.status === 'novo');
   for (const r of kupacRacuni) {
     if (r.datum) {
-      const diff = Math.floor((today - new Date(r.datum)) / (1000*60*60*24));
+      const diff = _diffDays(today, new Date(r.datum));
       if (diff >= 3) return 'kasni';
     }
   }
@@ -3723,7 +3730,7 @@ function renderLiveGrid(kupci) {
   const withStatus = (kupci||[]).map(k => {
     const kasni = (_allRacuni||[]).some(r => {
       if (r.kupacId !== k.id || r.status !== 'novo') return false;
-      return r.datum && Math.floor((today - new Date(r.datum)) / (1000*60*60*24)) >= 3;
+      return r.datum && _diffDays(today, new Date(r.datum)) >= 3;
     });
     return { ...k, kasni };
   });
@@ -3764,7 +3771,7 @@ function doLiveSearch(val) {
     res.innerHTML = found.map(x => {
       const kasni = (_allRacuni||[]).some(r => {
         if (r.kupacId !== x.id || r.status !== 'novo') return false;
-        return r.datum && Math.floor((today - new Date(r.datum)) / (1000*60*60*24)) >= 3;
+        return r.datum && _diffDays(today, new Date(r.datum)) >= 3;
       });
       if (kasni) {
         return `<div class="live-result" style="background:rgba(255,184,0,0.1);border:1.5px solid rgba(255,184,0,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
@@ -3818,7 +3825,10 @@ async function toggleLive() {
         const timeout = setTimeout(() => controller.abort(), 5000); // 5 sec timeout
         const resp = await fetch(`${RAILWAY_URL}/start-live`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer novarobashop2026'
+          },
           body: JSON.stringify({ adminId: window._currentUser.uid, tiktokUsername: tiktok }),
           signal: controller.signal
         });
@@ -3853,7 +3863,10 @@ async function toggleLive() {
     try {
       await fetch(`${RAILWAY_URL}/stop-live`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer novarobashop2026'
+          },
         body: JSON.stringify({ adminId: window._currentUser.uid })
       });
     } catch(e) {}
@@ -5769,7 +5782,7 @@ async function sendMahnungen(racuni) {
   const today = new Date();
   for (const r of racuni) {
     if (r.status !== 'novo' || !r.datum) continue;
-    const diff = Math.floor((today - new Date(r.datum)) / (1000*60*60*24));
+    const diff = _diffDays(today, new Date(r.datum));
     if (diff < 1 || diff > 3) continue;
     // Provjeri da li je već poslana mahnung za ovaj dan
     const key = `mahnung${diff}`;

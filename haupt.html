@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novarobashop – Haupt Kontrola</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, updatePassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
+    authDomain: "novarobashop-e2a61.firebaseapp.com",
+    projectId: "novarobashop-e2a61",
+    storageBucket: "novarobashop-e2a61.firebasestorage.app",
+    messagingSenderId: "262847590425",
+    appId: "1:262847590425:web:16e3f34e21a2661d0dfa88"
+  };
+
+  const HAUPT_UID = '8MVnqyppnHZFv1dCbB1RYqCjCod2';
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const googleProvider = new GoogleAuthProvider();
+  const storage = getStorage(app);
+  window._fb = { storage, ref, uploadString, getDownloadURL, auth, db, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, updatePassword, GoogleAuthProvider, signInWithPopup, googleProvider, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, query, where, getDocs, serverTimestamp, orderBy, deleteDoc };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Samo Haupt UID dozvoljeno
+      if (user.uid !== HAUPT_UID) {
+        await signOut(auth);
+        showLoginScreen();
+        document.getElementById('login-error').textContent = '🔒 Pristup odbijen. Samo Haupt nalog.';
+        document.getElementById('login-error').classList.add('show');
+        return;
+      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('haupt-screen').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+      if (typeof window.loadHauptData === 'function') {
+        window.loadHauptData();
+      } else {
+        let _tries = 0;
+        const t = setInterval(() => {
+          _tries++;
+          if (typeof window.loadHauptData === 'function') { clearInterval(t); window.loadHauptData(); }
+          else if (_tries > 100) { clearInterval(t); console.error('loadHauptData not found after 5s'); }
+        }, 50);
+      }
+    } else {
+      document.getElementById('loading').style.display = 'none';
+      if (typeof window.showLoginScreen === 'function') {
+        window.showLoginScreen();
+      } else {
+        let _tries2 = 0;
+        const t = setInterval(() => {
+          _tries2++;
+          if (typeof window.showLoginScreen === 'function') { clearInterval(t); window.showLoginScreen(); }
+          else if (_tries2 > 100) { clearInterval(t); console.error('showLoginScreen not found after 5s'); }
+        }, 50);
+      }
+    }
+  });
+</script>
+
+<style>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║   NOVAROBASHOP — Obsidian Design System 2026                 ║
+   ║   Unified · Premium · Sharp · Consistent across all portals  ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+:root {
+  /* ── Surfaces ── */
+  --ink:      #07090e;
+  --ink2:     #0b1220;
+  --ink3:     #0f1a2e;
+  --surface:  rgba(11,18,32,0.94);
+  --surface2: rgba(15,26,46,0.75);
+  --glass:    rgba(255,255,255,0.04);
+
+  /* ── Brand ── */
+  --amber:    #f59e0b;
+  --amber2:   #d97706;
+  --amber3:   #fbbf24;
+  --amber-glow: rgba(245,158,11,0.28);
+
+  /* ── Semantic colors ── */
+  --teal:     #14b8a6;
+  --teal2:    #0d9488;
+  --teal-glow: rgba(20,184,166,0.25);
+  --blue:     #3b82f6;
+  --blue2:    #1d4ed8;
+  --violet:   #8b5cf6;
+  --violet2:  #7c3aed;
+  --rose:     #f43f5e;
+  --rose2:    #e11d48;
+  --emerald:  #10b981;
+  --emerald2: #059669;
+  --orange:   #f97316;
+
+  /* ── Text ── */
+  --txt:   #e2e8f0;
+  --txt2:  #94a3b8;
+  --txt3:  #64748b;
+
+  /* ── Borders ── */
+  --brd:   rgba(148,163,184,0.1);
+  --brd2:  rgba(148,163,184,0.06);
+  --brd3:  rgba(148,163,184,0.2);
+
+  /* ── Radius ── */
+  --r-xs:   8px;
+  --r-sm:   12px;
+  --r-md:   18px;
+  --r-lg:   24px;
+  --r-xl:   30px;
+  --r-pill: 999px;
+
+  /* ── Backwards-compat aliases ── */
+  --dark:   var(--ink);
+  --dark2:  var(--ink2);
+  --dark3:  var(--ink3);
+  --card:   var(--surface);
+  --gold:   var(--amber);
+  --gold2:  var(--amber2);
+  --red:    var(--rose);
+  --green:  var(--emerald);
+  --gray:   var(--txt3);
+  --gray2:  var(--txt2);
+  --white:  var(--txt);
+  --border: var(--brd);
+  --border2:var(--brd2);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--ink);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection { background: rgba(245,158,11,0.22); color: var(--txt); }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.15); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.28); }
+
+/* ════════════════════════════════════════════
+   LOADING
+   ════════════════════════════════════════════ */
+#loading {
+  background:
+    radial-gradient(ellipse at 35% 25%, rgba(245,158,11,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 72% 78%, rgba(20,184,166,0.05) 0%, transparent 50%),
+    var(--ink);
+}
+.loading-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px; font-weight: 700; letter-spacing: -1px;
+  background: linear-gradient(135deg, #e2e8f0 0%, var(--amber) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.loading-logo span { color: var(--amber); -webkit-text-fill-color: var(--amber); }
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 2.5px solid rgba(245,158,11,0.12);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.9s cubic-bezier(0.5,0,0.5,1) infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ════════════════════════════════════════════
+   LOGIN
+   ════════════════════════════════════════════ */
+#login-screen {
+  display: none; min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(245,158,11,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(160deg, #0b1322 0%, var(--ink) 100%);
+  align-items: center; justify-content: center;
+  flex-direction: column; padding: 24px;
+}
+.login-logo { text-align: center; margin-bottom: 32px; }
+.login-logo-wrap { text-align: center; margin-bottom: 32px; }
+.login-logo-text, .login-logo-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 42px; font-weight: 700; letter-spacing: -2px; line-height: 1;
+  background: linear-gradient(135deg, #f1f5f9 25%, var(--amber3) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.login-logo-text span, .login-logo-title span {
+  background: linear-gradient(135deg, var(--amber), var(--amber2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.login-logo-sub {
+  font-size: 10px; color: var(--txt3);
+  letter-spacing: 4px; text-transform: uppercase;
+  margin-top: 8px; font-weight: 600;
+}
+.login-title  { font-size: 22px; font-weight: 800; margin-bottom: 4px; color: var(--txt); }
+.login-sub    { font-size: 13px; color: var(--txt2); margin-bottom: 20px; }
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--brd3);
+  border-radius: var(--r-xl);
+  padding: 36px 30px;
+  width: 100%; max-width: 420px;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  position: relative; overflow: hidden;
+}
+.login-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,0.5), transparent);
+}
+.login-error {
+  background: rgba(244,63,94,0.07);
+  border: 1px solid rgba(244,63,94,0.22);
+  border-radius: var(--r-xs);
+  padding: 10px 14px; font-size: 13px; color: #fda4af;
+  margin-bottom: 14px; display: none;
+}
+.login-error.show { display: block; }
+
+/* ── Form elements ── */
+.inp-label {
+  font-size: 10px; font-weight: 700; color: var(--txt3);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  display: block; margin-bottom: 7px;
+}
+.inp {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--brd);
+  border-radius: var(--r-sm);
+  padding: 13px 16px;
+  color: var(--txt); font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; margin-bottom: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.inp:focus {
+  border-color: var(--amber);
+  background: rgba(245,158,11,0.04);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+}
+.inp::placeholder { color: var(--txt3); }
+.inp-dark {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--brd);
+  border-radius: var(--r-xs);
+  padding: 11px 14px;
+  color: var(--txt); font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.inp-dark:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(20,184,166,0.1);
+}
+.inp-dark::placeholder { color: var(--txt3); }
+select.inp-dark option { background: var(--ink2); color: var(--txt); }
+
+/* ── Buttons ── */
+.btn-gold {
+  width: 100%;
+  background: linear-gradient(135deg, var(--amber) 0%, var(--amber2) 100%);
+  border: none; border-radius: var(--r-sm);
+  padding: 14px; color: #160900;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: 'DM Sans';
+  box-shadow: 0 6px 24px var(--amber-glow);
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(245,158,11,0.42); }
+.btn-gold:active { transform: translateY(0); }
+.btn-gold:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+.btn-teal {
+  width: 100%;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border: none; border-radius: var(--r-sm);
+  padding: 13px; color: white;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: 'DM Sans';
+  box-shadow: 0 6px 20px var(--teal-glow);
+  transition: all 0.2s;
+}
+.btn-teal:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(20,184,166,0.4); }
+.btn-teal:active { transform: translateY(0); }
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border: none; border-radius: var(--r-sm);
+  padding: 14px; color: white;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans';
+  box-shadow: 0 6px 20px rgba(59,130,246,0.3);
+  transition: all 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.42); }
+.btn-primary:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+
+.btn-google {
+  width: 100%; padding: 13px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--brd3);
+  background: rgba(255,255,255,0.04);
+  color: var(--txt); font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.2s; font-family: 'DM Sans';
+}
+.btn-google:hover { background: rgba(255,255,255,0.08); border-color: rgba(148,163,184,0.32); }
+
+.btn-sm {
+  padding: 7px 14px; border-radius: var(--r-xs);
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; border: none;
+  font-family: 'DM Sans'; transition: all 0.15s;
+}
+.btn-sm:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.btn-sm:active { transform: translateY(0); }
+
+.btn-block   { background:rgba(244,63,94,0.1);  color:#fda4af; border:1px solid rgba(244,63,94,0.22)!important;  cursor:pointer; }
+.btn-unblock { background:rgba(16,185,129,0.1); color:#6ee7b7; border:1px solid rgba(16,185,129,0.22)!important; cursor:pointer; }
+.btn-blue    { background:rgba(59,130,246,0.1); color:#93c5fd; border:1px solid rgba(59,130,246,0.22)!important;  cursor:pointer; }
+.btn-detail  { background:rgba(59,130,246,0.1); color:#93c5fd; border:1px solid rgba(59,130,246,0.22)!important; }
+.btn-red     { background:rgba(244,63,94,0.1);  color:#fda4af; border:1px solid rgba(244,63,94,0.22)!important;  cursor:pointer; }
+.btn-purple  { background:rgba(139,92,246,0.1); color:#c4b5fd; border:1px solid rgba(139,92,246,0.22)!important; cursor:pointer; }
+
+.logout-btn {
+  background: rgba(244,63,94,0.07); color: #fda4af;
+  border: 1px solid rgba(244,63,94,0.18);
+  border-radius: var(--r-xs); padding: 6px 13px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans'; transition: all 0.2s;
+}
+.logout-btn:hover { background: rgba(244,63,94,0.14); }
+
+.divider { display:flex; align-items:center; gap:10px; margin:14px 0; }
+.divider-line { flex:1; height:1px; background: var(--brd); }
+.divider-text { color: var(--txt3); font-size:12px; }
+.forgot-link { text-align:center; font-size:13px; color:var(--txt3); margin-top:14px; cursor:pointer; }
+.forgot-link span { color: var(--teal); }
+
+/* ════════════════════════════════════════════
+   HAUPT SCREEN
+   ════════════════════════════════════════════ */
+#haupt-screen {
+  display: none; min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 5% 0%, rgba(245,158,11,0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 95% 100%, rgba(59,130,246,0.04) 0%, transparent 40%),
+    linear-gradient(180deg, #0b1322 0%, var(--ink) 100%);
+}
+.h-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--brd);
+  background: rgba(7,9,14,0.9);
+  backdrop-filter: blur(24px);
+  position: sticky; top:0; z-index:50;
+}
+.h-logo { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.5px; }
+.h-logo span { color: var(--amber); }
+.h-badge {
+  background: rgba(245,158,11,0.1); color: var(--amber);
+  border: 1px solid rgba(245,158,11,0.28);
+  border-radius: var(--r-pill);
+  padding: 5px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  box-shadow: 0 0 16px rgba(245,158,11,0.12);
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px; padding: 16px;
+}
+@media(max-width:500px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--brd);
+  border-radius: var(--r-md);
+  padding: 16px; text-align: center;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.stat-card::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent);
+  pointer-events: none;
+}
+.stat-card:hover { border-color: rgba(245,158,11,0.22); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.stat-num { font-size: 30px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; line-height: 1; }
+.stat-lbl { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+
+/* Tabs */
+.h-tabs {
+  display: flex; gap: 5px;
+  padding: 10px 16px 12px;
+  overflow-x: auto; scrollbar-width: none;
+  background: rgba(7,9,14,0.5);
+  border-bottom: 1px solid var(--brd2);
+}
+.h-tabs::-webkit-scrollbar { display:none; }
+.h-tab {
+  padding: 7px 15px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  white-space: nowrap;
+  background: rgba(148,163,184,0.06); color: var(--txt3);
+  border: 1px solid transparent;
+  font-family: 'DM Sans'; transition: all 0.2s; letter-spacing: 0.1px;
+}
+.h-tab:hover { background: rgba(148,163,184,0.11); color: var(--txt); }
+.h-tab.active {
+  background: linear-gradient(135deg, var(--amber), var(--amber2));
+  color: #160900; box-shadow: 0 4px 16px var(--amber-glow);
+  border-color: transparent;
+}
+
+/* Admin cards */
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--r-md);
+  padding: 16px; margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.admin-card:hover { border-color: rgba(245,158,11,0.18); box-shadow: 0 6px 28px rgba(0,0,0,0.35); }
+.admin-name  { font-weight:700; font-size:15px; }
+.admin-email { font-size:11px; color:var(--txt2); margin-top:2px; }
+
+/* Search bar */
+.h-search-bar {
+  display:flex; align-items:center;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--brd);
+  border-radius: var(--r-sm);
+  padding: 0 14px; margin-bottom: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.h-search-bar:focus-within { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.09); }
+.h-search-bar input { flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:'DM Sans'; padding:11px 0; }
+.h-search-bar button { background:none; border:none; color:var(--txt3); font-size:16px; cursor:pointer; padding:4px; }
+
+/* ════════════════════════════════════════════
+   ADMIN SCREEN
+   ════════════════════════════════════════════ */
+#admin-screen {
+  background:
+    radial-gradient(ellipse at 5% 0%, rgba(20,184,166,0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 95% 100%, rgba(59,130,246,0.04) 0%, transparent 40%),
+    linear-gradient(180deg, #0b1322 0%, var(--ink) 100%);
+}
+.a-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--brd);
+  background: rgba(7,9,14,0.9);
+  backdrop-filter: blur(24px);
+  position: sticky; top:0; z-index:50;
+}
+.a-logo { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+.a-logo span { color: var(--amber); }
+.a-header-right { display:flex; align-items:center; gap:10px; }
+.a-header-sub   { font-size:10px; color:var(--txt3); margin-top:2px; letter-spacing:0.3px; }
+.a-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color:white; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:13px; cursor:pointer;
+  box-shadow: 0 0 0 2px rgba(20,184,166,0.25);
+  transition: box-shadow 0.2s;
+}
+.a-avatar:hover { box-shadow: 0 0 0 3px rgba(20,184,166,0.4); }
+
+/* Admin tabs */
+.a-tabs {
+  display:flex; gap:5px; padding:10px 16px;
+  overflow-x:auto; scrollbar-width:none;
+  background: rgba(7,9,14,0.5);
+  border-bottom: 1px solid var(--brd2);
+}
+.a-tabs::-webkit-scrollbar { display:none; }
+.a-tab {
+  padding: 7px 14px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  white-space: nowrap;
+  background: rgba(148,163,184,0.06); color: var(--txt3);
+  border: 1px solid transparent;
+  font-family: 'DM Sans'; transition: all 0.2s; letter-spacing: 0.1px;
+}
+.a-tab:hover { background: rgba(148,163,184,0.11); color: var(--txt); }
+.a-tab.active {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: white; box-shadow: 0 4px 16px var(--teal-glow);
+}
+
+/* Kupac card */
+.kupac-card {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--r-md);
+  padding: 16px; margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.kupac-card:hover { border-color: rgba(20,184,166,0.22); box-shadow: 0 6px 28px rgba(0,0,0,0.32); }
+.kupac-top    { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.kupac-name   { font-weight:700; font-size:15px; }
+.kupac-email  { font-size:11px; color:var(--txt2); margin-top:2px; }
+.kupac-tiktok { font-size:11px; color:var(--teal); margin-top:2px; }
+.kupac-actions { display:flex; gap:7px; flex-wrap:wrap; }
+
+/* Badges */
+.badge-aktivan  { background:rgba(16,185,129,0.12);  color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; letter-spacing:0.3px; }
+.badge-blokiran { background:rgba(244,63,94,0.12);   color:#fda4af; border:1px solid rgba(244,63,94,0.25);  border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
+.badge-kasni    { background:rgba(249,115,22,0.12);  color:#fdba74; border:1px solid rgba(249,115,22,0.25); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
+.badge-expiring { background:rgba(249,115,22,0.12);  color:#fdba74; border:1px solid rgba(249,115,22,0.25); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
+
+/* Racun card */
+.racun-card {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--r-md);
+  padding: 16px; margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.racun-card:hover { border-color: var(--brd3); }
+.racun-top    { display:flex; justify-content:space-between; margin-bottom:6px; }
+.racun-id     { font-weight:800; font-size:14px; }
+.racun-date   { font-size:11px; color:var(--txt2); }
+.racun-kupac  { font-size:12px; color:var(--txt2); margin-bottom:8px; }
+.racun-bottom { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.racun-amt    { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+.racun-badge  { border-radius:var(--r-pill); padding:4px 11px; font-size:10px; font-weight:800; letter-spacing:0.5px; }
+.rb-novo    { background:rgba(244,63,94,0.14);  color:#fda4af; border:1px solid rgba(244,63,94,0.26); }
+.rb-ceka    { background:rgba(245,158,11,0.14); color:#fcd34d; border:1px solid rgba(245,158,11,0.26); }
+.rb-placeno { background:rgba(16,185,129,0.14); color:#6ee7b7; border:1px solid rgba(16,185,129,0.26); }
+.rb-storno  { background:rgba(148,163,184,0.1); color:#94a3b8; border:1px solid rgba(148,163,184,0.18); }
+
+/* Paket btns */
+.paket-btns { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.paket-btn {
+  padding: 7px 14px; border-radius: var(--r-xs);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--brd); background: var(--glass); color: var(--txt2);
+  font-family: 'DM Sans'; transition: all 0.15s;
+}
+.paket-btn:hover { background: rgba(148,163,184,0.1); }
+.sel-prep   { background:rgba(59,130,246,0.14);  color:#93c5fd;  border-color:rgba(59,130,246,0.3)!important; }
+.sel-ship   { background:rgba(20,184,166,0.14);  color:#5eead4;  border-color:rgba(20,184,166,0.3)!important; }
+.sel-cancel { background:rgba(244,63,94,0.14);   color:#fda4af;  border-color:rgba(244,63,94,0.3)!important; }
+
+/* Form sections */
+.form-section {
+  background: var(--surface2);
+  border: 1px solid var(--brd);
+  border-radius: var(--r-md);
+  padding: 18px; margin-bottom: 14px;
+}
+.form-section-title, .form-title {
+  font-size: 10px; font-weight: 800;
+  color: var(--teal); text-transform: uppercase;
+  letter-spacing: 1.8px; margin-bottom: 16px;
+}
+
+/* Live portal */
+#atab-live { padding: 16px; }
+.live-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-radius: var(--r-pill); padding: 5px 15px;
+  font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  box-shadow: 0 4px 16px rgba(220,38,38,0.5);
+  animation: live-glow 2s ease-in-out infinite;
+}
+@keyframes live-glow { 0%,100%{box-shadow:0 4px 16px rgba(220,38,38,0.4)} 50%{box-shadow:0 4px 28px rgba(220,38,38,0.75)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+.live-search {
+  width:100%; background:rgba(255,255,255,0.04); border:1.5px solid var(--brd);
+  border-radius:var(--r-sm); padding:12px 16px; color:var(--txt);
+  font-size:15px; font-family:'DM Sans'; outline:none; margin:12px 0; transition:border-color 0.2s;
+}
+.live-search:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+.live-result { padding:11px 14px; border-radius:var(--r-sm); display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; margin-bottom:8px; }
+.live-reg    { background:rgba(16,185,129,0.07); border:1.5px solid rgba(16,185,129,0.3); }
+.live-noreg  { background:rgba(244,63,94,0.07);  border:1.5px solid rgba(244,63,94,0.3);  }
+.live-dot     { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.live-dot-g   { background:#22c55e; box-shadow:0 0 8px #22c55e; }
+.live-dot-r   { background:#ef4444; box-shadow:0 0 8px #ef4444; }
+.live-dot-o   { background:#f97316; box-shadow:0 0 8px #f97316; }
+.live-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:10px; margin-top:16px; }
+.live-card {
+  background: rgba(16,185,129,0.05);
+  border: 1.5px solid rgba(16,185,129,0.2);
+  border-radius: var(--r-md); padding:14px; text-align:center;
+  transition: all 0.2s;
+}
+.live-card:hover { border-color: rgba(16,185,129,0.42); transform:translateY(-2px); }
+.live-card.kasni { background:rgba(249,115,22,0.05); border-color:rgba(249,115,22,0.25); }
+.live-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(16,185,129,0.12); color:#6ee7b7;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:800; margin:0 auto 8px;
+}
+.live-avatar.kasni-av { background:rgba(249,115,22,0.12); color:#fdba74; }
+.live-kname { font-size:12px; font-weight:700; margin-bottom:2px; }
+.live-ktik  { font-size:10px; color:var(--txt3); }
+
+/* Admin notif panel */
+#a-notif-panel { background: white; }
+
+/* ════════════════════════════════════════════
+   KUPAC SCREEN
+   ════════════════════════════════════════════ */
+#kupac-screen {
+  background: #F0F5FF;
+  color: #0f172a;
+  padding-bottom: 80px;
+}
+.k-header {
+  background: white;
+  padding: 14px 18px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom: 1px solid #e2eaf8;
+  position:sticky; top:0; z-index:10;
+  box-shadow: 0 2px 16px rgba(15,23,42,0.07);
+}
+.k-logo { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:#0f172a; }
+.k-logo span { color: var(--amber2); }
+.k-header-sub { font-size:10px; color:#64748b; letter-spacing:0.3px; }
+.k-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  color:white; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:13px;
+  box-shadow: 0 3px 12px rgba(59,130,246,0.32);
+}
+.k-bottom-nav {
+  position:fixed; bottom:0; left:0; right:0;
+  background: white;
+  border-top: 1px solid #e2eaf8;
+  display:flex; z-index:10;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.07);
+  overflow-x: auto;
+}
+.k-bottom-nav::-webkit-scrollbar { display:none; }
+.k-nav-item {
+  flex:1; min-width:48px;
+  display:flex; flex-direction:column;
+  align-items:center; gap:3px;
+  cursor:pointer; padding:9px 4px;
+  transition: opacity 0.2s;
+}
+.k-nav-item:hover { opacity:0.72; }
+.k-nav-icon { font-size:19px; }
+.k-nav-lbl  { font-size:9px; font-weight:700; color:#94a3b8; white-space:nowrap; }
+.k-racun-card {
+  background: white;
+  border-radius: var(--r-md);
+  padding: 16px; margin-bottom: 10px;
+  box-shadow: 0 2px 14px rgba(15,23,42,0.07);
+  border: 1px solid #edf3fc;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.k-racun-card:hover { box-shadow: 0 6px 24px rgba(15,23,42,0.11); transform: translateY(-1px); }
+.k-paket-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.k-paket-dot.prep   { background: var(--blue); }
+.k-paket-dot.ship   { background: var(--teal); }
+.k-paket-dot.cancel { background: var(--rose); }
+
+/* ════════════════════════════════════════════
+   MODAL
+   ════════════════════════════════════════════ */
+.modal-overlay {
+  position:fixed; inset:0;
+  background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(8px);
+  z-index:200; display:flex; align-items:flex-end;
+  opacity:0; pointer-events:none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+.modal-box {
+  background: var(--ink2);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 28px; width:100%; max-height:92vh; overflow-y:auto;
+  border-top: 1px solid var(--brd3);
+  box-shadow: 0 -24px 64px rgba(0,0,0,0.6);
+  position: relative;
+}
+.modal-box::before {
+  content:''; display:block;
+  width:36px; height:4px; background:var(--brd3); border-radius:4px;
+  margin: -8px auto 20px;
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════ */
+.toast {
+  position:fixed; bottom:32px; left:50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(11,18,32,0.97);
+  border: 1px solid var(--brd3);
+  color: var(--txt);
+  padding: 11px 24px;
+  border-radius: var(--r-pill);
+  font-size: 14px; font-weight: 600;
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:9999; white-space:nowrap;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+/* ════════════════════════════════════════════
+   MISC
+   ════════════════════════════════════════════ */
+.section-empty {
+  text-align:center; padding:52px 20px;
+  color:var(--txt3); font-size:14px; opacity:0.75;
+}
+.notif-dot {
+  width:7px; height:7px; background:var(--rose);
+  border-radius:50%; display:inline-block;
+  margin-left:4px; vertical-align:middle;
+  box-shadow: 0 0 6px rgba(244,63,94,0.7);
+}
+.poruka-card {
+  background:var(--surface); border:1px solid var(--brd);
+  border-radius:var(--r-md); padding:14px; margin-bottom:8px;
+  transition:border-color 0.2s, box-shadow 0.2s; cursor:pointer;
+}
+.poruka-card:hover { border-color:var(--brd3); }
+.poruka-card.notif-new { border-color:rgba(245,158,11,0.32)!important; background:rgba(245,158,11,0.04)!important; }
+.notif-card { background:rgba(249,115,22,0.05); border:1px solid rgba(249,115,22,0.18); border-radius:var(--r-md); padding:14px; margin-bottom:8px; }
+.notif-new  { background:rgba(244,63,94,0.05)!important; border-color:rgba(244,63,94,0.22)!important; }
+
+.podrska-btn {
+  width:100%; padding:14px; border-radius:var(--r-sm);
+  font-size:14px; font-weight:700; cursor:pointer;
+  font-family:'DM Sans'; border:none; margin-bottom:10px;
+  display:flex; align-items:center; gap:10px; justify-content:center;
+  transition:all 0.2s;
+}
+.podrska-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+
+/* Kalender btns */
+.kal-btn { padding:6px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--brd); background:var(--glass); color:var(--txt2); font-family:'DM Sans'; transition:all 0.15s; }
+.kal-btn:hover { background:rgba(148,163,184,0.1); }
+.kal-active { background:linear-gradient(135deg,var(--teal),var(--teal2))!important; color:white!important; border-color:transparent!important; box-shadow:0 4px 14px var(--teal-glow); }
+
+/* Star rating */
+.star-rating { display:flex; gap:4px; }
+.star { font-size:26px; cursor:pointer; transition:transform 0.1s; }
+.star:hover { transform:scale(1.22); }
+
+/* Screen base */
+.screen { display:none; width:100%; min-height:100vh; }
+
+</style>
+</head>
+<body>
+
+<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;">
+  <div class="loading-logo">Nova<span>roba</span>shop</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+  <div class="login-logo-wrap">
+    <div class="login-logo-text">Nova<span>roba</span>shop</div>
+    <div class="login-logo-sub">Haupt Kontrola</div>
+  </div>
+  <div class="login-card">
+    <div style="font-size:20px;font-weight:800;margin-bottom:4px;">🔐 Prijava</div>
+    <div style="font-size:13px;color:var(--gray2);margin-bottom:20px;">Samo za Haupt nalog</div>
+    <div class="login-error" id="login-error"></div>
+    <label class="inp-label">Email adresa</label>
+    <input type="email" class="inp" id="login-email" placeholder="vas@email.com" />
+    <label class="inp-label">Lozinka</label>
+    <input type="password" class="inp" id="login-pass" placeholder="••••••••" />
+    <button class="btn-gold" id="login-btn" onclick="doLogin()">Prijavite se</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0;">
+      <div style="flex:1;height:1px;background:rgba(148,163,184,0.12);"></div>
+      <span style="color:var(--gray);font-size:12px;">ili</span>
+      <div style="flex:1;height:1px;background:rgba(148,163,184,0.12);"></div>
+    </div>
+    <button id="google-btn" onclick="doGoogleLogin()" style="width:100%;padding:13px;border-radius:14px;border:1.5px solid rgba(148,163,184,0.15);background:rgba(255,255,255,0.04);color:white;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'DM Sans',sans-serif;transition:all 0.2s;">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Nastavi sa Google
+    </button>
+  </div>
+</div>
+
+<!-- ===== HAUPT SCREEN ===== -->
+<div id="haupt-screen">
+  <div class="h-header">
+    <div>
+      <div class="h-logo">Nova<span>roba</span>shop</div>
+      <div style="font-size:10px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Haupt Kontrola</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="h-badge">👑 HAUPT</div>
+      <button class="logout-btn" onclick="doLogout()">Odjavi se</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--gold);" id="stat-admini">—</div><div class="stat-lbl">Admini</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--teal);" id="stat-kupci">—</div><div class="stat-lbl">Kupci</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#93c5fd;" id="stat-racuni">—</div><div class="stat-lbl">Računi</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#4ade80;" id="stat-licenca">—</div><div class="stat-lbl">Akt. Licence</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="h-tabs">
+    <button class="h-tab active" onclick="hTab('dashboard',this)">📊 Dashboard</button>
+    <button class="h-tab" onclick="hTab('admini',this)">👥 Admini</button>
+    <button class="h-tab" onclick="hTab('dodaj-admin',this)">➕ Dodaj Admin</button>
+    <button class="h-tab" onclick="hTab('kupci',this)" id="tab-kupci-btn">🛍️ Kupci</button>
+    <button class="h-tab" onclick="hTab('licence',this)" id="tab-licence-btn">📋 Licence</button>
+    <button class="h-tab" onclick="hTab('poruke',this)" id="tab-poruke-btn">💬 Poruke</button>
+    <button class="h-tab" onclick="hTab('notifikacije',this)" id="tab-notif-btn">🔔 Obaveštenja</button>
+    <button class="h-tab" onclick="hTab('masa',this)">📧 Masa</button>
+  </div>
+
+  <div style="padding:0 16px 60px;">
+
+    <!-- ═══ DASHBOARD TAB ═══ -->
+    <div id="htab-dashboard">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px;margin-top:4px;">📊 Dashboard</div>
+
+      <!-- Ukupno prihodi -->
+      <div style="background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:20px;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px;">💰 Ukupno naplaćeno (svi admini)</div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-1px;" id="dash-total-rsd">—</div>
+        <div style="font-size:12px;color:var(--gray2);margin-top:4px;" id="dash-total-sub">— računa · — čeka</div>
+      </div>
+
+      <!-- 4 mini stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:16px;padding:14px;">
+          <div style="font-size:10px;color:#4ade80;text-transform:uppercase;letter-spacing:1px;font-weight:700;">✅ Plaćeno</div>
+          <div style="font-size:22px;font-weight:800;color:#4ade80;margin-top:4px;" id="dash-placeno-rsd">—</div>
+        </div>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:16px;padding:14px;">
+          <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:700;">⏳ Čeka</div>
+          <div style="font-size:22px;font-weight:800;color:var(--gold);margin-top:4px;" id="dash-ceka-rsd">—</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:16px;padding:14px;">
+          <div style="font-size:10px;color:#f87171;text-transform:uppercase;letter-spacing:1px;font-weight:700;">🔒 Blokirani admini</div>
+          <div style="font-size:22px;font-weight:800;color:#f87171;margin-top:4px;" id="dash-blokirani">—</div>
+        </div>
+        <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:16px;padding:14px;">
+          <div style="font-size:10px;color:#fb923c;text-transform:uppercase;letter-spacing:1px;font-weight:700;">⏰ Ističke licence</div>
+          <div style="font-size:22px;font-weight:800;color:#fb923c;margin-top:4px;" id="dash-expiring">—</div>
+        </div>
+      </div>
+
+      <!-- Top admini po prihodu -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">🏆 Top Admini po Prihodu</div>
+        <div id="dash-top-admini"><div class="section-empty">Učitavanje...</div></div>
+      </div>
+
+      <!-- Licence upozorenje -->
+      <div id="dash-lic-warning" style="display:none;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#fb923c;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">⏰ Licence Ističu Uskoro (≤7 dana)</div>
+        <div id="dash-lic-warning-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ADMINI TAB ═══ -->
+    <div id="htab-admini" style="display:none;">
+      <div class="h-search-bar">
+        <span style="font-size:16px;margin-right:6px;">🔍</span>
+        <input type="text" placeholder="Pretraži admina po @tiktok, imenu..." oninput="filterHAdmini(this.value)" id="admini-search" />
+        <button onclick="document.getElementById('admini-search').value='';filterHAdmini('')">✕</button>
+      </div>
+      <div id="h-admini-list"><div class="section-empty">Učitavanje...</div></div>
+    </div>
+
+    <!-- ═══ DODAJ ADMIN TAB ═══ -->
+    <div id="htab-dodaj-admin" style="display:none;">
+      <div class="form-section">
+        <div class="form-title">➕ Novi Admin Nalog</div>
+        <label class="inp-label">Ime i prezime</label>
+        <input type="text" class="inp-dark" id="new-admin-name" placeholder="Marko Petrović" />
+        <label class="inp-label">Email adresa</label>
+        <input type="email" class="inp-dark" id="new-admin-email" placeholder="admin@email.com" />
+        <label class="inp-label">Lozinka</label>
+        <input type="password" class="inp-dark" id="new-admin-pass" placeholder="Min. 6 karaktera" />
+        <label class="inp-label">Licenca do (datum)</label>
+        <input type="date" class="inp-dark" id="new-admin-licenca" />
+        <button class="btn-teal" id="add-admin-btn" onclick="addAdmin()">✓ Kreiraj Admin nalog</button>
+      </div>
+    </div>
+
+    <!-- ═══ LICENCE TAB ═══ -->
+    <div id="htab-licence" style="display:none;">
+      <div class="h-search-bar">
+        <span style="font-size:16px;margin-right:6px;">🔍</span>
+        <input type="text" placeholder="Pretraži po @tiktok, imenu..." oninput="filterHLicence(this.value)" id="licence-search" />
+        <button onclick="document.getElementById('licence-search').value='';filterHLicence('')">✕</button>
+      </div>
+      <div id="h-licence-list"><div class="section-empty">Učitavanje...</div></div>
+    </div>
+
+    <!-- ═══ PORUKE TAB ═══ -->
+    <div id="htab-poruke" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:16px;font-weight:800;">💬 Poruke</div>
+      </div>
+      <div class="h-search-bar">
+        <span style="font-size:16px;margin-right:6px;">🔍</span>
+        <input type="text" id="poruke-search" placeholder="Pretraži po @tiktok imenu..." oninput="filterHPoruke(this.value)" />
+        <button onclick="document.getElementById('poruke-search').value='';filterHPoruke('')">✕</button>
+      </div>
+      <div id="h-poruke-list"><div class="section-empty">Nema poruka.</div></div>
+      <!-- Nova poruka -->
+      <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px;">✉️ Nova poruka korisniku</div>
+        <div style="position:relative;margin-bottom:10px;">
+          <input type="text" id="nova-poruka-search" placeholder="🔍 Ukucaj @tiktok ime..." oninput="searchHauptUser(this.value)" autocomplete="off"
+            style="width:100%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(148,163,184,0.12);border-radius:12px;padding:10px 14px;color:white;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
+          <div id="haupt-user-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0d1626;border:1.5px solid rgba(148,163,184,0.15);border-radius:12px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);"></div>
+        </div>
+        <input type="hidden" id="nova-poruka-userId" />
+        <div id="nova-poruka-selected" style="display:none;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--teal);"></div>
+        <!-- Hidden select for compatibility -->
+        <select id="odgovor-tip" style="display:none;"></select>
+        <textarea class="inp-dark" id="haupt-odgovor" placeholder="Vaša poruka..." rows="3" style="resize:none;margin-bottom:8px;"></textarea>
+        <input type="file" id="foto-inp-hnova" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'hnova')" />
+        <input type="file" id="foto-cam-hnova" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'hnova')" />
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button type="button" onclick="document.getElementById('foto-cam-hnova').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(148,163,184,0.15);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--gray2);">📷 Kamera</button>
+          <button type="button" onclick="document.getElementById('foto-inp-hnova').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(148,163,184,0.15);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--gray2);">🖼️ Galerija</button>
+        </div>
+        <div id="foto-prev-hnova"></div>
+        <button class="btn-gold" onclick="sendHauptOdgovor()" style="margin-top:8px;">📩 Pošalji poruku</button>
+      </div>
+    </div>
+
+    <!-- ═══ KUPCI TAB ═══ -->
+    <div id="htab-kupci" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:16px;font-weight:800;">🛍️ Svi Kupci</div>
+        <input type="text" id="h-kupci-search" class="inp-dark" placeholder="🔍 @tiktok, ime, nickname..."
+          oninput="filterHKupci(this.value)"
+          style="flex:1;min-width:180px;max-width:280px;margin-bottom:0;font-size:13px;padding:8px 12px;" />
+      </div>
+      <div id="h-kupci-count" style="font-size:11px;color:var(--txt3);margin-bottom:10px;"></div>
+      <div id="h-kupci-list"><div class="section-empty">Učitavam kupce...</div></div>
+    </div>
+
+    <!-- ═══ NOTIFIKACIJE TAB ═══ -->
+    <div id="htab-notifikacije" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:14px;">🔔 Obaveštenja o blokiranim nalozima</div>
+      <div id="h-notif-list"><div class="section-empty">Nema obaveštenja.</div></div>
+    </div>
+
+    <!-- ═══ MASA PORUKA TAB ═══ -->
+    <div id="htab-masa" style="display:none;">
+      <div class="form-section">
+        <div class="form-title">📧 Massen-Nachricht an alle Admins</div>
+        <label class="inp-label">Naslov poruke</label>
+        <input type="text" class="inp-dark" id="masa-naslov" placeholder="Važno obaveštenje..." />
+        <label class="inp-label">Tekst poruke</label>
+        <textarea class="inp-dark" id="masa-tekst" rows="4" placeholder="Pišite poruku svim adminima..." style="resize:none;"></textarea>
+        <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#93c5fd;">
+          ℹ️ Poruka će biti poslata svim aktivnim adminima kao push notifikacija i u haupt_odgovori inbox.
+        </div>
+        <button class="btn-teal" onclick="sendMasaPoruku()" id="masa-btn">📤 Pošalji svim adminima</button>
+      </div>
+      <!-- Push notifikacija na jednog admina -->
+      <div class="form-section">
+        <div class="form-title" style="color:var(--purple);">📱 Push Notifikacija — Jedan Admin</div>
+        <label class="inp-label">Izaberi admina</label>
+        <select class="inp-dark" id="push-admin-sel">
+          <option value="">— Izaberi admina —</option>
+        </select>
+        <label class="inp-label">Naslov</label>
+        <input type="text" class="inp-dark" id="push-naslov" placeholder="Hitno! Proveri nalog..." />
+        <label class="inp-label">Poruka</label>
+        <textarea class="inp-dark" id="push-tekst" rows="3" placeholder="Tekst obaveštenja..." style="resize:none;"></textarea>
+        <button style="width:100%;background:linear-gradient(135deg,var(--purple),#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';box-shadow:0 4px 18px rgba(139,92,246,0.25);transition:all 0.2s;" onclick="sendPushAdmin()" id="push-btn">
+          📱 Pošalji Push Notifikaciju
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /padding wrapper -->
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+async function uploadFotoToStorage(base64Data, path) {
+  try {
+    const { storage, ref, uploadString, getDownloadURL } = window._fb;
+    const fotoRef = ref(storage, path);
+    await uploadString(fotoRef, base64Data, 'data_url');
+    return await getDownloadURL(fotoRef);
+  } catch(err) {
+    console.error('Upload foto error:', err);
+    return null;
+  }
+}
+
+// ===== FOTO HELPER =====
+let _fotoCache = {};
+
+function compressImage(base64, maxSize=800, quality=0.75) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = base64;
+  });
+}
+
+function openImgViewer(src) {
+  var old = document.getElementById('img-viewer-overlay');
+  if (old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'img-viewer-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  overlay.onclick = function(e) { if(e.target===overlay||e.target===wrap) overlay.remove(); };
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:relative;max-width:95vw;max-height:95vh;';
+  var image = document.createElement('img');
+  image.src = src;
+  image.style.cssText = 'max-width:95vw;max-height:90vh;object-fit:contain;border-radius:10px;display:block;';
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'position:absolute;top:-12px;right:-12px;background:#E63946;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:900;cursor:pointer;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,0.5);';
+  closeBtn.onclick = function() { overlay.remove(); };
+  wrap.appendChild(image);
+  wrap.appendChild(closeBtn);
+  overlay.appendChild(wrap);
+  document.body.appendChild(overlay);
+}
+
+function msgFotoPreview(inputEl, previewId) {
+  const file = inputEl.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const compressed = await compressImage(e.target.result);
+    _fotoCache[previewId] = compressed;
+    const prev = document.getElementById('foto-prev-' + previewId);
+    if (prev) {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:relative;margin-top:6px;';
+      var im = document.createElement('img');
+      im.src = compressed;
+      im.onclick = function() { openImgViewer(this.src); };
+      im.style.cssText = 'width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;';
+      var xb = document.createElement('button');
+      xb.textContent = '✕';
+      xb.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:900;cursor:pointer;line-height:1;';
+      xb.onclick = function() { clearMsgFoto(previewId); };
+      d.appendChild(im); d.appendChild(xb);
+      prev.innerHTML = '';
+      prev.appendChild(d);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearMsgFoto(previewId) {
+  delete _fotoCache[previewId];
+  const prev = document.getElementById('foto-prev-' + previewId);
+  if (prev) prev.innerHTML = '';
+  const inp = document.getElementById('foto-inp-' + previewId);
+  if (inp) inp.value = '';
+  const cam = document.getElementById('foto-cam-' + previewId);
+  if (cam) cam.value = '';
+}
+
+function showToast(msg, dur=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function showLoginScreen() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('haupt-screen').style.display = 'none';
+}
+
+async function doGoogleLogin() {
+  const btn = document.getElementById('google-btn');
+  btn.disabled = true; btn.textContent = 'Prijavljivanje...';
+  try {
+    const { auth, signInWithPopup, googleProvider } = window._fb;
+    await signInWithPopup(auth, googleProvider);
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'Google prijava nije uspela.';
+    document.getElementById('login-error').classList.add('show');
+    btn.disabled = false; btn.textContent = 'Nastavi sa Google';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  err.classList.remove('show');
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Prijava...';
+  try {
+    const { auth, signInWithEmailAndPassword } = window._fb;
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    err.textContent = 'Pogrešan email ili lozinka.';
+    err.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Prijavite se';
+  }
+}
+
+async function doLogout() {
+  const { auth, signOut } = window._fb;
+  await signOut(auth);
+}
+
+// ===== LOAD HAUPT DATA =====
+async function loadHauptData() {
+  const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
+
+  // Stats - admini
+  onSnapshot(query(collection(db, 'users'), where('role', '==', 'admin')), snap => {
+    const admins = [];
+    snap.forEach(d => admins.push({id:d.id,...d.data()}));
+    document.getElementById('stat-admini').textContent = admins.length;
+    const today = new Date().toISOString().slice(0,10);
+    const aktivne = admins.filter(a => a.licencaDo && a.licencaDo >= today).length;
+    document.getElementById('stat-licenca').textContent = aktivne;
+    window._hauptAdmins = admins;
+    renderHAdmini(admins);
+    renderHLicence(admins);
+    renderHDashboard();
+    // Fill push-admin-sel
+    const pushSel = document.getElementById('push-admin-sel');
+    if (pushSel) {
+      pushSel.innerHTML = '<option value="">— Izaberi admina —</option>' +
+        admins.map(a => `<option value="${a.id}">@${a.tiktokIme||'—'} · ${a.name||a.email}</option>`).join('');
+    }
+  });
+
+  // Stats - kupci
+  onSnapshot(query(collection(db, 'users'), where('role', '==', 'kupac')), snap => {
+    const kupci = [];
+    snap.forEach(d => kupci.push({id:d.id,...d.data()}));
+    _hauptKupci = kupci;
+    window._hauptKupci = kupci;
+    document.getElementById('stat-kupci').textContent = snap.size;
+    // Refresh tab if open
+    if (document.getElementById('htab-kupci').style.display !== 'none') renderHKupci(kupci);
+  });
+
+  // Stats - racuni + per-admin earnings
+  onSnapshot(collection(db, 'racuni'), snap => {
+    document.getElementById('stat-racuni').textContent = snap.size;
+    const allRacuni = [];
+    snap.forEach(d => allRacuni.push({id:d.id,...d.data()}));
+    window._hauptRacuni = allRacuni;
+    // re-render admini if loaded
+    if (window._hauptAdmins) renderHAdmini(window._hauptAdmins);
+    renderHDashboard();
+  });
+
+  // Poruke
+  onSnapshot(collection(db, 'haupt_poruke'), snap => {
+    const poruke = [];
+    snap.forEach(d => poruke.push({id:d.id,...d.data()}));
+    _allHPoruke = poruke;
+    renderHPoruke(poruke);
+    const neprocitane = poruke.filter(p => !p.procitano).length;
+    const tabBtn = document.getElementById('tab-poruke-btn');
+    tabBtn.textContent = '💬 Poruke' + (neprocitane > 0 ? ` (${neprocitane})` : '');
+  });
+
+  // Load all users for reply selector
+  const allUsersSnap = await getDocs(collection(db, 'users'));
+  const allUsers = [];
+  allUsersSnap.forEach(d => allUsers.push({id:d.id,...d.data()}));
+  window._allHauptUsers = allUsers;
+  const sel = document.getElementById('odgovor-tip');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Izaberi korisnika —</option>' +
+      allUsers.filter(u => u.role !== 'haupt').map(u => {
+        const tiktok = u.tiktokIme ? '@'+u.tiktokIme : '';
+        const label = tiktok ? `${tiktok} (${u.role==='admin'?'Admin':'Kupac'})` : `${u.name||u.email} (${u.role==='admin'?'Admin':'Kupac'})`;
+        return `<option value="${u.id}">${label}</option>`;
+      }).join('');
+  }
+
+  // Notifikacije o blokiranim
+  onSnapshot(collection(db, 'haupt_notifikacije'), snap => {
+    const notif = [];
+    snap.forEach(d => notif.push({id:d.id,...d.data()}));
+    renderHNotif(notif);
+    const nove = notif.filter(n => !n.procitano).length;
+    const tabBtn = document.getElementById('tab-notif-btn');
+    tabBtn.textContent = '🔔 Obaveštenja' + (nove > 0 ? ` (${nove})` : '');
+  });
+}
+
+function renderHAdmini(admins) {
+  const el = document.getElementById('h-admini-list');
+  if (!admins.length) { el.innerHTML = '<div class="section-empty">Nema admina.</div>'; return; }
+  const today = new Date().toISOString().slice(0,10);
+  const now = new Date();
+  const racuni = window._hauptRacuni || [];
+  el.innerHTML = admins.map(a => {
+    const licOk = a.licencaDo && a.licencaDo >= today;
+    const adminRacuni = racuni.filter(r => r.adminId === a.id);
+    const ukupno = adminRacuni.reduce((sum, r) => sum + (r.iznos||0), 0);
+    const placeno = adminRacuni.filter(r => r.status === 'placeno' || r.status === 'poslato').reduce((sum, r) => sum + (r.iznos||0), 0);
+    const ceka = adminRacuni.filter(r => r.status === 'novo' || r.status === 'ceka').reduce((sum, r) => sum + (r.iznos||0), 0);
+    const safeId = a.id.replace(/[^a-zA-Z0-9]/g,'_');
+
+    // Last-seen calculation
+    let lastSeenTxt = '—';
+    let lastSeenColor = '#64748b';
+    let lastSeenDot = '#64748b';
+    if (a.lastSeen) {
+      const ls = new Date(a.lastSeen);
+      const diffMin = Math.floor((now - ls) / 60000);
+      if (diffMin < 3)        { lastSeenTxt = '🟢 Online';            lastSeenColor = '#22c55e'; lastSeenDot = '#22c55e'; }
+      else if (diffMin < 60)  { lastSeenTxt = `${diffMin}min`;        lastSeenColor = '#86efac'; lastSeenDot = '#22c55e'; }
+      else if (diffMin < 1440){ lastSeenTxt = `${Math.floor(diffMin/60)}h`;   lastSeenColor = '#fcd34d'; lastSeenDot = '#f59e0b'; }
+      else                    { lastSeenTxt = ls.toLocaleDateString('sr-Latn',{day:'numeric',month:'short'}); lastSeenColor = '#94a3b8'; lastSeenDot = '#64748b'; }
+    }
+
+    return `<div class="admin-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;" onclick="toggleHAdminDetail('${safeId}')">
+        <div>
+          <div class="admin-name" style="color:#4ECDC4;">@${a.tiktokIme||'—'}</div>
+          <div style="font-size:13px;color:#aaa;margin-top:2px;">${a.tiktokNick||a.name||'—'}</div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:2px;">Licenca do: ${a.licencaDo||'—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          ${a.blocked ? '<span class="badge-blokiran">Blokiran</span>' : licOk ? '<span class="badge-aktivan">Aktivan</span>' : '<span style="background:rgba(255,140,0,0.15);color:#FF8C00;border:1px solid rgba(255,140,0,0.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">Istekla</span>'}
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:${lastSeenDot};${lastSeenDot==='#22c55e'?'box-shadow:0 0 6px #22c55e;':''}"></div>
+            <span style="font-size:10px;color:${lastSeenColor};font-weight:600;">${lastSeenTxt}</span>
+          </div>
+          <span style="font-size:11px;color:#555;">▼ detalji</span>
+        </div>
+      </div>
+      <!-- Detail expand -->
+      <div id="hadmin-detail-${safeId}" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${a.name||'—'}</b></div>
+          <div><span style="color:#888;">Email:</span><br><b style="color:white;">${a.email||'—'}</b></div>
+          <div><span style="color:#888;">Ulica i br.:</span><br><b style="color:white;">${a.ulica||'—'}</b></div>
+          <div><span style="color:#888;">PTT:</span><br><b style="color:white;">${a.ptt||'—'}</b></div>
+          <div><span style="color:#888;">Grad:</span><br><b style="color:white;">${a.grad||'—'}</b></div>
+          <div><span style="color:#888;">Telefon:</span><br><b style="color:white;">${a.telefon||'—'}</b></div>
+          <div><span style="color:#888;">Poslednji login:</span><br><b style="color:${lastSeenColor};">${lastSeenTxt}</b></div>
+          ${a.lastSeen?`<div><span style="color:#888;">Tačno vreme:</span><br><b style="color:white;">${new Date(a.lastSeen).toLocaleString('sr-Latn')}</b></div>`:''}
+        </div>
+      </div>
+      <!-- Earnings -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:rgba(0,210,150,0.08);border:1px solid rgba(0,210,150,0.2);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#aaa;margin-bottom:2px;">💰 Plaćeno</div>
+          <div style="font-size:13px;font-weight:800;color:#00d296;">${placeno.toLocaleString()} RSD</div>
+        </div>
+        <div style="background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.2);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#aaa;margin-bottom:2px;">⏳ Čeka</div>
+          <div style="font-size:13px;font-weight:800;color:#FFB800;">${ceka.toLocaleString()} RSD</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#aaa;margin-bottom:2px;">📊 Ukupno</div>
+          <div style="font-size:13px;font-weight:800;color:white;">${ukupno.toLocaleString()} RSD</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-sm btn-blue" onclick="produzilicencu('${a.id}')">📅 Produži licencu</button>
+        ${a.blocked
+          ? `<button class="btn-sm btn-unblock" onclick="odblokujAdmin('${a.id}')">🔓 Odblokiraj</button>`
+          : `<button class="btn-sm btn-block" onclick="blokirajAdmin('${a.id}')">🔒 Blokiraj</button>`
+        }
+        <button class="btn-sm btn-purple" onclick="hTab('masa',document.querySelectorAll('.h-tab')[6]);document.getElementById('push-admin-sel').value='${a.id}'">📱 Push</button>
+        <button class="btn-sm btn-red" onclick="obrisiAdmin('${a.id}','${(a.name||a.tiktokIme||'Admin').replace(/'/g,"\\'")}')">🗑️ Obriši</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHAdminDetail(safeId) {
+  const d = document.getElementById('hadmin-detail-' + safeId);
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderHLicence(admins) {
+  const el = document.getElementById('h-licence-list');
+  const today = new Date().toISOString().slice(0,10);
+  if (!admins.length) { el.innerHTML = '<div class="section-empty">Nema admina.</div>'; return; }
+  el.innerHTML = admins.map(a => {
+    const licOk = a.licencaDo && a.licencaDo >= today;
+    const daysLeft = a.licencaDo ? Math.ceil((new Date(a.licencaDo) - new Date()) / (1000*60*60*24)) : null;
+    const safeId = a.id.replace(/[^a-zA-Z0-9]/g,'_');
+    return `<div class="admin-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;cursor:pointer;" onclick="toggleHLicDetail('${safeId}')">
+        <div>
+          <div class="admin-name" style="color:#4ECDC4;">@${a.tiktokIme||'—'}</div>
+          <div style="font-size:13px;color:#aaa;margin-top:2px;">${a.tiktokNick||a.name||'—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          ${licOk ? `<span class="badge-aktivan">${daysLeft} dana</span>` : '<span class="badge-blokiran">Istekla</span>'}
+          <span style="font-size:11px;color:#555;">▼ detalji</span>
+        </div>
+      </div>
+      <!-- Detail expand -->
+      <div id="hlic-detail-${safeId}" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${a.name||'—'}</b></div>
+          <div><span style="color:#888;">Email:</span><br><b style="color:white;">${a.email||'—'}</b></div>
+          <div><span style="color:#888;">Ulica i br.:</span><br><b style="color:white;">${a.ulica||'—'}</b></div>
+          <div><span style="color:#888;">PTT:</span><br><b style="color:white;">${a.ptt||'—'}</b></div>
+          <div><span style="color:#888;">Grad:</span><br><b style="color:white;">${a.grad||'—'}</b></div>
+          <div><span style="color:#888;">Selo:</span><br><b style="color:white;">${a.selo||'—'}</b></div>
+          <div><span style="color:#888;">Telefon:</span><br><b style="color:white;">${a.telefon||'—'}</b></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">Licenca do: <b style="color:white;">${a.licencaDo||'—'}</b></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="date" id="lic-${a.id}" class="inp-dark" style="flex:1;margin-bottom:0;" value="${a.licencaDo||''}" />
+        <button class="btn-sm btn-blue" onclick="sacuvajLicencu('${a.id}')">✓ Sačuvaj</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHLicDetail(safeId) {
+  const d = document.getElementById('hlic-detail-' + safeId);
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+
+let _allHPoruke = [];
+
+function filterHPoruke(val) {
+  if (!val) { renderHPoruke(_allHPoruke); return; }
+  const s = val.replace('@','').toLowerCase();
+  renderHPoruke(_allHPoruke.filter(p =>
+    (p.odTiktok||'').toLowerCase().includes(s) ||
+    (p.odIme||'').toLowerCase().includes(s)
+  ));
+}
+
+function searchHauptUser(val) {
+  const dd = document.getElementById('haupt-user-dropdown');
+  if (!val) { dd.style.display='none'; return; }
+  const s = val.replace('@','').toLowerCase();
+  const users = (window._allHauptUsers||[]).filter(u =>
+    (u.tiktokIme||'').toLowerCase().includes(s) ||
+    (u.name||'').toLowerCase().includes(s)
+  ).slice(0,8);
+  if (!users.length) { dd.style.display='none'; return; }
+  dd.style.display='block';
+  dd.innerHTML = users.map(u => `
+    <div onclick="selectHauptUser('${u.id}','${(u.name||'').replace(/'/g,"\'")}','${u.tiktokIme||''}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;"
+      onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background=''">
+      <span style="color:#4ECDC4;font-weight:800;">@${u.tiktokIme||'—'}</span>
+      <span style="color:white;margin-left:8px;">${u.name||u.email}</span>
+      <span style="color:#888;margin-left:6px;font-size:11px;">${u.role==='admin'?'Admin':'Kupac'}</span>
+    </div>`).join('');
+}
+
+function selectHauptUser(id, name, tiktok) {
+  document.getElementById('nova-poruka-userId').value = id;
+  document.getElementById('nova-poruka-search').value = '@'+tiktok;
+  document.getElementById('haupt-user-dropdown').style.display='none';
+  const sel = document.getElementById('nova-poruka-selected');
+  sel.style.display='block';
+  sel.textContent = '✅ ' + (tiktok ? '@'+tiktok+' · ' : '') + name;
+}
+
+function getStatusStyle(status) {
+  if (status === 'hitno') return 'background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);';
+  if (status === 'proverava') return 'background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);';
+  if (status === 'reseno') return 'background:rgba(45,190,108,0.15);color:#2DBE6C;border:1px solid rgba(45,190,108,0.3);';
+  return 'background:rgba(255,255,255,0.07);color:#aaa;border:1px solid rgba(255,255,255,0.1);';
+}
+
+function getStatusLabel(status) {
+  if (status === 'hitno') return '🔴 Hitno';
+  if (status === 'proverava') return '🟡 Proverava se';
+  if (status === 'reseno') return '🟢 Rešeno';
+  return '⬜ Bez statusa';
+}
+
+async function setPorukaStatus(porukaId, status) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'haupt_poruke', porukaId), { status });
+}
+
+function renderHPoruke(poruke) {
+  const el = document.getElementById('h-poruke-list');
+  if (!poruke.length) { el.innerHTML = '<div class="section-empty">Nema poruka.</div>'; return; }
+
+  el.innerHTML = poruke.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(p => {
+    const tiktok = p.odTiktok ? `<div style="font-size:13px;color:#4ECDC4;font-weight:800;">@${p.odTiktok}</div>` : '';
+    const role = p.tip === 'admin' ? '👔 Admin' : '🛍️ Kupac';
+    const statusStyle = getStatusStyle(p.status);
+    const statusLabel = getStatusLabel(p.status);
+    const safeId = p.id.replace(/[^a-zA-Z0-9]/g,'_');
+    const safeOd = (p.od||'').replace(/'/g,"\'");
+    const safeIme = (p.odIme||'').replace(/'/g,"\'");
+    const safeTiktok = (p.odTiktok||'').replace(/'/g,"\'");
+    return `<div class="poruka-card ${!p.procitano ? 'notif-new' : ''}" onclick="toggleHauptReply('${safeId}')" style="cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;">${role}</div>
+          ${tiktok}
+          <div style="font-weight:600;font-size:12px;color:rgba(255,255,255,0.6);">${p.odIme||'?'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--gray);">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
+          <div style="margin-top:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;${statusStyle}">${statusLabel}</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:10px;">${p.tekst}</div>
+      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src);event.stopPropagation();" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;" />` : ''}
+      <div id="reply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
+        <!-- Status buttons -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+          <button onclick="setPorukaStatus('${p.id}','hitno')" style="flex:1;min-width:80px;padding:7px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
+          <button onclick="setPorukaStatus('${p.id}','proverava')" style="flex:1;min-width:80px;padding:7px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
+          <button onclick="setPorukaStatus('${p.id}','reseno')" style="flex:1;min-width:80px;padding:7px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;background:rgba(45,190,108,0.15);color:#2DBE6C;border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
+        </div>
+        <!-- Reply textarea -->
+        <textarea id="reply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok ? '@'+p.odTiktok : p.odIme||'korisniku'}..."></textarea>
+        <!-- Foto buttons -->
+        <input type="file" id="foto-inp-h${safeId}" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'h${safeId}')" />
+        <input type="file" id="foto-cam-h${safeId}" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'h${safeId}')" />
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button type="button" onclick="document.getElementById('foto-cam-h${safeId}').click()" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:#aaa;">📷 Kamera</button>
+          <button type="button" onclick="document.getElementById('foto-inp-h${safeId}').click()" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:#aaa;">🖼️ Galerija</button>
+        </div>
+        <div id="foto-prev-h${safeId}"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onclick="sendHauptReply('${safeOd}','${safeIme}','${safeTiktok}','${safeId}','${p.id}')" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">📩 Pošalji odgovor</button>
+          <button onclick="deleteHauptPoruka('${p.id}',event)" style="background:rgba(230,57,70,0.15);color:#E63946;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHauptReply(safeId) {
+  const box = document.getElementById('reply-box-' + safeId);
+  if (!box) return;
+  const isOpen = box.style.display !== 'none';
+  document.querySelectorAll('[id^="reply-box-"]').forEach(b => b.style.display = 'none');
+  if (!isOpen) {
+    box.style.display = 'block';
+    const ta = document.getElementById('reply-text-' + safeId);
+    if (ta) setTimeout(() => ta.focus(), 100);
+  }
+}
+
+async function deleteHauptPoruka(porukaId, event) {
+  event.stopPropagation();
+  const age = _allHPoruke.find(p => p.id === porukaId);
+  if (age) {
+    const created = new Date(age.vreme||0);
+    const diffDays = (Date.now() - created) / (1000*60*60*24);
+    if (diffDays < 2 && age.status !== 'reseno') {
+      if (!confirm('Poruka nije starija od 2 dana ili nije rešena. Svakako obrisati?')) return;
+    }
+  }
+  const { db, doc, deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'haupt_poruke', porukaId));
+  showToast('🗑️ Poruka obrisana');
+}
+
+async function sendHauptReply(userId, userName, tiktok, safeId, realId) {
+  try {
+    const ta = document.getElementById('reply-text-' + safeId);
+    const tekst = ta ? ta.value.trim() : '';
+    if (!tekst) { showToast('⚠️ Unesite odgovor'); return; }
+    if (!userId) { showToast('⚠️ Greška: nema userId!'); return; }
+    const { db, collection, addDoc, doc, getDoc } = window._fb;
+    
+    let role = 'kupac';
+    try {
+      const userSnap = await getDoc(doc(db, 'users', userId));
+      role = userSnap.exists() ? userSnap.data().role : 'kupac';
+    } catch(e) { console.warn('getDoc failed, assuming kupac', e); }
+    
+    const fotoKey = 'h' + safeId;
+    let fotoUrl = null;
+    const fotoData = _fotoCache[fotoKey];
+    if (fotoData) {
+      fotoUrl = await uploadFotoToStorage(fotoData, 'poruke/haupt/' + Date.now() + '.jpg');
+    }
+    clearMsgFoto(fotoKey);
+    if (role === 'admin') {
+      await addDoc(collection(db, 'haupt_odgovori'), {
+        za: userId, zaIme: userName, od: 'haupt', odIme: 'Haupt',
+        tekst, foto: fotoUrl, vreme: new Date().toISOString(), procitano: false
+      });
+    } else {
+      await addDoc(collection(db, 'admin_poruke'), {
+        od: 'haupt', odIme: 'Haupt',
+        doKupacId: userId, doKupacIme: userName,
+        tekst, foto: fotoUrl, vreme: new Date().toISOString(), procitano: false
+      });
+      await addDoc(collection(db, 'notifikacije'), {
+        userId: userId,
+        tip: 'poruka_od_haupta',
+        poruka: '👑 Haupt: ' + tekst.slice(0, 80),
+        vreme: new Date().toISOString(),
+        procitano: false
+      });
+    }
+    if (ta) ta.value = '';
+    const box = document.getElementById('reply-box-' + safeId);
+    if (box) box.style.display = 'none';
+    try { await setPorukaStatus(realId, 'reseno'); } catch(e) {}
+    showToast('✅ Odgovor poslat ' + (tiktok ? '@'+tiktok : userName) + '!');
+  } catch(err) {
+    console.error('sendHauptReply error:', err);
+    showToast('❌ Greška: ' + (err.message || err.code || err), 5000);
+  }
+}
+
+function renderHNotif(notif) {
+  const el = document.getElementById('h-notif-list');
+  if (!notif.length) { el.innerHTML = '<div class="section-empty">Nema obaveštenja.</div>'; return; }
+  el.innerHTML = notif.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(n => {
+
+    // ── Izmena podataka request ──
+    if (n.tip === 'izmena_podataka') {
+      const labels = n.izmeneLabels || [];
+      const isPending  = !n.status || n.status === 'ceka';
+      const isApproved = n.status === 'odobren';
+      const isRejected = n.status === 'odbijen';
+      const statusBadge = isPending
+        ? '<span style="background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">⏳ Čeka odobrenje</span>'
+        : isApproved
+        ? '<span style="background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">✅ Odobreno</span>'
+        : '<span style="background:rgba(244,63,94,0.15);color:#fda4af;border:1px solid rgba(244,63,94,0.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">❌ Odbijeno</span>';
+
+      return `<div class="notif-card ${!n.procitano&&isPending ? 'notif-new' : ''}" style="border-left:3px solid ${isPending?'#f59e0b':isApproved?'#10b981':'#f43f5e'};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-weight:800;font-size:13px;color:white;">✏️ Zahtev za izmenu podataka</div>
+            <div style="font-size:12px;color:var(--teal);margin-top:2px;">${n.kupacTiktok ? '@'+n.kupacTiktok : n.kupacName||'Kupac'}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            ${statusBadge}
+            <div style="font-size:10px;color:var(--gray2);">${(n.vreme||'').slice(0,16).replace('T',' ')}</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:10px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Tražene izmene:</div>
+          ${labels.map(l => `<div style="font-size:12px;color:white;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);">• ${l}</div>`).join('')}
+        </div>
+        ${isPending ? `<div style="display:flex;gap:8px;">
+          <button class="btn-sm" style="flex:1;background:rgba(16,185,129,0.12);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25);font-size:13px;padding:10px;" onclick="odobriIzmenu('${n.id}','${n.kupacId}')">✅ Odobri</button>
+          <button class="btn-sm" style="flex:1;background:rgba(244,63,94,0.1);color:#fda4af;border:1px solid rgba(244,63,94,0.22);font-size:13px;padding:10px;" onclick="odbijiIzmenu('${n.id}','${n.kupacId}')">❌ Odbij</button>
+        </div>` : `<button class="btn-sm" style="background:rgba(148,163,184,0.1);color:var(--gray2);border:1px solid rgba(148,163,184,0.15);" onclick="oznaciprocitanoNotif('${n.id}')">✓ Arhiviraj</button>`}
+      </div>`;
+    }
+
+    // ── Standard notification ──
+    return `<div class="notif-card ${!n.procitano ? 'notif-new' : ''}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-weight:700;font-size:13px;">⚠️ ${n.tip === 'blokiran_kupac' ? 'Blokiran kupac' : 'Obaveštenje'}</div>
+        <div style="font-size:10px;color:var(--gray2);">${(n.vreme||'').slice(0,16).replace('T',' ')}</div>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${n.poruka||''}</div>
+      ${n.adminName ? `<div style="font-size:11px;color:var(--gray2);">Admin: ${n.adminName}</div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        ${!n.procitano ? `<button class="btn-sm" style="background:rgba(16,185,129,0.1);color:#6ee7b7;border:1px solid rgba(16,185,129,0.2);" onclick="oznaciprocitanoNotif('${n.id}')">✓ Pročitano</button>` : ''}
+        ${n.kupacId ? `<button class="btn-sm btn-unblock" onclick="odblokujKupacHaupt('${n.kupacId}','${n.id}')">🔓 Odblokiraj kupca</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hTab(name, el) {
+  document.querySelectorAll('.h-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['dashboard','admini','dodaj-admin','kupci','licence','poruke','notifikacije','masa'].forEach(n => {
+    const div = document.getElementById('htab-' + n);
+    if (div) div.style.display = 'none';
+  });
+  document.getElementById('htab-' + name).style.display = 'block';
+  if (name === 'dashboard') renderHDashboard();
+  if (name === 'kupci') renderHKupci(window._hauptKupci || []);
+}
+
+// ═══ KUPCI VERWALTUNG ═══
+let _hauptKupci = [];
+
+function renderHKupci(kupci) {
+  const el = document.getElementById('h-kupci-list');
+  const cnt = document.getElementById('h-kupci-count');
+  if (cnt) cnt.textContent = kupci.length + ' kupaca ukupno';
+  if (!kupci.length) { el.innerHTML = '<div class="section-empty">Nema kupaca.</div>'; return; }
+
+  el.innerHTML = kupci.map(k => {
+    const safeId = k.id.replace(/[^a-zA-Z0-9]/g,'_');
+    // Kupac data stored for JS fill (emoji-safe)
+    window['_hkData_'+safeId] = k;
+    return `<div style="background:var(--surface);border:1px solid var(--brd3);border-radius:16px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--teal);">@${k.tiktokIme||'—'}</div>
+          <div style="font-size:12px;color:var(--txt2);">${k.tiktokNick||''}</div>
+          <div style="font-size:12px;color:var(--txt);margin-top:2px;">${k.name||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--txt3);">${k.email||''}</div>
+          ${k.blocked ? '<span style="font-size:10px;background:rgba(244,63,94,0.15);color:#fda4af;border-radius:6px;padding:2px 8px;">🔒 Blokiran</span>' : '<span style="font-size:10px;background:rgba(16,185,129,0.12);color:#6ee7b7;border-radius:6px;padding:2px 8px;">✅ Aktivan</span>'}
+        </div>
+      </div>
+
+      <!-- Podaci za uređivanje -->
+      <div id="hk-edit-${safeId}" style="display:none;background:rgba(255,255,255,0.03);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--brd);">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">✏️ Uredi podatke</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Ime i prezime</label>
+            <input type="text" id="hk-name-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">TikTok @ID</label>
+            <input type="text" id="hk-tiktokime-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">TikTok Nickname (mit Emojis ✅)</label>
+            <input type="text" id="hk-tiktoknick-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" placeholder="z.B. Ana 🌸 ili Marko 💙" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Telefon</label>
+            <input type="text" id="hk-tel-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Ulica i broj</label>
+            <input type="text" id="hk-ulica-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Poštanski br.</label>
+            <input type="text" id="hk-ptt-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Grad</label>
+            <input type="text" id="hk-grad-${safeId}" class="inp-dark" style="margin-bottom:0;font-size:13px;" />
+          </div>
+        </div>
+        <button onclick="sacuvajHKupca('${k.id}','${safeId}')"
+          style="width:100%;margin-top:10px;background:linear-gradient(135deg,var(--teal),#0d9488);border:none;border-radius:10px;padding:11px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans';">
+          💾 Sačuvaj izmene
+        </button>
+      </div>
+
+      <!-- Akcije -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button onclick="toggleHKEdit('${safeId}')"
+          style="flex:1;background:rgba(245,158,11,0.12);color:#fcd34d;border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">
+          ✏️ Uredi
+        </button>
+        ${k.blocked
+          ? `<button onclick="odblokuiHKupac('${k.id}')" style="flex:1;background:rgba(16,185,129,0.1);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🔓 Odblokiraj</button>`
+          : `<button onclick="blokuiHKupac('${k.id}')" style="flex:1;background:rgba(244,63,94,0.1);color:#fda4af;border:1px solid rgba(244,63,94,0.25);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🔒 Blokiraj</button>`
+        }
+        <button onclick="obrisiHKupca('${k.id}','${(k.name||k.tiktokIme||'').replace(/'/g,'')}')"
+          style="background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.2);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;">
+          🗑️
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHKEdit(safeId) {
+  const el = document.getElementById('hk-edit-' + safeId);
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+
+  if (!isOpen) {
+    // Werte per JS setzen — so werden Emojis korrekt angezeigt
+    const k = window['_hkData_' + safeId] || {};
+    const set = (id, val) => {
+      const inp = document.getElementById(id);
+      if (inp) inp.value = val || '';
+    };
+    set('hk-name-'+safeId,       k.name       || '');
+    set('hk-tiktokime-'+safeId,  k.tiktokIme  || '');
+    set('hk-tiktoknick-'+safeId, k.tiktokNick || '');
+    set('hk-tel-'+safeId,        k.telefon    || '');
+    set('hk-ulica-'+safeId,      k.ulica      || '');
+    set('hk-ptt-'+safeId,        k.ptt        || '');
+    set('hk-grad-'+safeId,       k.grad       || '');
+    // Fokus auf TikTok Nickname
+    setTimeout(() => document.getElementById('hk-tiktoknick-'+safeId)?.focus(), 100);
+  }
+}
+
+function filterHKupci(val) {
+  if (!val) { renderHKupci(_hauptKupci); return; }
+  const s = val.toLowerCase().replace('@','');
+  renderHKupci(_hauptKupci.filter(k =>
+    (k.tiktokIme||'').toLowerCase().includes(s) ||
+    (k.tiktokNick||'').toLowerCase().includes(s) ||
+    (k.name||'').toLowerCase().includes(s) ||
+    (k.email||'').toLowerCase().includes(s)
+  ));
+}
+
+async function sacuvajHKupca(kupacId, safeId) {
+  const { db, doc, updateDoc, collection, addDoc } = window._fb;
+  const name      = document.getElementById('hk-name-'+safeId)?.value.trim() || '';
+  const tiktokIme = document.getElementById('hk-tiktokime-'+safeId)?.value.trim().replace('@','').toLowerCase() || '';
+  const tiktokNick= document.getElementById('hk-tiktoknick-'+safeId)?.value.trim() || '';
+  const telefon   = document.getElementById('hk-tel-'+safeId)?.value.trim() || '';
+  const ulica     = document.getElementById('hk-ulica-'+safeId)?.value.trim() || '';
+  const ptt       = document.getElementById('hk-ptt-'+safeId)?.value.trim() || '';
+  const grad      = document.getElementById('hk-grad-'+safeId)?.value.trim() || '';
+
+  if (!name && !tiktokIme) { showToast('⚠️ Unesite ime ili TikTok'); return; }
+
+  try {
+    await updateDoc(doc(db, 'users', kupacId), { name, tiktokIme, tiktokNick, telefon, ulica, ptt, grad });
+
+    // Obavesti kupca
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: kupacId,
+      tip: 'izmena_odobrena',
+      poruka: '✅ Haupt je ispravio tvoje podatke. Provjeri profil!',
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+
+    showToast('✅ Podaci kupca sačuvani!');
+    document.getElementById('hk-edit-'+safeId).style.display = 'none';
+  } catch(e) {
+    showToast('❌ Greška: ' + e.message);
+  }
+}
+
+async function blokuiHKupac(kupacId) {
+  if (!confirm('Blokirati ovog kupca?')) return;
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', kupacId), { blocked: true, blockedAt: new Date().toISOString() });
+  showToast('🔒 Kupac blokiran');
+}
+
+async function odblokuiHKupac(kupacId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', kupacId), { blocked: false, blockedAt: null });
+  showToast('🔓 Kupac odblokiran');
+}
+
+async function obrisiHKupca(kupacId, name) {
+  if (!confirm('Obrisati kupca ' + name + '? Ova akcija je TRAJNA!')) return;
+  const { db, doc, deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'users', kupacId));
+  showToast('🗑️ Kupac obrisan');
+}
+
+// ═══ DASHBOARD ═══
+function renderHDashboard() {
+  const admins  = window._hauptAdmins  || [];
+  const racuni  = window._hauptRacuni  || [];
+  const today   = new Date().toISOString().slice(0,10);
+
+  const totalRsd   = racuni.reduce((s,r) => s + (r.iznos||0), 0);
+  const placenoRsd = racuni.filter(r => r.status==='placeno'||r.paketStatus==='ship').reduce((s,r) => s + (r.iznos||0), 0);
+  const cekaRsd    = racuni.filter(r => r.status==='ceka').reduce((s,r) => s + (r.iznos||0), 0);
+  const blokirani  = admins.filter(a => a.blocked).length;
+  const expiring   = admins.filter(a => {
+    if (!a.licencaDo || a.licencaDo < today) return false;
+    const days = Math.ceil((new Date(a.licencaDo) - new Date()) / (1000*60*60*24));
+    return days <= 7;
+  }).length;
+
+  document.getElementById('dash-total-rsd').textContent = totalRsd.toLocaleString() + ' RSD';
+  document.getElementById('dash-total-sub').textContent = racuni.length + ' računa · ' + racuni.filter(r=>r.status==='ceka').length + ' čeka plaćanje';
+  document.getElementById('dash-placeno-rsd').textContent = placenoRsd.toLocaleString() + ' RSD';
+  document.getElementById('dash-ceka-rsd').textContent   = cekaRsd.toLocaleString() + ' RSD';
+  document.getElementById('dash-blokirani').textContent  = blokirani;
+  document.getElementById('dash-expiring').textContent   = expiring;
+
+  // Top admini
+  const adminTotals = {};
+  racuni.forEach(r => { if (!adminTotals[r.adminId]) adminTotals[r.adminId]=0; adminTotals[r.adminId]+=(r.iznos||0); });
+  const top = Object.entries(adminTotals).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([id,iznos]) => ({ a: admins.find(x=>x.id===id), iznos })).filter(x=>x.a);
+  const topEl = document.getElementById('dash-top-admini');
+  if (!top.length) { topEl.innerHTML='<div class="section-empty">Nema podataka.</div>'; }
+  else topEl.innerHTML = top.map(({a,iznos},i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2);">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,0.15);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@${a.tiktokIme||'—'}</div>
+        <div style="font-size:11px;color:var(--gray2);">${a.name||'—'} · ${a.licencaDo||'—'}</div>
+      </div>
+      <div style="font-size:15px;font-weight:800;color:var(--gold);white-space:nowrap;">${iznos.toLocaleString()} RSD</div>
+    </div>`).join('');
+
+  // Licence upozorenje
+  const expList = admins.filter(a => {
+    if (!a.licencaDo || a.licencaDo < today) return false;
+    const days = Math.ceil((new Date(a.licencaDo) - new Date()) / (1000*60*60*24));
+    return days <= 7;
+  });
+  const warnEl = document.getElementById('dash-lic-warning');
+  if (expList.length) {
+    warnEl.style.display = 'block';
+    document.getElementById('dash-lic-warning-list').innerHTML = expList.map(a => {
+      const days = Math.ceil((new Date(a.licencaDo) - new Date()) / (1000*60*60*24));
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(249,115,22,0.15);">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--teal);">@${a.tiktokIme||'—'}</div>
+          <div style="font-size:11px;color:var(--gray2);">${a.name||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:800;color:#fb923c;">${days} dana</div>
+          <button onclick="hTab('licence',document.querySelectorAll('.h-tab')[3])" style="font-size:10px;background:rgba(249,115,22,0.15);color:#fb923c;border:1px solid rgba(249,115,22,0.3);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans';margin-top:2px;">Produži</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else { warnEl.style.display = 'none'; }
+}
+
+// ═══ FILTER ADMINI ═══
+function filterHAdmini(val) {
+  if (!val) { renderHAdmini(window._hauptAdmins||[]); return; }
+  const s = val.replace('@','').toLowerCase();
+  renderHAdmini((window._hauptAdmins||[]).filter(a =>
+    (a.tiktokIme||'').toLowerCase().includes(s) ||
+    (a.tiktokNick||'').toLowerCase().includes(s) ||
+    (a.name||'').toLowerCase().includes(s) ||
+    (a.email||'').toLowerCase().includes(s)
+  ));
+}
+
+// ═══ FILTER LICENCE ═══
+function filterHLicence(val) {
+  if (!val) { renderHLicence(window._hauptAdmins||[]); return; }
+  const s = val.replace('@','').toLowerCase();
+  renderHLicence((window._hauptAdmins||[]).filter(a =>
+    (a.tiktokIme||'').toLowerCase().includes(s) ||
+    (a.name||'').toLowerCase().includes(s) ||
+    (a.email||'').toLowerCase().includes(s)
+  ));
+}
+
+// ═══ MASA PORUKA ═══
+async function sendMasaPoruku() {
+  const naslov = document.getElementById('masa-naslov').value.trim();
+  const tekst  = document.getElementById('masa-tekst').value.trim();
+  if (!naslov || !tekst) { showToast('⚠️ Unesite naslov i tekst'); return; }
+  const admins = (window._hauptAdmins||[]).filter(a => !a.blocked);
+  if (!admins.length) { showToast('⚠️ Nema aktivnih admina'); return; }
+  if (!confirm(`Poslati poruku svim ${admins.length} aktivnim adminima?`)) return;
+
+  const btn = document.getElementById('masa-btn');
+  btn.disabled = true; btn.textContent = 'Slanje...';
+
+  const { db, collection, addDoc } = window._fb;
+  let ok = 0;
+  for (const a of admins) {
+    try {
+      await addDoc(collection(db, 'haupt_odgovori'), {
+        za: a.id, zaIme: a.name||'Admin', od: 'haupt', odIme: 'Haupt',
+        tekst: `📢 ${naslov}\n\n${tekst}`, foto: null,
+        vreme: new Date().toISOString(), procitano: false
+      });
+      await addDoc(collection(db, 'notifikacije'), {
+        userId: a.id, tip: 'haupt_masa',
+        poruka: `👑 ${naslov}: ${tekst.slice(0,60)}`,
+        vreme: new Date().toISOString(), procitano: false
+      });
+      ok++;
+    } catch(e) { console.warn('masa error for', a.id, e); }
+  }
+  showToast(`✅ Poruka poslata ${ok}/${admins.length} admina!`);
+  document.getElementById('masa-naslov').value = '';
+  document.getElementById('masa-tekst').value = '';
+  btn.disabled = false; btn.textContent = '📤 Pošalji svim adminima';
+}
+
+// ═══ PUSH NA JEDNOG ADMINA ═══
+async function sendPushAdmin() {
+  const adminId = document.getElementById('push-admin-sel').value;
+  const naslov  = document.getElementById('push-naslov').value.trim();
+  const tekst   = document.getElementById('push-tekst').value.trim();
+  if (!adminId) { showToast('⚠️ Izaberi admina'); return; }
+  if (!naslov || !tekst) { showToast('⚠️ Unesite naslov i tekst'); return; }
+
+  const btn = document.getElementById('push-btn');
+  btn.disabled = true; btn.textContent = 'Šaljem...';
+
+  try {
+    const { db, collection, addDoc } = window._fb;
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: adminId, tip: 'haupt_push',
+      poruka: `🔔 ${naslov}: ${tekst}`,
+      vreme: new Date().toISOString(), procitano: false
+    });
+    await addDoc(collection(db, 'haupt_odgovori'), {
+      za: adminId, od: 'haupt', odIme: 'Haupt',
+      tekst: `📱 ${naslov}\n\n${tekst}`, foto: null,
+      vreme: new Date().toISOString(), procitano: false
+    });
+    showToast('✅ Push notifikacija poslata!');
+    document.getElementById('push-naslov').value = '';
+    document.getElementById('push-tekst').value = '';
+  } catch(e) { showToast('❌ Greška: ' + e.message); }
+  btn.disabled = false; btn.textContent = '📱 Pošalji Push Notifikaciju';
+}
+
+// ═══ OBRIŠI ADMINA ═══
+async function obrisiAdmin(adminId, adminName) {
+  if (!confirm(`Obrisati admina "${adminName}"?\n⚠️ Ovo ne briše Firebase Auth nalog, samo Firestore podatke!`)) return;
+  const { db, doc, deleteDoc } = window._fb;
+  await deleteDoc(doc(db, 'users', adminId));
+  showToast('🗑️ Admin obrisan iz baze');
+}
+
+async function addAdmin() {
+  const name = document.getElementById('new-admin-name').value.trim();
+  const email = document.getElementById('new-admin-email').value.trim();
+  const pass = document.getElementById('new-admin-pass').value;
+  const licenca = document.getElementById('new-admin-licenca').value;
+  if (!name || !email || !pass) { showToast('⚠️ Popunite sva polja'); return; }
+  if (pass.length < 6) { showToast('⚠️ Lozinka min. 6 karaktera'); return; }
+
+  const btn = document.getElementById('add-admin-btn');
+  btn.disabled = true; btn.textContent = 'Kreiranje...';
+
+  try {
+    // Koristimo drugi Firebase app instance da ne odjavimo Haupt
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getAuth, createUserWithEmailAndPassword: createUser } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const { getFirestore, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+    const secondaryConfig = {
+      apiKey: "AIzaSyBjjDYmnGoAmdeczSa6nY-pOM7lJ-qjzjY",
+      authDomain: "novarobashop-e2a61.firebaseapp.com",
+      projectId: "novarobashop-e2a61",
+    };
+
+    // Kreiraj drugi app instance
+    const secondaryApp = initializeApp(secondaryConfig, 'secondary-' + Date.now());
+    const secondaryAuth = getAuth(secondaryApp);
+    const secondaryDb = getFirestore(secondaryApp);
+
+    const cred = await createUser(secondaryAuth, email, pass);
+    const uid = cred.user.uid;
+    await setDoc(doc(secondaryDb, 'users', uid), {
+      name, email, role: 'admin',
+      licencaDo: licenca || new Date(Date.now() + 30*24*60*60*1000).toISOString().slice(0,10),
+      kupciCount: 0, blocked: false,
+      createdAt: new Date().toISOString()
+    });
+
+    // Odjavi se iz secondary app
+    await secondaryAuth.signOut();
+
+    showToast('✅ Admin kreiran: ' + name);
+    document.getElementById('new-admin-name').value = '';
+    document.getElementById('new-admin-email').value = '';
+    document.getElementById('new-admin-pass').value = '';
+    document.getElementById('new-admin-licenca').value = '';
+    btn.disabled = false; btn.textContent = '✓ Kreiraj Admin nalog';
+    loadHauptData();
+  } catch(e) {
+    showToast('❌ ' + (e.message.includes('email-already') ? 'Email već postoji' : e.message));
+    btn.disabled = false; btn.textContent = '✓ Kreiraj Admin nalog';
+  }
+}
+
+async function blokirajAdmin(adminId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', adminId), { blocked: true });
+  showToast('🔒 Admin blokiran');
+}
+
+async function odblokujAdmin(adminId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', adminId), { blocked: false });
+  showToast('🔓 Admin odblokiran');
+}
+
+async function produzilicencu(adminId) {
+  const d = document.getElementById('lic-' + adminId);
+  if (!d) { showToast('Koristite tab Licence za produženje'); return; }
+  hTab('licence', document.querySelectorAll('.h-tab')[2]);
+}
+
+async function sacuvajLicencu(adminId) {
+  const datum = document.getElementById('lic-' + adminId).value;
+  if (!datum) { showToast('⚠️ Unesite datum'); return; }
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', adminId), { licencaDo: datum });
+  showToast('✅ Licenca produžena do ' + datum);
+}
+
+async function oznaciprocitano(porukaId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'haupt_poruke', porukaId), { procitano: true });
+}
+
+async function oznaciprocitanoNotif(notifId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'haupt_notifikacije', notifId), { procitano: true });
+}
+
+// ── Odobri izmenu podataka ──
+async function odobriIzmenu(notifId, kupacId) {
+  const { db, doc, updateDoc, getDoc, collection, addDoc } = window._fb;
+
+  // Get the notification to read the changes
+  const snap = await getDoc(doc(db, 'haupt_notifikacije', notifId));
+  if (!snap.exists()) { showToast('❌ Zahtev nije pronađen'); return; }
+  const n = snap.data();
+  const izmene = n.izmene || {};
+
+  if (Object.keys(izmene).length === 0) { showToast('⚠️ Nema izmena za primenu'); return; }
+
+  try {
+    // Apply changes to user document
+    await updateDoc(doc(db, 'users', kupacId), izmene);
+
+    // Mark notification as approved
+    await updateDoc(doc(db, 'haupt_notifikacije', notifId), {
+      status: 'odobren', procitano: true
+    });
+
+    // Notify kupac
+    const labels = n.izmeneLabels || Object.keys(izmene);
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: kupacId,
+      tip: 'izmena_odobrena',
+      poruka: '✅ Haupt je odobrio tvoje izmene: ' + labels.join(', '),
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+
+    showToast('✅ Izmene odobrene i primenjene!');
+  } catch(e) {
+    showToast('❌ Greška: ' + e.message);
+  }
+}
+
+// ── Odbij izmenu podataka ──
+async function odbijiIzmenu(notifId, kupacId) {
+  const reason = prompt('Razlog odbijanja (opciono):') || '';
+  const { db, doc, updateDoc, collection, addDoc } = window._fb;
+
+  await updateDoc(doc(db, 'haupt_notifikacije', notifId), {
+    status: 'odbijen', procitano: true, razlog: reason
+  });
+
+  await addDoc(collection(db, 'notifikacije'), {
+    userId: kupacId,
+    tip: 'izmena_odbijena',
+    poruka: '❌ Haupt je odbio tvoj zahtev za izmenu.' + (reason ? ' Razlog: ' + reason : ''),
+    vreme: new Date().toISOString(),
+    procitano: false
+  });
+
+  showToast('❌ Zahtev odbijen');
+}
+
+async function odblokujKupacHaupt(kupacId, notifId) {
+  const { db, doc, updateDoc } = window._fb;
+  await updateDoc(doc(db, 'users', kupacId), { blocked: false, blockedAt: null });
+  await updateDoc(doc(db, 'haupt_notifikacije', notifId), { procitano: true });
+  showToast('🔓 Kupac odblokiran');
+}
+
+async function sendHauptOdgovor() {
+  try {
+  const userId = document.getElementById('nova-poruka-userId').value;
+  const userName = document.getElementById('nova-poruka-search').value.replace('@','');
+  const tekst = document.getElementById('haupt-odgovor').value.trim();
+  if (!userId || !tekst) { showToast('⚠️ Odaberite primaoca i unesite poruku'); return; }
+  const { db, collection, addDoc, doc, getDoc } = window._fb;
+  
+  // Check if admin or kupac
+  const userSnap = await getDoc(doc(db, 'users', userId));
+  const role = userSnap.exists() ? userSnap.data().role : 'kupac';
+  
+  let fotoNovaUrl = null;
+  const fotoNova = _fotoCache['hnova'];
+  if (fotoNova) {
+    fotoNovaUrl = await uploadFotoToStorage(fotoNova, 'poruke/haupt/' + Date.now() + '.jpg');
+  }
+  clearMsgFoto('hnova');
+  if (role === 'admin') {
+    await addDoc(collection(db, 'haupt_odgovori'), {
+      za: userId, zaIme: userName, od: 'haupt', odIme: 'Haupt',
+      tekst, foto: fotoNovaUrl, vreme: new Date().toISOString(), procitano: false
+    });
+  } else {
+    await addDoc(collection(db, 'admin_poruke'), {
+      od: 'haupt', odIme: 'Haupt',
+      doKupacId: userId, doKupacIme: userName,
+      tekst, foto: fotoNovaUrl, vreme: new Date().toISOString(), procitano: false
+    });
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: userId,
+      tip: 'poruka_od_haupta',
+      poruka: '👑 Haupt: ' + tekst.slice(0, 80),
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+  }
+  document.getElementById('haupt-odgovor').value = '';
+  document.getElementById('nova-poruka-userId').value = '';
+  document.getElementById('nova-poruka-selected').style.display = 'none';
+  showToast('✅ Poruka poslata!');
+  } catch(err) {
+    console.error('sendHauptOdgovor error:', err);
+    showToast('❌ Greška: ' + (err.message || err.code || err), 5000);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+// Expose functions called from module script
+window.loadHauptData = loadHauptData;
+window.hTab = hTab;
+window.showLoginScreen = showLoginScreen;
+window.doLogin = doLogin;
+window.obrisiAdmin = obrisiAdmin;
+window.sendMasaPoruku = sendMasaPoruku;
+window.sendPushAdmin = sendPushAdmin;
+window.filterHAdmini = filterHAdmini;
+window.filterHLicence = filterHLicence;
+</script>
+</body>
+</html>
