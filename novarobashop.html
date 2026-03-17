@@ -4459,8 +4459,16 @@ function openKassenbon(racunId) {
 
   // Foto
   let fotoHtml = '';
-  if (r.adminFotoUrl) fotoHtml = `<div style="margin-top:12px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;" /></div>`;
-  if (r.uplatnicaUrl) fotoHtml += `<div style="margin-top:8px;font-size:11px;color:#888;margin-bottom:4px;">📎 Vaša uplatnica:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;" />`;
+  if (r.adminFotoUrl) fotoHtml = `
+    <div style="margin-top:12px;background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px;">
+      <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🖼️ Foto artikla od admina</div>
+      <img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #bfdbfe;cursor:pointer;" />
+    </div>`;
+  if (r.uplatnicaUrl) fotoHtml += `
+    <div style="margin-top:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;">
+      <div style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📎 Tvoja uplatnica (potvrda o uplati)</div>
+      <img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="width:100%;border-radius:6px;border:1.5px solid #bbf7d0;cursor:pointer;" />
+    </div>`;
 
   // Upload dugme
   let uploadHtml = '';
@@ -5019,6 +5027,14 @@ function kRacunCard(r, showUpload, showArhiva) {
           <div style="font-size:16px;font-weight:800;color:#0f172a;">Račun #${broj}</div>
           <span style="background:rgba(244,63,94,0.12);color:#e11d48;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;">🔴 NOVO</span>
         </div>
+        ${r.adminFotoUrl ? `
+        <div style="display:flex;align-items:center;gap:10px;background:#f8faff;border:1px solid #dbeafe;border-radius:10px;padding:8px 10px;margin-bottom:10px;">
+          <img src="${r.adminFotoUrl}" onclick="event.stopPropagation();openImgViewer(this.src)" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid #bfdbfe;cursor:pointer;flex-shrink:0;" />
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:2px;">🖼️ Foto artikla od admina</div>
+            <div style="font-size:11px;color:#64748b;">Ovo je slika tvoje narudžbine.<br>Tapni za uvećanje.</div>
+          </div>
+        </div>` : ''}
         ${stavkeHtml}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px dashed #fecaca;">
           <div style="font-size:22px;font-weight:900;color:#0f172a;">${iznos} RSD</div>
@@ -5058,6 +5074,11 @@ function kRacunCard(r, showUpload, showArhiva) {
         </div>
         <div style="font-size:20px;font-weight:900;color:#0f172a;margin:6px 0;">${iznos} RSD</div>
         <div style="font-size:12px;color:#92400e;font-weight:600;">✅ Uplata primljena — admin proverava</div>
+        ${r.adminFotoUrl ? `
+        <div style="display:flex;align-items:center;gap:10px;background:#f8faff;border:1px solid #dbeafe;border-radius:10px;padding:8px 10px;margin-top:8px;">
+          <img src="${r.adminFotoUrl}" onclick="event.stopPropagation();openImgViewer(this.src)" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1.5px solid #bfdbfe;cursor:pointer;flex-shrink:0;" />
+          <div style="font-size:11px;color:#64748b;"><b style="color:#1d4ed8;">🖼️ Foto artikla od admina</b><br>Ovo je slika tvoje narudžbine.</div>
+        </div>` : ''}
         ${r.uplatnicaUrl ? `<div style="margin-top:8px;"><img src="${r.uplatnicaUrl}" onclick="event.stopPropagation();openImgViewer(this.src)" style="max-height:70px;max-width:120px;object-fit:contain;border-radius:8px;border:1.5px solid #fde68a;cursor:pointer;display:block;" /></div>` : ''}
       </div>
       <div style="background:#fffdf5;padding:12px 16px;">
