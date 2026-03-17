@@ -2339,12 +2339,55 @@ function _diffDays(dateA, dateB) {
   const b = new Date(dateB); b.setHours(0,0,0,0);
   return Math.round((a - b) / (1000 * 60 * 60 * 24));
 }
+
+// Gibt den Fälligkeitstag (Date) für eine Rechnung zurück
+// Regeln:
+//   - Neukunde (1. Rechnung überhaupt): 1 Werktag
+//   - Stammkunde: 4 Werktage (Sa+So zählen nicht)
+// "Werktag" = Mo–Fr, Sa+So werden übersprungen
+function _getRok(r, alleKupacRacuni) {
+  if (!r.datum) return null;
+
+  const start = new Date(r.datum);
+  start.setHours(0,0,0,0);
+
+  // Neukunde = diese Rechnung ist die erste (oder einzige) des Kunden
+  const frühereRacuni = (alleKupacRacuni || []).filter(x =>
+    x.kupacId === r.kupacId &&
+    x.id !== r.id &&
+    (x.createdAt || x.datum || '') < (r.createdAt || r.datum || '')
+  );
+  const istNeukunde = frühereRacuni.length === 0;
+  const fristTage = istNeukunde ? 1 : 4;
+
+  // Werktage vorwärts zählen (Sa=6, So=0 überspringen)
+  let datum = new Date(start);
+  let gezählt = 0;
+  while (gezählt < fristTage) {
+    datum.setDate(datum.getDate() + 1);
+    const wochentag = datum.getDay();
+    if (wochentag !== 0 && wochentag !== 6) gezählt++; // nicht Sa/So
+  }
+  return datum;
+}
+
+// Wie viele Werktage noch bis zum Rok (negativ = überschritten)
+function _diffWerktage(rokDate) {
+  if (!rokDate) return null;
+  const heute = new Date(); heute.setHours(0,0,0,0);
+  const rok = new Date(rokDate); rok.setHours(0,0,0,0);
+  // Einfach Kalendertage — Wochenenden zählen nicht gegen den Kunden
+  // aber für den Countdown zeigen wir Kalendertage bis Fälligkeit
+  return Math.ceil((rok - heute) / (1000*60*60*24));
+}
+
 async function checkOverdueRacuni(racuni) {
-  const today = new Date();
   const tasks = racuni.map(async r => {
     if (r.status !== 'novo' || !r.datum || r.blocked) return;
-    const diffDays = _diffDays(today, new Date(r.datum));
-    if (diffDays >= 4) {
+    const rok = _getRok(r, racuni);
+    if (!rok) return;
+    const heute = new Date(); heute.setHours(0,0,0,0);
+    if (rok <= heute) { // Frist abgelaufen
       try {
         const { db, doc, updateDoc, collection, addDoc } = window._fb;
         await updateDoc(doc(db, 'users', r.kupacId), { blocked: true, blockedAt: new Date().toISOString() });
@@ -2359,7 +2402,6 @@ async function checkOverdueRacuni(racuni) {
           vreme: new Date().toISOString(),
           procitano: false
         });
-        // Warnung an alle anderen Admins die diesen Kunden kennen
         await _warnOtherAdminsAboutBlock(
           r.kupacId, r.kupacName,
           window._currentUser?.uid || '', window._currentUser?.name || ''
@@ -2373,12 +2415,12 @@ async function checkOverdueRacuni(racuni) {
 }
 
 function getKupacStatus(kupac, racuni) {
-  const today = new Date();
+  const heute = new Date(); heute.setHours(0,0,0,0);
   const kupacRacuni = racuni.filter(r => r.kupacId === kupac.id && r.status === 'novo');
   for (const r of kupacRacuni) {
     if (r.datum) {
-      const diff = _diffDays(today, new Date(r.datum));
-      if (diff >= 3) return 'kasni';
+      const rok = _getRok(r, racuni);
+      if (rok && rok <= heute) return 'kasni';
     }
   }
   return 'aktivan';
@@ -2858,8 +2900,7 @@ function renderKalender(f) {
 
   let items = racuni.map(r => {
     const k = kupci.find(x => x.id === r.kupacId);
-    const datum = r.datum ? new Date(r.datum) : null;
-    const rokDatum = datum ? new Date(datum.getTime() + 4*24*60*60*1000) : null; // rok = datum + 4 dana
+    const rokDatum = _getRok(r, _allRacuni || []); // Neukunde=1 Werktag, Stammkunde=4 Werktage
     const diffDays = rokDatum ? Math.ceil((rokDatum - today) / (1000*60*60*24)) : null;
     return { r, k, rokDatum, diffDays };
   }).sort((a,b) => (a.diffDays??999) - (b.diffDays??999));
@@ -3143,9 +3184,8 @@ function renderKDugovi(racuni) {
   if(subEl) subEl.textContent = otvoreni.length+' otvorenih računa';
   const today = new Date(); today.setHours(0,0,0,0);
   el.innerHTML = otvoreni.sort((a,b)=>(a.datum||'')>(b.datum||'')?1:-1).map(r=>{
-    const datum = r.datum ? new Date(r.datum) : null;
-    const rok   = datum  ? new Date(datum.getTime()+4*24*60*60*1000) : null;
-    const diff  = rok    ? Math.ceil((rok-today)/(1000*60*60*24)) : null;
+    const rok   = _getRok(r, window._kAllRacuni || []);
+    const diff  = rok ? Math.ceil((rok-today)/(1000*60*60*24)) : null;
     const kasni = diff!==null && diff<0;
     const urgent= diff!==null && diff<=1;
     return `<div style="background:${kasni?'#fef2f2':urgent?'#fff7ed':'#f0fdf4'};border:1.5px solid ${kasni?'#fca5a5':urgent?'#fde68a':'#bbf7d0'};border-radius:16px;padding:14px;margin-bottom:10px;">
@@ -5270,24 +5310,33 @@ function renderKHome() {
   if(el_p) el_p.textContent = poslato;
   if(el_d) el_d.textContent = dug > 0 ? dug.toLocaleString()+' RSD' : '0 RSD';
 
-  // Countdown — find oldest unpaid racun
+  // Countdown — dringendste unbezahlte Rechnung
   const unpaid = racuni.filter(r=>r.status==='novo'&&r.datum).sort((a,b)=>a.datum>b.datum?1:-1);
   const cdBox = document.getElementById('k-countdown-box');
   if(cdBox) {
     if (unpaid.length) {
       const oldest = unpaid[0];
       const today  = new Date(); today.setHours(0,0,0,0);
-      const rok    = new Date(oldest.datum); rok.setDate(rok.getDate()+4);
-      const diff   = Math.ceil((rok - today)/(1000*60*60*24));
+      const rok    = _getRok(oldest, alleRacuni); // Neukunde=1 Werktag, Stammkunde=4 Werktage
+      const diff   = rok ? Math.ceil((rok - today)/(1000*60*60*24)) : 4;
       const kasni  = diff < 0;
       const danas  = diff === 0;
       const urgent = diff <= 1;
 
+      // Neukunde-Hinweis
+      const frühereRacuni = alleRacuni.filter(x =>
+        x.kupacId === oldest.kupacId &&
+        x.id !== oldest.id &&
+        (x.createdAt||x.datum||'') < (oldest.createdAt||oldest.datum||'')
+      );
+      const istNeukunde = frühereRacuni.length === 0;
+      const neukHinweis = istNeukunde ? ' · Novi kupac' : '';
+
       const bg  = kasni ? 'linear-gradient(135deg,#fef2f2,#fff1f2)' : urgent ? 'linear-gradient(135deg,#fff7ed,#fffbeb)' : 'linear-gradient(135deg,#f0fdf4,#ecfdf5)';
       const brd = kasni ? '#fca5a5' : urgent ? '#fde68a' : '#bbf7d0';
       const clr = kasni ? '#dc2626' : urgent ? '#d97706' : '#16a34a';
-      const lbl = kasni ? `⚠️ Kasniš ${Math.abs(diff)} dana!` : danas ? '🔥 Rok je DANAS!' : `⏰ Rok za plaćanje`;
-      const sub = kasni ? 'Nalog može biti blokiran!' : danas ? 'Uplati danas da izbegneš blokadu' : `Imaš još ${diff} ${diff===1?'dan':'dana'}`;
+      const lbl = kasni ? `⚠️ Kasniš ${Math.abs(diff)} dana!` : danas ? '🔥 Rok je DANAS!' : `⏰ Rok za plaćanje${neukHinweis}`;
+      const sub = kasni ? 'Nalog može biti blokiran!' : danas ? 'Uplati danas da izbegneš blokadu' : `Imaš još ${diff} ${diff===1?'dan':'dana'} (vikendi se ne računaju)`;
       const btnBg = kasni ? '#dc2626' : urgent ? '#d97706' : '#16a34a';
 
       cdBox.style.cssText = `display:block;border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid ${brd};background:${bg};`;
