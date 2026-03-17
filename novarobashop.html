@@ -4858,53 +4858,26 @@ async function loadKupacData() {
 
   const { db, collection, onSnapshot, query, where, getDocs } = window._fb;
 
-  // 1. Učitaj SVE admine jednom (za bankdata itd.) — ali ih ne prikazuj sve u dropdaunu
-  const adminSnap = await getDocs(query(collection(db, 'users'), where('role','==','admin')));
-  _adminList = [];
-  adminSnap.forEach(d => _adminList.push({ id: d.id, ...d.data() }));
-
-  // 2. Učitaj račune (realtime) — i svaki put obnovi dropdown samo sa adminima koji postoje u računima
+  // Učitaj sve racune ovog kupca (realtime)
   onSnapshot(query(collection(db, 'racuni'), where('kupacId', '==', u.uid)), snap => {
     _allKupacRacuni = [];
     snap.forEach(d => _allKupacRacuni.push({id:d.id,...d.data()}));
     window._kAllRacuni = _allKupacRacuni;
-
-    // ── Dropdown: samo admini koji su zaista poslali ovom kupcu račun ──
-    const myAdminIds = new Set(_allKupacRacuni.map(r => r.adminId).filter(Boolean));
-    const myAdmins = _adminList.filter(a => myAdminIds.has(a.id));
+    // filtriraj po izabranom adminu
     const sel = document.getElementById('k-global-admin-sel');
-    const currentVal = sel ? sel.value : '';
-    const adminOptions = (myAdmins.length > 1 ? '<option value="">— Svi admini —</option>' : '') +
-      myAdmins.map(a => `<option value="${a.id}">${a.tiktokIme ? '@'+a.tiktokIme+' · '+(a.tiktokNick||'') : (a.name||a.email)}</option>`).join('');
-    ['k-global-admin-sel','k-nova-admin-sel','k-poruka-admin-sel'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.innerHTML = adminOptions;
-      // Vrati stari izbor ako je još validan
-      if (currentVal && myAdmins.find(a => a.id === currentVal)) el.value = currentVal;
-    });
-
-    // Ako je samo jedan admin → automatski ga izaberi (bez da kupac mora birati)
-    if (myAdmins.length === 1) {
-      ['k-global-admin-sel','k-nova-admin-sel','k-poruka-admin-sel'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = myAdmins[0].id;
-      });
-      filterKupacByAdmin(myAdmins[0].id);
-    } else {
-      // Filtriraj po trenutnom izboru
-      const activeAdmin = sel ? sel.value : '';
-      filterKupacByAdmin(activeAdmin);
-    }
-
+    const adminId = sel ? sel.value : '';
+    filterKupacByAdmin(adminId);
     checkKupacOverdue(_allKupacRacuni);
     sendMahnungen(_allKupacRacuni);
+    // Update dugovi badge silently
     const otvoreni = _allKupacRacuni.filter(r=>r.status==='novo'||r.status==='ceka');
     const badgeEl = document.getElementById('k-dugovi-badge');
     if(badgeEl){ if(otvoreni.length>0){badgeEl.style.display='flex';badgeEl.textContent=otvoreni.length;}else badgeEl.style.display='none'; }
+    // Update racuni badge
     const noviBadge = document.getElementById('k-racuni-badge');
     const noviCount = _allKupacRacuni.filter(r=>r.status==='novo').length;
     if(noviBadge){ if(noviCount>0){noviBadge.style.display='flex';noviBadge.textContent=noviCount;}else noviBadge.style.display='none'; }
+    // Refresh home if open
     renderKHome();
   });
 
@@ -4927,15 +4900,24 @@ async function loadKupacData() {
   } catch(e) {
     console.error('admin_poruke setup error:', e);
   }
+
+  // Učitaj listu admina
+  const adminSnap = await getDocs(query(collection(db, 'users'), where('role','==','admin')));
+  _adminList = [];
+  adminSnap.forEach(d => _adminList.push({ id: d.id, ...d.data() }));
+  const adminOptions = '<option value="">— Izaberite admina —</option>' +
+    _adminList.map(a => `<option value="${a.id}">${a.tiktokIme ? '@'+a.tiktokIme+' · '+(a.tiktokNick||'') : (a.name||a.email)}</option>`).join('');
+  ['k-global-admin-sel','k-nova-admin-sel','k-poruka-admin-sel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = adminOptions;
+  });
 }
 
 function filterKupacByAdmin(adminId) {
   if (!adminId) {
-    // bez izbora - prikaži sve
     renderKAllRacuni(_allKupacRacuni);
     return;
   }
-  // filtriraj racune po adminId
   const filtered = _allKupacRacuni.filter(r => r.adminId === adminId);
   renderKAllRacuni(filtered);
 }
