@@ -4458,13 +4458,31 @@ function openKassenbon(racunId) {
 
   // Upload dugme
   let uploadHtml = '';
-  if (status === 'novo') {
+  if ((status === 'novo' || status === 'ceka') && ps !== 'ship') {
+    const isCeka = status === 'ceka';
+    const uploadLabel = isCeka ? '🔄 Pošalji novu sliku (zameni staru):' : '📎 Pošalji potvrdu o uplati:';
+    const uploadBg = isCeka ? 'rgba(245,158,11,0.07)' : 'rgba(59,130,246,0.06)';
+    const uploadBorder = isCeka ? 'rgba(245,158,11,0.3)' : '#e0e8ff';
     uploadHtml = `
-      <div style="margin-top:14px;display:flex;gap:8px;">
-        <button onclick="openUplatnica('${r.id}','camera')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📷 Kamera</button>
-        <button onclick="openUplatnica('${r.id}','gallery')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🖼️ Galerija</button>
-      </div>
-      <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">❌ Storno zahtev</button>`;
+      <div style="margin-top:14px;">
+        <div style="background:${uploadBg};border:1px solid ${uploadBorder};border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:${isCeka?'#d97706':'#2563eb'};margin-bottom:4px;">${uploadLabel}</div>
+          <div style="font-size:11px;color:#777;line-height:1.6;">1. Slikaj potvrdu o uplati 📸<br>2. Tapni <b>Kamera</b> ili <b>Galerija</b> ispod<br>3. Proveri sliku, pa tapni <b>Pošalji!</b> ✅</div>
+        </div>
+        <div id="upl-preview-kassenbon" style="display:none;margin-bottom:10px;text-align:center;">
+          <img id="upl-img-kassenbon" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;" />
+          <div style="font-size:12px;color:#555;margin-bottom:8px;font-weight:600;">Proveri sliku — da li je čitka?</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="confirmUplatnica('${r.id}','kassenbon')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('kassenbon')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕ Otkaži</button>
+          </div>
+        </div>
+        <div id="upl-btns-kassenbon" style="display:flex;gap:8px;">
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera','kassenbon')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kassenbon')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🖼️ Galerija</button>
+        </div>
+        ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans';">❌ Storno zahtev</button>` : ''}
+      </div>`;
   }
 
   document.getElementById('kassenbon-content').innerHTML = `
@@ -5008,15 +5026,32 @@ function kRacunCard(r, showUpload, showArhiva) {
     ${(status==='placeno'||ps==='ship') ? `<button onclick="shareRacunAsImage('${r.id}')" style="margin-left:auto;background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📸 Podeli</button>` : ''}
   </div>`;
 
-  if (showUpload && status !== 'storno') {
+  if ((showUpload || status === 'ceka') && status !== 'storno' && status !== 'placeno' && ps !== 'ship') {
+    const isCeka = status === 'ceka';
+    const uploadLabel = isCeka
+      ? '🔄 Pošalji novu sliku (zameni staru):'
+      : '📎 Pošaljite uplatnicu za ovaj račun:';
+    const uploadBg = isCeka ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.06)';
+    const uploadBorder = isCeka ? 'rgba(245,158,11,0.3)' : '#e0e8ff';
     html += bankInfo;
     html += `<div style="margin-top:12px;border-top:1px dashed #e0e8ff;padding-top:12px;">
-      <div style="font-size:12px;color:var(--gray2);margin-bottom:8px;">📎 Pošaljite uplatnicu za ovaj račun:</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="openUplatnica('${r.id}','camera')" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">📷 Kamera</button>
-        <button onclick="openUplatnica('${r.id}','gallery')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ Galerija</button>
+      <div style="background:${uploadBg};border:1px solid ${uploadBorder};border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:${isCeka?'#d97706':'#3b82f6'};margin-bottom:4px;">${uploadLabel}</div>
+        <div style="font-size:11px;color:#888;">1. Slikaj potvrdu o uplati 📸<br>2. Tapni Kamera ili Galerija<br>3. Sačekaj da admin potvrdi ✅</div>
       </div>
-      <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">❌ Storno zahtev</button>
+      <div id="upl-preview-${r.id}" style="display:none;margin-bottom:10px;text-align:center;">
+        <img id="upl-img-${r.id}" style="max-height:140px;max-width:220px;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />
+        <div style="font-size:12px;color:#555;margin-bottom:8px;">Ovo je tvoja slika — izgleda dobro?</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;">✅ Pošalji!</button>
+          <button onclick="cancelUplatnicaPreview('${r.id}')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;">✕ Otkaži</button>
+        </div>
+      </div>
+      <div id="upl-btns-${r.id}" style="display:flex;gap:8px;">
+        <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">📷 Kamera</button>
+        <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ Galerija</button>
+      </div>
+      ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">❌ Storno zahtev</button>` : ''}
     </div>`;
   }
 
@@ -5037,8 +5072,8 @@ function renderKNove(racuni) {
 function renderKCeka(racuni) {
   const el = document.getElementById('k-ceka-list');
   if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema računa koji čekaju.</div>'; return; }
-  el.innerHTML = '<div style="background:#FFF6DC;border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#9B7200;">Vaša uplata čeka potvrdu admina.</div>'
-    + racuni.map(r => kRacunCard(r, false, false)).join('');
+  el.innerHTML = '<div style="background:#FFF6DC;border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#9B7200;">⏳ Vaša uplata čeka potvrdu admina.<br><span style="font-size:11px;color:#b45309;">Ako nisi poslao/la sliku ili je slika nejasna, možeš je zameniti ispod.</span></div>'
+    + racuni.map(r => kRacunCard(r, true, false)).join('');
 }
 
 function renderKArhiva(racuni) {
@@ -5307,52 +5342,138 @@ function shareRacunAsImage(racunId) {
   overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
 }
 
-function openUplatnica(racunId, mode) {
+// Uplatnica preview cache: contextId -> { racunId, base64 }
+const _uplatnicaPreviewCache = {};
+
+function openUplatnicaWithPreview(racunId, mode, contextId) {
+  const cid = contextId || racunId;
+  _uplatnicaPreviewCache[cid] = { racunId, base64: null };
   _currentUplatnicaRacunId = racunId;
+  _currentUplatnicaContext = cid;
   const input = document.getElementById('uplatnica-input');
   if (mode === 'camera') input.setAttribute('capture', 'environment');
   else input.removeAttribute('capture');
   input.click();
 }
 
+// Legacy - kept for backward compat
+function openUplatnica(racunId, mode) {
+  openUplatnicaWithPreview(racunId, mode, racunId);
+}
+
+let _currentUplatnicaContext = null;
+
 async function uploadUplatnica(event) {
   const file = event.target.files[0];
   if (!file || !_currentUplatnicaRacunId) return;
-  showToast('⏳ Slanje slike...');
+  event.target.value = '';
+
   const reader = new FileReader();
   reader.onload = async (e) => {
     try {
       // Kompresuj sliku pre uploada
-      const compressed = await compressImage(e.target.result, 800, 0.75);
-      // Upload u Firebase Storage (ne Firestore!)
-      const path = 'uplatnice/' + _currentUplatnicaRacunId + '_' + Date.now() + '.jpg';
-      const uplatnicaUrl = await uploadFotoToStorage(compressed, path);
-      if (!uplatnicaUrl) { showToast('❌ Greška pri uploadu slike. Pokušaj ponovo.'); return; }
-      const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
-      await updateDoc(doc(db, 'racuni', _currentUplatnicaRacunId), {
-        status: 'ceka', uplatnicaUrl: uplatnicaUrl, uplatnicaVreme: new Date().toISOString()
-      });
-      // Obavesti admina
-      const racunSnap = await getDoc(doc(db, 'racuni', _currentUplatnicaRacunId));
-      const r = racunSnap.data();
-      await addDoc(collection(db,'notifikacije'), {
-        userId: r.adminId,
-        tip: 'nova_uplata',
-        racunId: _currentUplatnicaRacunId,
-        poruka: `💰 ${window._currentUser.name} je poslao uplatnicu za Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`,
-        vreme: new Date().toISOString(),
-        procitano: false
-      });
-      sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`);
-      showToast('✅ Uplatnica poslata! Admin proverava.');
-      kNavTab('ceka');
+      const compressed = await compressImage(e.target.result, 900, 0.80);
+      const cid = _currentUplatnicaContext || _currentUplatnicaRacunId;
+
+      // Prikaži preview
+      _uplatnicaPreviewCache[cid] = { racunId: _currentUplatnicaRacunId, base64: compressed };
+
+      const imgEl  = document.getElementById('upl-img-' + cid);
+      const preEl  = document.getElementById('upl-preview-' + cid);
+      const btnEl  = document.getElementById('upl-btns-' + cid);
+
+      if (imgEl && preEl && btnEl) {
+        imgEl.src = compressed;
+        preEl.style.display = 'block';
+        btnEl.style.display = 'none';
+      } else {
+        // fallback: odmah šalji (kassenbon modal etc)
+        await _doSendUplatnica(cid);
+      }
     } catch(err) {
-      console.error('uploadUplatnica error:', err);
-      showToast('❌ Greška pri slanju. Pokušaj ponovo.');
+      console.error('uploadUplatnica preview error:', err);
+      showToast('❌ Greška pri učitavanju slike. Pokušaj ponovo.', 5000);
     }
-    event.target.value = '';
   };
   reader.readAsDataURL(file);
+}
+
+async function confirmUplatnica(racunId, contextId) {
+  const cid = contextId || racunId;
+  await _doSendUplatnica(cid);
+}
+
+function cancelUplatnicaPreview(contextId) {
+  const preEl = document.getElementById('upl-preview-' + contextId);
+  const btnEl = document.getElementById('upl-btns-' + contextId);
+  if (preEl) preEl.style.display = 'none';
+  if (btnEl) btnEl.style.display = 'flex';
+  delete _uplatnicaPreviewCache[contextId];
+  showToast('↩️ Otkazano. Možeš ponovo slikati.');
+}
+
+async function _doSendUplatnica(contextId) {
+  const cache = _uplatnicaPreviewCache[contextId];
+  if (!cache || !cache.base64) { showToast('❌ Nema slike za slanje.'); return; }
+  const racunId = cache.racunId;
+
+  // Sakrij dugmad, prikaži loading
+  const preEl = document.getElementById('upl-preview-' + contextId);
+  const btnEl = document.getElementById('upl-btns-' + contextId);
+  if (preEl) preEl.innerHTML = '<div style="text-align:center;padding:20px;color:#3b82f6;font-weight:700;font-size:14px;">⏳ Šaljem sliku...<br><div style="font-size:11px;color:#888;margin-top:4px;">Sačekaj, ne zatvori app!</div></div>';
+
+  try {
+    const path = 'uplatnice/' + racunId + '_' + Date.now() + '.jpg';
+    const uplatnicaUrl = await uploadFotoToStorage(cache.base64, path);
+
+    if (!uplatnicaUrl) {
+      if (preEl) preEl.style.display = 'none';
+      if (btnEl) btnEl.style.display = 'flex';
+      showToast('❌ Slanje nije uspelo. Provjeri internet i pokušaj ponovo.', 6000);
+      return;
+    }
+
+    const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
+    await updateDoc(doc(db, 'racuni', racunId), {
+      status: 'ceka',
+      uplatnicaUrl,
+      uplatnicaVreme: new Date().toISOString()
+    });
+
+    // Obavesti admina
+    const racunSnap = await getDoc(doc(db, 'racuni', racunId));
+    const r = racunSnap.data();
+    await addDoc(collection(db, 'notifikacije'), {
+      userId: r.adminId,
+      tip: 'nova_uplata',
+      racunId,
+      poruka: `💰 ${window._currentUser.name} je poslao uplatnicu za Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`,
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+    sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`);
+
+    delete _uplatnicaPreviewCache[contextId];
+    showToast('✅ Uplatnica poslata! Admin proverava. Hvala!', 4000);
+
+    // Zatvori kassenbon modal ako je otvoren
+    const modal = document.getElementById('kassenbon-modal');
+    if (modal && modal.style.display !== 'none') {
+      setTimeout(() => { if(modal) modal.style.display = 'none'; }, 1500);
+    }
+    kNavTab('ceka');
+
+  } catch(err) {
+    console.error('_doSendUplatnica error:', err);
+    if (preEl) preEl.style.display = 'none';
+    if (btnEl) btnEl.style.display = 'flex';
+    // Jasna poruka po tipu greške
+    let msg = '❌ Greška pri slanju slike.';
+    if (err.code === 'storage/unauthorized') msg = '❌ Nemaš dozvolu za upload. Kontaktiraj admina.';
+    else if (err.code === 'storage/quota-exceeded') msg = '❌ Nema prostora na serveru. Kontaktiraj admina.';
+    else if (err.message && err.message.includes('network')) msg = '❌ Nema interneta. Poveži se i pokušaj ponovo.';
+    showToast(msg + ' Pokušaj ponovo.', 6000);
+  }
 }
 
 async function stornoRacun(racunId) {
