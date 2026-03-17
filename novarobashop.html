@@ -1578,11 +1578,17 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
   <!-- Tab content -->
   <div id="ktab-racuni" style="padding:16px;display:none;">
-    <div style="font-size:13px;font-weight:700;color:var(--rose);margin-bottom:12px;">🔴 Novi Računi</div>
+    <div style="background:linear-gradient(135deg,#eff6ff,#fff);border:1.5px solid #bfdbfe;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:800;color:#1d4ed8;margin-bottom:4px;">📸 Kako platiti račun?</div>
+      <div style="font-size:13px;color:#1e40af;line-height:1.7;">1. Uplati iznos u banci ili pošti<br>2. Tapni <b>📷 Kamera</b> ili <b>🖼️ Galerija</b> ispod<br>3. Pošalji sliku potvrde — gotovo! ✅</div>
+    </div>
     <div id="k-racuni-list"></div>
   </div>
   <div id="ktab-ceka" style="padding:16px;display:none;">
-    <div style="font-size:13px;font-weight:700;color:#9B7200;margin-bottom:12px;">🟡 Čeka Potvrdu</div>
+    <div style="background:linear-gradient(135deg,#fffbeb,#fff);border:1.5px solid #fde68a;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:800;color:#92400e;">⏳ Čeka potvrdu admina</div>
+      <div style="font-size:12px;color:#b45309;margin-top:3px;">Uplata je primljena. Ako slika nije čitka, možeš poslati novu ispod.</div>
+    </div>
     <div id="k-ceka-list"></div>
   </div>
   <div id="ktab-arhiva" style="padding:16px;display:none;">
@@ -4974,93 +4980,135 @@ function renderKAllRacuni(racuni) {
 }
 
 function kRacunCard(r, showUpload, showArhiva) {
-  const ps = r.paketStatus || 'prep';
-  const paketTxt = ps==='ship'?'Poslato':ps==='cancel'?'Stornirano':'Priprema se';
-  const broj = r.broj || r.id.slice(-4);
-  const iznos = (r.iznos||0).toLocaleString();
+  const ps     = r.paketStatus || 'prep';
+  const broj   = r.broj || r.id.slice(-4);
+  const iznos  = (r.iznos||0).toLocaleString();
   const status = r.status || 'novo';
+  const needsUpload = (status === 'novo' || status === 'ceka') && ps !== 'ship' && status !== 'storno';
 
-  let statusBadge = '';
-  if (status === 'storno') statusBadge = '<span style="background:rgba(148,163,184,0.1);color:#94a3b8;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">STORNO</span>';
-  else if (showArhiva) statusBadge = '<span style="background:rgba(16,185,129,0.12);color:#059669;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">PLAĆENO</span>';
-  else if (status === 'ceka') statusBadge = '<span style="background:rgba(245,158,11,0.12);color:#d97706;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">ČEKA</span>';
-  else statusBadge = '<span style="background:rgba(244,63,94,0.12);color:#fda4af;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">NOVO</span>';
-
-  // bankdata od izabranog admina
+  // Bankdaten des gewählten Admins
   const adminId = document.getElementById('k-global-admin-sel')?.value;
-  const admin = _adminList.find(a => a.id === adminId);
-  const bankInfo = (admin && admin.bankNum) ? `
-    <div style="background:#f1f5ff;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:12px;">
-      <div style="font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:6px;">🏦 Podaci za uplatu</div>
-      <div><span style="color:#888;">Broj računa:</span> <b>${admin.bankNum}</b></div>
-      ${admin.bankName ? `<div><span style="color:#888;">Vlasnik:</span> <b>${admin.bankName}</b></div>` : ''}
-      ${admin.postnetNum ? `<div><span style="color:#888;">PostNet:</span> <b>${admin.postnetNum}</b></div>` : ''}
-    </div>` : '';
+  const admin   = _adminList.find(a => a.id === adminId);
 
-  let html = `<div class="k-racun-card" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
+  // ── NOVO: große, klare Upload-Karte ──
+  if (status === 'novo' && ps !== 'ship') {
+    const bankHtml = (admin && (admin.bankNum || admin.postnetNum)) ? `
+      <div style="background:#f1f5ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🏦 Podaci za uplatu</div>
+        ${admin.bankNum  ? `<div style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:3px;">🏦 ${admin.bankNum}${admin.bankName?' &nbsp;<span style="font-weight:500;font-size:13px;color:#64748b;">'+admin.bankName+'</span>':''}</div>` : ''}
+        ${admin.postnetNum ? `<div style="font-size:15px;font-weight:800;color:#0f172a;">📮 ${admin.postnetNum}${admin.postnetName?' &nbsp;<span style="font-weight:500;font-size:13px;color:#64748b;">'+admin.postnetName+'</span>':''}</div>` : ''}
+      </div>` : '';
+
+    let stavkeHtml = '';
+    if (r.stavke && r.stavke.length) {
+      stavkeHtml = r.stavke.map(s => {
+        const kol = s.kolicina||1;
+        return `<div style="display:flex;justify-content:space-between;font-size:13px;color:#374151;padding:3px 0;">
+          <span>${kol>1?kol+'× ':''} ${s.naziv}</span>
+          <span style="font-weight:700;">${(s.cena*kol).toLocaleString()} RSD</span>
+        </div>`;
+      }).join('');
+    } else {
+      stavkeHtml = `<div style="font-size:13px;color:#555;padding:3px 0;">${r.opis||'—'}</div>`;
+    }
+
+    return `<div class="k-racun-card" style="border:2px solid rgba(244,63,94,0.25);padding:0;overflow:hidden;margin-bottom:14px;">
+      <!-- Glava računa -->
+      <div style="background:linear-gradient(135deg,#fff5f5,#fff);padding:14px 16px 12px;border-bottom:1px dashed #fecaca;" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-size:16px;font-weight:800;color:#0f172a;">Račun #${broj}</div>
+          <span style="background:rgba(244,63,94,0.12);color:#e11d48;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;">🔴 NOVO</span>
+        </div>
+        ${stavkeHtml}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px dashed #fecaca;">
+          <div style="font-size:22px;font-weight:900;color:#0f172a;">${iznos} RSD</div>
+          <div style="font-size:11px;color:#94a3b8;">${r.datum||''}</div>
+        </div>
+      </div>
+      <!-- Upload sekcija — direktno vidljiva, bez skrolovanja -->
+      <div style="background:#fafafa;padding:14px 16px;">
+        ${bankHtml}
+        <div style="font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:12px;text-align:center;">📸 Pošalji sliku potvrde o uplati</div>
+        <!-- Preview -->
+        <div id="upl-preview-${r.id}" style="display:none;margin-bottom:12px;text-align:center;">
+          <img id="upl-img-${r.id}" style="max-height:180px;width:100%;object-fit:contain;border-radius:12px;border:2px solid #3b82f6;margin-bottom:10px;" />
+          <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:10px;">Proveri — da li se vidi dobro?</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕</button>
+          </div>
+        </div>
+        <!-- Dugmad -->
+        <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#1d4ed8;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'DM Sans';">🖼️ Galerija</button>
+        </div>
+        <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:10px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans';">Storno zahtev</button>
+      </div>
+    </div>`;
+  }
+
+  // ── CEKA: sažeta karta s opcijom zamene slike ──
+  if (status === 'ceka') {
+    return `<div class="k-racun-card" style="border:2px solid rgba(245,158,11,0.3);padding:0;overflow:hidden;margin-bottom:14px;">
+      <div style="background:linear-gradient(135deg,#fffbeb,#fff);padding:14px 16px 12px;border-bottom:1px dashed #fde68a;" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div style="font-size:15px;font-weight:800;color:#0f172a;">Račun #${broj}</div>
+          <span style="background:rgba(245,158,11,0.12);color:#d97706;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;">⏳ ČEKA</span>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:#0f172a;margin:6px 0;">${iznos} RSD</div>
+        <div style="font-size:12px;color:#92400e;font-weight:600;">✅ Uplata primljena — admin proverava</div>
+        ${r.uplatnicaUrl ? `<div style="margin-top:8px;"><img src="${r.uplatnicaUrl}" onclick="event.stopPropagation();openImgViewer(this.src)" style="max-height:70px;max-width:120px;object-fit:contain;border-radius:8px;border:1.5px solid #fde68a;cursor:pointer;display:block;" /></div>` : ''}
+      </div>
+      <div style="background:#fffdf5;padding:12px 16px;">
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:8px;text-align:center;">Slika nejasna? Pošalji novu:</div>
+        <div id="upl-preview-${r.id}" style="display:none;margin-bottom:10px;text-align:center;">
+          <img id="upl-img-${r.id}" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #f59e0b;margin-bottom:8px;" />
+          <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:8px;">Proveri — da li se vidi dobro?</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:13px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';">✕</button>
+          </div>
+        </div>
+        <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#d97706;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';">🖼️ Galerija</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── PLAĆENO / POSLATO / STORNO: kompaktna karta ──
+  let statusBadge = '';
+  if (status === 'storno')  statusBadge = '<span style="background:rgba(148,163,184,0.1);color:#94a3b8;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">STORNO</span>';
+  else if (ps === 'ship')   statusBadge = '<span style="background:rgba(20,184,166,0.12);color:#0d9488;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">📦 POSLATO</span>';
+  else                      statusBadge = '<span style="background:rgba(16,185,129,0.12);color:#059669;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">✅ PLAĆENO</span>';
+
+  let stavkeHtml2 = '';
+  if (r.stavke && r.stavke.length) {
+    stavkeHtml2 = `<div style="margin-bottom:8px;">` + r.stavke.map(s => {
+      const kol = s.kolicina||1;
+      return `<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:2px 0;">
+        <span>${kol>1?kol+'× ':''} ${s.naziv}</span>
+        <span style="font-weight:700;">${(s.cena*kol).toLocaleString()} RSD</span>
+      </div>`;
+    }).join('') + `</div>`;
+  } else if (r.opis) {
+    stavkeHtml2 = `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
+  }
+
+  return `<div class="k-racun-card" onclick="openKassenbon('${r.id}')" style="cursor:pointer;margin-bottom:12px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
       <div><div style="font-size:14px;font-weight:800;color:#0A1428;">Račun #${broj}</div>
       <div style="font-size:11px;color:var(--gray2);margin-top:2px;">${r.datum||''}</div></div>
       ${statusBadge}
-    </div>`;
-  // Stavke preview — lista artikala
-  if (r.stavke && r.stavke.length) {
-    html += `<div style="margin-bottom:8px;">` + r.stavke.map(s => {
-      const kol = s.kolicina||1;
-      return `<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:2px 0;">`
-        + `<span>${kol>1?kol+'x ':''} ${s.naziv}</span>`
-        + `<span style="font-weight:700;">${(s.cena*(kol)).toLocaleString()} RSD</span>`
-        + `</div>`;
-    }).join('') + `</div>`;
-  } else if (r.opis) {
-    html += `<div style="font-size:12px;color:#666;margin-bottom:6px;">${r.opis}</div>`;
-  }
-  html += `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e5e7eb;padding-top:8px;margin-top:4px;">
-    <div style="font-size:18px;font-weight:800;color:#0f172a;">${iznos} RSD</div>
-    <div style="font-size:11px;color:#888;font-family:'Courier New',monospace;">Tapni za detalje 🧾</div>
+    </div>
+    ${stavkeHtml2}
+    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e5e7eb;padding-top:8px;margin-top:4px;">
+      <div style="font-size:18px;font-weight:800;color:#0f172a;">${iznos} RSD</div>
+      ${(status==='placeno'||ps==='ship') ? `<button onclick="event.stopPropagation();shareRacunAsImage('${r.id}')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📸 Podeli</button>` : '<div style="font-size:11px;color:#888;">Tapni za detalje 🧾</div>'}
+    </div>
   </div>`;
-  if (r.adminFotoUrl) html += `<div style="margin-bottom:10px;"><div style="font-size:10px;color:var(--gray2);margin-bottom:4px;">📷 Foto od admina:</div><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
-  html += `<div style="display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #F0F2F8;">
-    <div class="k-paket-dot ${ps}"></div>
-    <div style="font-size:12px;color:#555;font-weight:600;">${paketTxt}</div>
-    ${(status==='placeno'||ps==='ship') ? `<button onclick="shareRacunAsImage('${r.id}')" style="margin-left:auto;background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans';">📸 Podeli</button>` : ''}
-  </div>`;
-
-  if ((showUpload || status === 'ceka') && status !== 'storno' && status !== 'placeno' && ps !== 'ship') {
-    const isCeka = status === 'ceka';
-    const uploadLabel = isCeka
-      ? '🔄 Pošalji novu sliku (zameni staru):'
-      : '📎 Pošaljite uplatnicu za ovaj račun:';
-    const uploadBg = isCeka ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.06)';
-    const uploadBorder = isCeka ? 'rgba(245,158,11,0.3)' : '#e0e8ff';
-    html += bankInfo;
-    html += `<div style="margin-top:12px;border-top:1px dashed #e0e8ff;padding-top:12px;">
-      <div style="background:${uploadBg};border:1px solid ${uploadBorder};border-radius:10px;padding:10px 12px;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:700;color:${isCeka?'#d97706':'#3b82f6'};margin-bottom:4px;">${uploadLabel}</div>
-        <div style="font-size:11px;color:#888;">1. Slikaj potvrdu o uplati 📸<br>2. Tapni Kamera ili Galerija<br>3. Sačekaj da admin potvrdi ✅</div>
-      </div>
-      <div id="upl-preview-${r.id}" style="display:none;margin-bottom:10px;text-align:center;">
-        <img id="upl-img-${r.id}" style="max-height:140px;max-width:220px;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />
-        <div style="font-size:12px;color:#555;margin-bottom:8px;">Ovo je tvoja slika — izgleda dobro?</div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;">✅ Pošalji!</button>
-          <button onclick="cancelUplatnicaPreview('${r.id}')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;">✕ Otkaži</button>
-        </div>
-      </div>
-      <div id="upl-btns-${r.id}" style="display:flex;gap:8px;">
-        <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">📷 Kamera</button>
-        <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="flex:1;background:#0f172a;color:white;border:none;border-radius:10px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;">🖼️ Galerija</button>
-      </div>
-      ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">❌ Storno zahtev</button>` : ''}
-    </div>`;
-  }
-
-  if (r.uplatnicaUrl) {
-    html += `<div style="margin-top:10px;"><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid #e0e8ff;cursor:pointer;display:block;" /></div>`;
-  }
-
-  html += '</div>';
-  return html;
 }
 
 function renderKNove(racuni) {
@@ -5072,8 +5120,7 @@ function renderKNove(racuni) {
 function renderKCeka(racuni) {
   const el = document.getElementById('k-ceka-list');
   if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema računa koji čekaju.</div>'; return; }
-  el.innerHTML = '<div style="background:#FFF6DC;border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#9B7200;">⏳ Vaša uplata čeka potvrdu admina.<br><span style="font-size:11px;color:#b45309;">Ako nisi poslao/la sliku ili je slika nejasna, možeš je zameniti ispod.</span></div>'
-    + racuni.map(r => kRacunCard(r, true, false)).join('');
+  el.innerHTML = racuni.map(r => kRacunCard(r, true, false)).join('');
 }
 
 function renderKArhiva(racuni) {
