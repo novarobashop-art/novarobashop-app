@@ -1230,12 +1230,16 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <label class="inp-label">Opis</label>
         <input type="text" class="inp-dark" id="racun-opis" placeholder="Naziv paketa..." />
         <label class="inp-label">Foto (opciono)</label>
-        <input type="file" id="racun-foto-input" accept="image/*" style="display:none;" onchange="previewRacunFoto(event)" />
+        <input type="file" id="racun-foto-input-camera"  accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
+        <input type="file" id="racun-foto-input-gallery" accept="image/*" style="display:none;" onchange="previewRacunFoto(event)" />
         <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
           <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Ukloni foto</button>
         </div>
-        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Nunito';margin-bottom:8px;">📷 Slikaj Foto</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button onclick="document.getElementById('racun-foto-input-camera').click()" style="flex:1;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Nunito';">📷 Kamera</button>
+          <button onclick="document.getElementById('racun-foto-input-gallery').click()" style="flex:1;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Nunito';">🖼️ Galerija</button>
+        </div>
         <button class="btn-teal" onclick="addRacun()">✓ Kreiraj račun</button>
       </div>
       <div id="a-racuni-list"></div>
@@ -4236,7 +4240,10 @@ function previewRacunFoto(event) {
 function clearRacunFoto() {
   _racunFotoBase64 = null;
   document.getElementById('racun-foto-preview').style.display = 'none';
-  document.getElementById('racun-foto-input').value = '';
+  const cam = document.getElementById('racun-foto-input-camera');
+  const gal = document.getElementById('racun-foto-input-gallery');
+  if (cam) cam.value = '';
+  if (gal) gal.value = '';
 }
 
 async function addRacun() {
