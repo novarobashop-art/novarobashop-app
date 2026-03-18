@@ -1595,6 +1595,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </select>
   </div>
 
+  <!-- Zwei separate Inputs: Kamera (capture) und Galerie (ohne capture) -->
+  <input type="file" id="uplatnica-input-camera"  accept="image/*" capture="environment" style="display:none;" onchange="uploadUplatnica(event)" />
+  <input type="file" id="uplatnica-input-gallery" accept="image/*" style="display:none;" onchange="uploadUplatnica(event)" />
+  <!-- Legacy fallback -->
   <input type="file" id="uplatnica-input" accept="image/*" style="display:none;" onchange="uploadUplatnica(event)" />
 
   <!-- DASHBOARD TAB — DEFAULT -->
@@ -6220,9 +6224,9 @@ function openUplatnicaWithPreview(racunId, mode, contextId) {
   _uplatnicaPreviewCache[cid] = { racunId, base64: null };
   _currentUplatnicaRacunId = racunId;
   _currentUplatnicaContext = cid;
-  const input = document.getElementById('uplatnica-input');
-  if (mode === 'camera') input.setAttribute('capture', 'environment');
-  else input.removeAttribute('capture');
+  // Getrennten Input für Kamera vs. Galerie verwenden
+  const inputId = mode === 'camera' ? 'uplatnica-input-camera' : 'uplatnica-input-gallery';
+  const input = document.getElementById(inputId) || document.getElementById('uplatnica-input');
   input.click();
 }
 
@@ -6965,17 +6969,37 @@ function msgFotoPreview(inputEl, previewId) {
 }
 
 function triggerFoto(previewId, isCamera) {
-  // Einen einzigen Input nutzen, capture dynamisch setzen/entfernen
-  const inp = document.getElementById('foto-inp-' + previewId)
-           || document.getElementById('foto-cam-' + previewId);
-  if (!inp) return;
+  // Separate Inputs für Kamera und Galerie
   if (isCamera) {
-    inp.setAttribute('capture', 'environment');
+    // Kamera-Input: immer capture="environment"
+    let camInp = document.getElementById('foto-cam-' + previewId);
+    if (!camInp) {
+      // Dynamisch erstellen falls nicht vorhanden
+      camInp = document.createElement('input');
+      camInp.type = 'file';
+      camInp.id = 'foto-cam-' + previewId;
+      camInp.accept = 'image/*';
+      camInp.setAttribute('capture', 'environment');
+      camInp.style.display = 'none';
+      camInp.onchange = function() { msgFotoPreview(this, previewId); };
+      document.body.appendChild(camInp);
+    }
+    camInp.click();
   } else {
-    inp.removeAttribute('capture');
+    // Galerie-Input: ohne capture
+    let galInp = document.getElementById('foto-inp-' + previewId);
+    if (!galInp) {
+      galInp = document.createElement('input');
+      galInp.type = 'file';
+      galInp.id = 'foto-inp-' + previewId;
+      galInp.accept = 'image/*';
+      galInp.style.display = 'none';
+      galInp.onchange = function() { msgFotoPreview(this, previewId); };
+      document.body.appendChild(galInp);
+    }
+    galInp.removeAttribute('capture');
+    galInp.click();
   }
-  // Kleiner Delay damit Browser das Attribut übernimmt
-  setTimeout(() => inp.click(), 50);
 }
 
 function clearMsgFoto(previewId) {
