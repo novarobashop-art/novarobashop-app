@@ -2045,7 +2045,7 @@ function showToast(msg, dur=3000) {
 const _FAQS = [
   { q:"📦 Kako da platim račun?", a:"1. Idi na tab Računi<br>2. Klikni na račun koji trebaš da platiš<br>3. Pogledaj podatke za uplatu<br>4. Uplati iznos u banci ili pošti<br>5. Slikaj potvrdu o uplati<br>6. Klikni Kamera ili Galerija i pošalji sliku adminu" },
   { q:"📷 Kako da pošaljem uplatnicu?", a:"Nakon što uplatiš:<br>1. Otvori tab Računi<br>2. Klikni na otvorenu računu<br>3. Klikni Kamera — odmah fotografiši potvrdu<br>   ili Galerija — izaberi sliku iz telefona<br>4. Sačekaj da admin potvrdi plaćanje" },
-  { q:"⏰ Koliko vremena imam za plaćanje?", a:"Imaš <b>4 dana</b> od kreiranja računa.<br>Dan 1-2: Normalno<br>Dan 3: Upozorenje<br>Dan 4: Poslednje upozorenje<br>Dan 5+: Nalog može biti blokiran<br><br>Na Home strani uvek vidiš countdown koliko dana ti je ostalo." },
+  { q:"⏰ Koliko vremena imam za plaćanje?", a:"Novi kupci (prva narudžbina): imaš <b>1 radni dan</b>.<br>Stalni kupci: imaš <b>3 radna dana</b> od kreiranja računa.<br><br>Dan 1-2: Normalno<br>Dan 3: Upozorenje<br>Dan 4+: Nalog može biti blokiran<br><br>Na Home strani uvek vidiš countdown koliko dana ti je ostalo." },
   { q:"🟡 Šta znači Čeka Potvrdu?", a:"Poslao/la si uplatnicu i čekaš da admin potvrdi uplatu.<br><br>Obično traje <b>1-24 sata</b>. Kad admin potvrdi, račun postaje Plaćeno automatski." },
   { q:"📦 Šta znači Poslato?", a:"Admin je potvrdio da je paket poslat!<br>Sačekaj dostavu na kućnu adresu.<br><br>Ako postoji problem sa dostavom, kontaktiraj admina direktno." },
   { q:"🔒 Nalog mi je blokiran — šta da radim?", a:"Nalog se blokira ako ima neplaćenih računa duže od 4 dana.<br><br>Rešenje:<br>1. Plati otvorene račune što pre<br>2. Pošalji uplatnicu adminu<br>3. Kontaktiraj admina kroz Podršku u app<br>4. Admin odblokuje nalog čim potvrdi uplatu" },
@@ -2393,7 +2393,7 @@ function _getRok(r, alleKupacRacuni) {
     (x.createdAt || x.datum || '') < (r.createdAt || r.datum || '')
   );
   const istNeukunde = frühereRacuni.length === 0;
-  const fristTage = istNeukunde ? 1 : 4;
+  const fristTage = istNeukunde ? 1 : 3;
 
   // Werktage vorwärts zählen (Sa=6, So=0 überspringen)
   let datum = new Date(start);
