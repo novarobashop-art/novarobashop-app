@@ -3701,9 +3701,11 @@ function renderAdminInbox() {
       byKupac[kid] = { kid, name: p.odIme||'', tiktok: p.odTiktok||'', nick: p.odNick||'',
         lastMsg: p.tekst||'📷 Slika', lastVreme: p.vreme||'',
         unread: poruke.filter(x => x.od===kid && !x.procitano).length,
-        porukaId: p.id, status: p.status };
+        porukaId: p.id, status: p.status||'' };
     } else {
       byKupac[kid].unread += (!p.procitano ? 1 : 0);
+      // Status der neuesten Nachricht behalten
+      if (p.status) byKupac[kid].status = p.status;
     }
   });
 
@@ -3723,8 +3725,16 @@ function renderAdminInbox() {
     const isActive = r.kid === _adminChatKupacId;
     const vreme = (r.lastVreme||'').slice(11,16);
     const avatar = (r.tiktok||r.name||'K').charAt(0).toUpperCase();
+    // Status-Kreis
+    const stCircle = {
+      hitno:     `<div style="width:12px;height:12px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.8);flex-shrink:0;"></div>`,
+      proverava: `<div style="width:12px;height:12px;border-radius:50%;background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,0.8);flex-shrink:0;"></div>`,
+      reseno:    `<div style="width:12px;height:12px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.8);flex-shrink:0;"></div>`,
+    };
+    const statusDot = stCircle[r.status] || '';
+    const leftBorder = r.status === 'hitno' ? 'rgba(239,68,68,0.5)' : r.status === 'proverava' ? 'rgba(245,158,11,0.5)' : r.status === 'reseno' ? 'rgba(34,197,94,0.5)' : isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)';
     return `<div onclick="openAdminChat('${r.kid}','${(r.name||'').replace(/'/g,"\\'")}','${r.tiktok||''}','${r.porukaId||''}')"
-      style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;background:${isActive?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.03)'};border:1px solid ${isActive?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.06)'};transition:all 0.15s;">
+      style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;background:${isActive?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.03)'};border:1px solid ${leftBorder};transition:all 0.15s;">
       <div style="width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0;color:white;">${avatar}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -3733,7 +3743,10 @@ function renderAdminInbox() {
         </div>
         <div style="font-size:11px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.lastMsg}</div>
       </div>
-      ${r.unread ? `<div style="background:var(--blue);color:white;border-radius:50%;min-width:20px;height:20px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${r.unread}</div>` : ''}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+        ${statusDot}
+        ${r.unread ? `<div style="background:var(--blue);color:white;border-radius:50%;min-width:18px;height:18px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;">${r.unread}</div>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
