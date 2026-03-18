@@ -1503,25 +1503,66 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
 
     <!-- PODRŠKA ADMIN TAB -->
-    <div id="atab-podrska-admin" style="display:none;">
-      <!-- Poruke od Kupaca -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:15px;font-weight:800;">💬 Poruke od Kupaca</div>
-        <input type="text" id="admin-poruke-search" placeholder="🔍 @tiktok..." oninput="filterAdminPoruke(this.value)"
-          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Nunito';outline:none;width:140px;" />
-      </div>
+    <div id="atab-podrska-admin" style="display:none;flex-direction:column;height:calc(100vh - 160px);overflow:hidden;">
 
-      <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
-      <!-- Poruke od Haupta -->
-      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
-        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;">👑 Poruke od Haupta</div>
-        <div id="admin-haupt-odgovori"><div style="font-size:12px;color:var(--txt3);">Nema poruka od Haupta.</div></div>
-      </div>
-      <!-- Kontaktiraj Haupt -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
-        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;">📩 Kontaktiraj Haupt</div>
-        <textarea class="inp-dark" id="admin-haupt-msg" placeholder="Pišite Hauptu..." rows="3" style="resize:none;margin-bottom:8px;"></textarea>
-        <button class="btn-gold" onclick="sendAdminToHaupt()">Pošalji Hauptu</button>
+      <!-- ── 2-Panel Layout: Kunden-Liste + Chat ── -->
+      <div style="display:flex;height:100%;gap:0;">
+
+        <!-- PANEL A: Kunden-Liste -->
+        <div id="admin-chat-panel-a" style="width:100%;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,0.08);">
+          <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;align-items:center;flex-shrink:0;">
+            <div style="font-size:14px;font-weight:800;">💬 Inbox</div>
+            <input type="text" id="admin-poruke-search" placeholder="🔍 Pretraži..." oninput="filterAdminPoruke(this.value)"
+              style="flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Nunito';outline:none;" />
+          </div>
+          <!-- Haupt Nachrichten Bereich -->
+          <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;">
+            <div onclick="openAdminHauptChat()" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.2);border-radius:12px;cursor:pointer;" id="admin-haupt-inbox-row">
+              <div style="width:38px;height:38px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👑</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:800;color:var(--gold);">Haupt</div>
+                <div style="font-size:11px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="admin-haupt-preview">—</div>
+              </div>
+              <div id="admin-haupt-badge" style="display:none;background:var(--rose);color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:800;align-items:center;justify-content:center;">!</div>
+            </div>
+          </div>
+          <!-- Kunden Liste -->
+          <div id="admin-poruke-list" style="flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;">
+            <div class="section-empty">Nema poruka.</div>
+          </div>
+        </div>
+
+        <!-- PANEL B: Chat mit einem Kunden -->
+        <div id="admin-chat-panel-b" style="display:none;flex-direction:column;width:100%;">
+          <!-- Chat Header -->
+          <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;flex-shrink:0;background:rgba(255,255,255,0.03);">
+            <button onclick="closeAdminChat()" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;">←</button>
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;" id="admin-chat-avatar">K</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:800;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="admin-chat-title">—</div>
+              <div style="font-size:10px;color:var(--txt3);" id="admin-chat-sub">—</div>
+            </div>
+            <!-- Status Buttons -->
+            <div style="display:flex;gap:4px;flex-shrink:0;" id="admin-chat-status-btns"></div>
+          </div>
+          <!-- Chat Feed -->
+          <div id="admin-chat-feed" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;"></div>
+          <!-- Foto Vorschau -->
+          <div id="foto-prev-areply" style="padding:0 14px 4px;flex-shrink:0;"></div>
+          <!-- Eingabe -->
+          <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.07);padding:10px 12px;background:rgba(255,255,255,0.02);display:flex;gap:8px;align-items:flex-end;">
+            <input type="file" id="foto-inp-areply" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'areply')" />
+            <input type="file" id="foto-cam-areply" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'areply')" />
+            <button onclick="document.getElementById('foto-inp-areply').click()" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
+            <button onclick="document.getElementById('foto-cam-areply').click()" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
+            <textarea id="admin-chat-input" rows="1" placeholder="Odgovori..."
+              oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminChatSend();}"
+              style="flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:18px;padding:9px 14px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);line-height:1.4;max-height:90px;overflow-y:auto;"></textarea>
+            <button onclick="adminChatSend()" style="background:var(--gold);border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">➤</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1642,45 +1683,91 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-poslato" style="padding:16px;display:none;">
     <div id="k-poslato-list"></div>
   </div>
-  <div id="ktab-podrska" style="padding:16px;display:none;">
-    <div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px;">💬 Podrška i Uplata</div>
+  <!-- ══════════════ PODRŠKA — CHAT UI ══════════════ -->
+  <div id="ktab-podrska" style="display:none;flex-direction:column;height:calc(100dvh - 64px);overflow:hidden;">
 
-    <!-- Bankdaten -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">🏦 Podaci za uplatu</div>
-      <div style="margin-bottom:8px;"><div style="font-size:10px;color:var(--txt3);">Broj računa</div><div style="font-weight:700;" id="k-bank-num">—</div></div>
-      <div style="margin-bottom:8px;"><div style="font-size:10px;color:var(--txt3);">Vlasnik</div><div style="font-weight:700;" id="k-bank-name">—</div></div>
-      <div style="margin-bottom:8px;"><div style="font-size:10px;color:var(--txt3);">PostNet broj</div><div style="font-weight:700;" id="k-postnet-num">—</div></div>
-      <div><div style="font-size:10px;color:var(--txt3);">PostNet ime</div><div style="font-weight:700;" id="k-postnet-name">—</div></div>
-    </div>
-    <!-- Poruke od admina -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📬 Poruke od Admina</div>
-      <div id="k-admin-poruke-list"><div style="text-align:center;color:var(--txt3);padding:20px;font-size:13px;">Nema poruka od admina.</div></div>
-    </div>
-    <!-- Poruka adminu -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Pošalji poruku Adminu</div>
-      <label style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
-      <select id="k-poruka-admin-sel" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;margin-bottom:10px;color:var(--txt);">
-        <option value="">Izaberite admina...</option>
+    <!-- ── Header: Admin wählen ── -->
+    <div style="padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:15px;font-weight:800;color:var(--txt);">💬 Podrška</div>
+        <div id="k-chat-online-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;margin-left:auto;"></div>
+        <div id="k-chat-online-lbl" style="font-size:10px;color:var(--txt3);">Izaberite admina</div>
+      </div>
+      <select id="k-poruka-admin-sel" onchange="onChatAdminChange(this.value)"
+        style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Nunito';outline:none;color:var(--txt);">
+        <option value="">— Izaberite admina —</option>
       </select>
-      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Vaša poruka..."></textarea>
+    </div>
+
+    <!-- ── Bankdaten (einklappbar) ── -->
+    <div id="k-chat-bank-bar" style="display:none;flex-shrink:0;background:rgba(37,99,235,0.08);border-bottom:1px solid rgba(37,99,235,0.18);padding:8px 16px;cursor:pointer;" onclick="toggleChatBank()">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;font-weight:700;color:#93c5fd;">🏦 Podaci za uplatu</span>
+        <span id="k-chat-bank-arrow" style="font-size:11px;color:#93c5fd;">▼</span>
+      </div>
+      <div id="k-chat-bank-detail" style="display:none;padding-top:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Broj računa</div>
+            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-bank-num">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Vlasnik</div>
+            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-bank-name">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">PostNet broj</div>
+            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-postnet-num">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">PostNet ime</div>
+            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-postnet-name">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Chat Verlauf ── -->
+    <div id="k-chat-feed" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;">
+      <div id="k-chat-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">💬</div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px;">Izaberite admina gore</div>
+        <div style="font-size:12px;color:var(--txt3);">Chat istorija će se pojaviti ovde</div>
+      </div>
+    </div>
+
+    <!-- ── Foto Vorschau ── -->
+    <div id="foto-prev-kporuka" style="padding:0 16px 4px;flex-shrink:0;"></div>
+
+    <!-- ── Haupt Warnung (einklappbar) ── -->
+    <div id="k-chat-haupt-bar" style="flex-shrink:0;border-top:1px solid rgba(255,122,48,0.2);padding:0;">
+      <div onclick="toggleHauptBar()" style="display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;background:rgba(255,122,48,0.05);">
+        <span style="font-size:11px;color:var(--orange);font-weight:700;">⚠️ Žalba Hauptu</span>
+        <span id="k-haupt-arrow" style="font-size:10px;color:var(--orange);margin-left:auto;">▶</span>
+      </div>
+      <div id="k-haupt-expand" style="display:none;padding:0 16px 10px;background:rgba(255,122,48,0.04);">
+        <div style="font-size:11px;color:#888;margin-bottom:6px;">Koristite samo ako Admin nije rešio problem</div>
+        <div style="display:flex;gap:6px;">
+          <textarea id="k-poruka-haupt" style="flex:1;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:10px;font-size:13px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="2" placeholder="Opišite problem..."></textarea>
+          <button onclick="posaljiPoruku('haupt')" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:20px;cursor:pointer;align-self:flex-end;">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Eingabe ── -->
+    <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.07);padding:10px 12px;background:var(--bg2);display:flex;gap:8px;align-items:flex-end;">
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
-      </div>
-      <div id="foto-prev-kporuka"></div>
-      <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Adminu</button>
-    </div>
-    <!-- Eskalacija - Haupt -->
-    <div style="background:rgba(255,122,48,0.06);border:1px solid rgba(255,122,48,0.2);border-radius:16px;padding:16px;">
-      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;">⚠️ Žalba - Kontaktiraj Haupt</div>
-      <div style="font-size:11px;color:#888;margin-bottom:10px;">Koristite samo ako Admin nije rešio problem</div>
-      <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
-      <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Hauptu</button>
+      <button onclick="document.getElementById('foto-inp-kporuka').click()" title="Galerija"
+        style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
+      <button onclick="document.getElementById('foto-cam-kporuka').click()" title="Kamera"
+        style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
+      <textarea id="k-poruka" rows="1" placeholder="Poruka..."
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"
+        style="flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:18px;padding:9px 14px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);line-height:1.4;max-height:90px;overflow-y:auto;"></textarea>
+      <button onclick="chatSendMsg()"
+        style="background:var(--blue);border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">➤</button>
     </div>
   </div>
 
@@ -2348,21 +2435,19 @@ async function loadAdminData() {
     renderAdminPoruke(poruke);
   });
 
-  // Load poruke from Haupt to this admin
+  // Load poruke from Haupt to this admin (für Chat-Verlauf)
+  let _allAdminHauptPoruke = [];
   onSnapshot(query(collection(db, 'haupt_odgovori'), where('za', '==', u.uid)), snap => {
-    const haupt = [];
-    snap.forEach(d => haupt.push({id:d.id,...d.data()}));
-    if (haupt.length) {
-      const el = document.getElementById('admin-haupt-odgovori');
-      if (el) el.innerHTML = haupt.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(p => `
-        <div style="background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.2);border-radius:12px;padding:12px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-            <div style="font-weight:800;font-size:12px;color:var(--gold);">👑 Haupt</div>
-            <div style="font-size:10px;color:var(--txt3);">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
-          </div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.85);">${p.tekst}</div>
-        </div>`).join('');
-    }
+    _allAdminHauptPoruke = [];
+    snap.forEach(d => _allAdminHauptPoruke.push({id:d.id,...d.data(),tip:'haupt'}));
+    // Preview in Inbox-Zeile
+    const latest = _allAdminHauptPoruke.sort((a,b)=>b.vreme>a.vreme?1:-1)[0];
+    const prev = document.getElementById('admin-haupt-preview');
+    if (prev && latest) prev.textContent = latest.tekst||'';
+    const badge = document.getElementById('admin-haupt-badge');
+    const unread = _allAdminHauptPoruke.filter(p=>!p.procitano).length;
+    if (badge) { badge.style.display = unread ? 'flex' : 'none'; badge.textContent = unread; }
+    if (_adminHauptMode) openAdminHauptChat();
   });
 
   // Load bank data
@@ -3368,48 +3453,286 @@ function toggleAdminReply(safeId) {
   }
 }
 
+// ══════════════════════════════════════════════════
+// ADMIN CHAT — Inbox + Chat Verlauf
+// ══════════════════════════════════════════════════
+let _adminChatKupacId   = null;  // aktuell geöffneter Kunde
+let _adminChatKupacName = '';
+let _adminChatPoruke    = [];    // empfangene (von Kunden)
+let _adminChatSent      = [];    // gesendete (vom Admin)
+let _adminHauptMode     = false; // Haupt-Chat geöffnet
+
 function renderAdminPoruke(poruke) {
+  _adminChatPoruke = poruke;
+  renderAdminInbox();
+  // Falls schon ein Chat offen, Verlauf neu rendern
+  if (_adminChatKupacId && !_adminHauptMode) renderAdminChatFeed();
+}
+
+function renderAdminInbox() {
   const el = document.getElementById('admin-poruke-list');
-  if (!poruke.length) { el.innerHTML = '<div class="section-empty">Nema poruka od kupaca.</div>'; return; }
-  el.innerHTML = poruke.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(p => {
-    const safeId = p.id.replace(/[^a-zA-Z0-9]/g,'_');
-    const statusStyle = getAPStatusStyle(p.status);
-    const statusLabel = getAPStatusLabel(p.status);
-    return `<div class="poruka-card ${!p.procitano?'notif-new':''}" onclick="toggleAdminReply('${safeId}')" style="cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div onclick="toggleAPoruka('${safeId}')" style="cursor:pointer;flex:1;">
-          <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;">🛍️ Kupac</div>
-          ${p.odTiktok ? `<div style="font-size:14px;color:var(--teal);font-weight:800;">@${p.odTiktok}${p.odNick ? ` <span style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:400;">· ${p.odNick}</span>` : ''}</div>` : ''}
-          ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);">${kpd.tiktokNick||''}</div>` : ''; })()}
-          <div id="aporuka-detail-${safeId}" style="display:none;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;margin-top:6px;font-size:11px;">
-            ${(() => { const kpd = (_allKupci||[]).find(k=>k.id===p.od); return kpd ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;"><div><span style="color:#888;">Ime:</span><br><b style="color:white;">${kpd.name||'—'}</b></div><div><span style="color:#888;">Tel:</span><br><b style="color:white;">${kpd.telefon||'—'}</b></div><div><span style="color:#888;">Ulica:</span><br><b style="color:white;">${kpd.ulica||'—'}</b></div><div><span style="color:#888;">PTT/Grad:</span><br><b style="color:white;">${kpd.ptt||'—'} ${kpd.grad||'—'}</b></div><div><span style="color:#888;">Selo:</span><br><b style="color:white;">${kpd.selo||'—'}</b></div></div>` : ''; })()}
-          </div>
-          <div style="font-size:10px;color:var(--txt2);margin-top:2px;">▼ detalji</div>
+  if (!el) return;
+  const poruke = _adminChatPoruke || [];
+  const search = (document.getElementById('admin-poruke-search')?.value||'').toLowerCase();
+
+  // Pro Kunde: neueste Nachricht
+  const byKupac = {};
+  poruke.forEach(p => {
+    const kid = p.od;
+    if (!byKupac[kid] || p.vreme > byKupac[kid].lastVreme) {
+      byKupac[kid] = { kid, name: p.odIme||'', tiktok: p.odTiktok||'', nick: p.odNick||'',
+        lastMsg: p.tekst||'📷 Slika', lastVreme: p.vreme||'',
+        unread: poruke.filter(x => x.od===kid && !x.procitano).length,
+        porukaId: p.id, status: p.status };
+    } else {
+      byKupac[kid].unread += (!p.procitano ? 1 : 0);
+    }
+  });
+
+  let rows = Object.values(byKupac).sort((a,b) => b.lastVreme > a.lastVreme ? 1 : -1);
+  if (search) rows = rows.filter(r =>
+    r.tiktok.toLowerCase().includes(search) ||
+    r.nick.toLowerCase().includes(search) ||
+    r.name.toLowerCase().includes(search)
+  );
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="section-empty">Nema poruka od kupaca.</div>';
+    return;
+  }
+
+  el.innerHTML = rows.map(r => {
+    const isActive = r.kid === _adminChatKupacId;
+    const vreme = (r.lastVreme||'').slice(11,16);
+    const avatar = (r.tiktok||r.name||'K').charAt(0).toUpperCase();
+    return `<div onclick="openAdminChat('${r.kid}','${(r.name||'').replace(/'/g,"\\'")}','${r.tiktok||''}','${r.porukaId||''}')"
+      style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;background:${isActive?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.03)'};border:1px solid ${isActive?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.06)'};transition:all 0.15s;">
+      <div style="width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0;color:white;">${avatar}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;font-weight:${r.unread?'800':'600'};color:${r.unread?'white':'var(--txt2)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;">@${r.tiktok||r.name||'—'}</div>
+          <div style="font-size:10px;color:var(--txt3);flex-shrink:0;margin-left:4px;">${vreme}</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:10px;color:var(--txt3);">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
-          <div style="margin-top:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;${statusStyle}">${statusLabel}</div>
-        </div>
+        <div style="font-size:11px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.lastMsg}</div>
       </div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />` : ''}
-      <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
-        <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(45,190,108,0.15);color:var(--green);border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
-        </div>
-        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'Nunito';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
-        ${fotoButtonsHtml('a'+safeId, false)}
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📩 Pošalji odgovor</button>
-          <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;">🗑️</button>
-        </div>
-      </div>
+      ${r.unread ? `<div style="background:var(--blue);color:white;border-radius:50%;min-width:20px;height:20px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${r.unread}</div>` : ''}
     </div>`;
   }).join('');
 }
 
+function filterAdminPoruke(val) {
+  renderAdminInbox();
+}
+
+function openAdminChat(kupacId, kupacName, tiktok, porukaId) {
+  _adminChatKupacId   = kupacId;
+  _adminChatKupacName = kupacName;
+  _adminHauptMode     = false;
+
+  // Panel wechseln
+  const pa = document.getElementById('admin-chat-panel-a');
+  const pb = document.getElementById('admin-chat-panel-b');
+  if (pa) pa.style.display = 'none';
+  if (pb) { pb.style.display = 'flex'; }
+
+  // Header befüllen
+  const avatar = (tiktok||kupacName||'K').charAt(0).toUpperCase();
+  const el = id => document.getElementById(id);
+  if(el('admin-chat-avatar')) el('admin-chat-avatar').textContent = avatar;
+  if(el('admin-chat-title'))  el('admin-chat-title').textContent  = tiktok ? '@'+tiktok : kupacName||'Kupac';
+  const kd = (_allKupci||[]).find(k => k.id === kupacId);
+  if(el('admin-chat-sub'))    el('admin-chat-sub').textContent    = kd ? (kd.tiktokNick||kd.name||'') : kupacName;
+
+  // Status-Buttons für neueste Poruka
+  const latestPoruka = (_adminChatPoruke||[]).filter(p=>p.od===kupacId).sort((a,b)=>b.vreme>a.vreme?1:-1)[0];
+  if (latestPoruka && el('admin-chat-status-btns')) {
+    el('admin-chat-status-btns').innerHTML = `
+      <button onclick="setAdminPorukaStatus('${latestPoruka.id}','hitno')" title="Hitno" style="background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:5px 8px;font-size:11px;cursor:pointer;color:var(--red);">🔴</button>
+      <button onclick="setAdminPorukaStatus('${latestPoruka.id}','proverava')" title="Proverava" style="background:rgba(255,184,0,0.15);border:1px solid rgba(255,184,0,0.3);border-radius:8px;padding:5px 8px;font-size:11px;cursor:pointer;color:#FFB800;">🟡</button>
+      <button onclick="setAdminPorukaStatus('${latestPoruka.id}','reseno')" title="Rešeno" style="background:rgba(45,190,108,0.15);border:1px solid rgba(45,190,108,0.3);border-radius:8px;padding:5px 8px;font-size:11px;cursor:pointer;color:var(--green);">🟢</button>`;
+  }
+
+  // Gesendete Nachrichten laden
+  loadAdminSentToKupac(kupacId);
+  renderAdminChatFeed();
+
+  // Als gelesen markieren
+  (_adminChatPoruke||[]).filter(p=>p.od===kupacId && !p.procitano).forEach(p => {
+    try { const {db,doc,updateDoc} = window._fb; updateDoc(doc(db,'poruke',p.id),{procitano:true}); } catch(e){}
+  });
+}
+
+function closeAdminChat() {
+  _adminChatKupacId = null;
+  _adminHauptMode   = false;
+  const pa = document.getElementById('admin-chat-panel-a');
+  const pb = document.getElementById('admin-chat-panel-b');
+  if (pa) pa.style.display = 'flex';
+  if (pb) pb.style.display = 'none';
+  renderAdminInbox();
+}
+
+function loadAdminSentToKupac(kupacId) {
+  if (!window._fb) return;
+  const { db, collection, query, where, onSnapshot } = window._fb;
+  const u = window._currentUser;
+  if (!u) return;
+  onSnapshot(query(collection(db,'admin_poruke'), where('adminId','==',u.uid), where('doKupacId','==',kupacId)), snap => {
+    _adminChatSent = [];
+    snap.forEach(d => _adminChatSent.push({id:d.id,...d.data(),_dir:'out',_vreme:d.data().vreme||''}));
+    if (_adminChatKupacId === kupacId && !_adminHauptMode) renderAdminChatFeed();
+  });
+}
+
+function renderAdminChatFeed() {
+  const feed = document.getElementById('admin-chat-feed');
+  if (!feed) return;
+  const kid = _adminChatKupacId;
+
+  const empfangen = (_adminChatPoruke||[])
+    .filter(p => p.od === kid)
+    .map(p => ({...p, _dir:'in', _vreme:p.vreme||''}));
+  const gesendet = (_adminChatSent||[]);
+
+  const alle = [...empfangen, ...gesendet].sort((a,b) => a._vreme > b._vreme ? 1 : -1);
+
+  if (!alle.length) {
+    feed.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;padding:40px;">Nema poruka.</div>';
+    return;
+  }
+
+  let lastDate = '';
+  const bubbles = alle.map(p => {
+    const isOut = p._dir === 'out';
+    const vreme = (p._vreme||'').slice(0,16).replace('T',' ');
+    const datum = vreme.slice(0,10);
+    let datumBar = '';
+    if (datum && datum !== lastDate) {
+      lastDate = datum;
+      const d = new Date(datum);
+      const heute = new Date(); heute.setHours(0,0,0,0);
+      const gestern = new Date(heute); gestern.setDate(gestern.getDate()-1);
+      let label = datum;
+      if (d.toDateString() === heute.toDateString()) label = 'Danas';
+      else if (d.toDateString() === gestern.toDateString()) label = 'Juče';
+      datumBar = `<div style="text-align:center;margin:10px 0 6px;">
+        <span style="background:rgba(255,255,255,0.08);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--txt3);">${label}</span>
+      </div>`;
+    }
+    const bg     = isOut ? 'var(--gold)' : 'rgba(255,255,255,0.09)';
+    const txt    = isOut ? '#000' : 'var(--txt)';
+    const align  = isOut ? 'flex-end' : 'flex-start';
+    const radius = isOut ? '18px 18px 4px 18px' : '18px 18px 18px 4px';
+    const sender = isOut ? '' : `<div style="font-size:10px;font-weight:700;color:var(--teal);margin-bottom:3px;">🛍️ Kupac</div>`;
+    const tick   = isOut ? (p.procitano ? ' ✓✓' : ' ✓') : '';
+    return `${datumBar}
+    <div style="display:flex;flex-direction:column;align-items:${align};gap:1px;">
+      ${sender}
+      <div style="max-width:80%;background:${bg};border-radius:${radius};padding:9px 13px;">
+        ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-width:200px;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:6px;cursor:pointer;display:block;" />` : ''}
+        <div style="font-size:14px;color:${txt};line-height:1.45;white-space:pre-wrap;">${p.tekst||''}</div>
+        <div style="font-size:10px;color:${isOut?'rgba(0,0,0,0.45)':'var(--txt3)'};text-align:right;margin-top:4px;">${vreme.slice(11,16)}${tick}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  feed.innerHTML = bubbles;
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 50);
+}
+
+async function adminChatSend() {
+  const kid  = _adminChatKupacId;
+  if (!kid) return;
+  if (_adminHauptMode) { sendAdminToHaupt(); return; }
+  const ta   = document.getElementById('admin-chat-input');
+  const tekst = ta ? ta.value.trim() : '';
+  const hasFoto = !!_fotoCache['areply'];
+  if (!tekst && !hasFoto) { showToast('⚠️ Unesite poruku'); return; }
+  const { db, collection, addDoc } = window._fb;
+  const u = window._currentUser;
+  let fotoUrl = null;
+  if (hasFoto) {
+    const path = 'poruke/' + u.uid + '/' + Date.now() + '.jpg';
+    fotoUrl = await uploadFotoToStorage(_fotoCache['areply'], path);
+    clearMsgFoto('areply');
+  }
+  const kd = (_allKupci||[]).find(k => k.id === kid);
+  await addDoc(collection(db,'admin_poruke'), {
+    adminId: u.uid,
+    adminName: u.name || '',
+    doKupacId: kid,
+    doKupacName: _adminChatKupacName,
+    od: u.uid,
+    tekst: tekst||'', foto: fotoUrl,
+    vreme: new Date().toISOString(),
+    procitano: false,
+    status: ''
+  });
+  // Push
+  try { sendPushToUser(kid, '📩 Poruka od Admina', (tekst||'📷').slice(0,60)); } catch(e){}
+  // Notif
+  try {
+    const { addDoc: ad, collection: col, serverTimestamp: st } = window._fb;
+    await ad(col(db,'notifikacije'),{
+      userId: kid, tip:'poruka_od_admina',
+      poruka: '📩 '+(u.name||'Admin')+': '+(tekst||'').slice(0,80),
+      vreme: new Date().toISOString(), procitano: false
+    });
+  } catch(e){}
+  if (ta) { ta.value=''; ta.style.height='auto'; }
+  renderAdminChatFeed();
+  showToast('✅ Poruka poslata!');
+}
+
+// Haupt Chat öffnen
+function openAdminHauptChat() {
+  _adminHauptMode     = true;
+  _adminChatKupacId   = null;
+  const pa = document.getElementById('admin-chat-panel-a');
+  const pb = document.getElementById('admin-chat-panel-b');
+  if (pa) pa.style.display = 'none';
+  if (pb) pb.style.display = 'flex';
+  const el = id => document.getElementById(id);
+  if(el('admin-chat-avatar')) el('admin-chat-avatar').textContent = '👑';
+  if(el('admin-chat-avatar')) el('admin-chat-avatar').style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+  if(el('admin-chat-title'))  el('admin-chat-title').textContent  = 'Haupt';
+  if(el('admin-chat-sub'))    el('admin-chat-sub').textContent    = 'Kontakt za žalbe';
+  if(el('admin-chat-status-btns')) el('admin-chat-status-btns').innerHTML = '';
+  // Haupt Poruke rendern
+  const feed = document.getElementById('admin-chat-feed');
+  if (feed) {
+    const hPoruke = (_allAdminHauptPoruke||[]).sort((a,b)=>a.vreme>b.vreme?1:-1);
+    if (!hPoruke.length) {
+      feed.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;padding:40px;">Nema poruka od Haupta.</div>';
+    } else {
+      let lastDate = '';
+      feed.innerHTML = hPoruke.map(p => {
+        const isOut = p.tip === 'admin';
+        const vreme = (p.vreme||'').slice(0,16).replace('T',' ');
+        const datum = vreme.slice(0,10);
+        let datumBar = '';
+        if (datum !== lastDate) {
+          lastDate = datum;
+          datumBar = `<div style="text-align:center;margin:10px 0 6px;"><span style="background:rgba(255,255,255,0.08);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--txt3);">${datum}</span></div>`;
+        }
+        const bg    = isOut ? 'var(--gold)' : 'rgba(232,160,32,0.12)';
+        const txt   = isOut ? '#000' : 'var(--txt)';
+        const align = isOut ? 'flex-end' : 'flex-start';
+        const radius= isOut ? '18px 18px 4px 18px' : '18px 18px 18px 4px';
+        return `${datumBar}
+        <div style="display:flex;flex-direction:column;align-items:${align};gap:1px;">
+          <div style="max-width:80%;background:${bg};border-radius:${radius};padding:9px 13px;">
+            <div style="font-size:14px;color:${txt};line-height:1.45;white-space:pre-wrap;">${p.tekst||''}</div>
+            <div style="font-size:10px;color:${isOut?'rgba(0,0,0,0.4)':'var(--txt3)'};text-align:right;margin-top:4px;">${vreme.slice(11,16)}</div>
+          </div>
+        </div>`;
+      }).join('');
+      setTimeout(()=>{feed.scrollTop=feed.scrollHeight;},50);
+    }
+  }
+  const inp = document.getElementById('admin-chat-input');
+  if (inp) inp.placeholder = 'Pišite Hauptu...';
+}
 
 function toggleAKupacDetail(safeId) {
   const d = document.getElementById('akupac-detail-' + safeId);
@@ -3431,7 +3754,7 @@ function aTab(name, el) {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
-  document.getElementById('atab-' + name).style.display = 'block';
+  document.getElementById('atab-' + name).style.display = (name === 'podrska-admin') ? 'flex' : 'block';
   if (name === 'live') renderLiveGrid(window._allKupciGlobal || []);
   if (name === 'dashboard') renderDashboard();
   if (name === 'proizvodi') loadProizvodi();
@@ -3825,7 +4148,10 @@ function showKupacRacuniFilter(kupacId) {
 }
 
 async function sendAdminToHaupt() {
-  const tekst = document.getElementById('admin-haupt-msg').value.trim();
+  // Liest aus Chat-Input (wenn Haupt-Modus) oder altem Feld
+  const inp = document.getElementById('admin-chat-input');
+  const tekst = (inp && _adminHauptMode ? inp.value : '').trim() ||
+                (document.getElementById('admin-haupt-msg')?.value||'').trim();
   if (!tekst) { showToast('⚠️ Unesite poruku'); return; }
   const { db, collection, addDoc } = window._fb;
   await addDoc(collection(db, 'haupt_poruke'), {
@@ -3836,7 +4162,8 @@ async function sendAdminToHaupt() {
     vreme: new Date().toISOString(),
     procitano: false
   });
-  document.getElementById('admin-haupt-msg').value = '';
+  if (inp && _adminHauptMode) { inp.value=''; inp.style.height='auto'; }
+  if (document.getElementById('admin-haupt-msg')) document.getElementById('admin-haupt-msg').value = '';
   showToast('✅ Poruka poslata Hauptu!');
 }
 
@@ -5061,6 +5388,9 @@ async function loadKupacData() {
     console.error('admin_poruke setup error:', e);
   }
 
+  // Realtime gesendete Nachrichten des Kunden (für Chat-Verlauf)
+  loadKupacSentPoruke(u.uid);
+
   // Učitaj listu admina
   const adminSnap = await getDocs(query(collection(db, 'users'), where('role','==','admin')));
   _adminList = [];
@@ -5362,7 +5692,7 @@ function kNavTab(name) {
     if (lbl) lbl.style.color = '#aaa';
   });
   const tab = document.getElementById('ktab-' + name);
-  if(tab) tab.style.display = 'block';
+  if(tab) tab.style.display = (name === 'podrska') ? 'flex' : 'block';
   const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name]||'var(--blue)';
@@ -5904,35 +6234,191 @@ async function deleteKPoruka(porukaId, event) {
   }
 }
 
+// ══════════════════════════════════════════════════
+// CHAT VERLAUF — Kunde Seite
+// ══════════════════════════════════════════════════
+let _chatAdminId   = null;   // aktuell gewählter Admin
+let _allKupacPoruke = [];    // alle admin_poruke für diesen Kunden
+let _allKupacSent   = [];    // alle poruke die Kunde gesendet hat
+
+function onChatAdminChange(adminId) {
+  _chatAdminId = adminId;
+  // Bankdaten zeigen/verbergen
+  const bar = document.getElementById('k-chat-bank-bar');
+  if (bar) bar.style.display = adminId ? 'block' : 'none';
+  // Online-Indikator
+  const dot = document.getElementById('k-chat-online-dot');
+  const lbl = document.getElementById('k-chat-online-lbl');
+  const admin = (_adminList||[]).find(a => a.id === adminId);
+  if (admin && dot && lbl) {
+    dot.style.background = '#22c55e';
+    lbl.textContent = admin.tiktokNick || admin.name || 'Admin';
+  }
+  // Bankdaten befüllen
+  if (admin) {
+    const el = id => document.getElementById(id);
+    if(el('k-bank-num'))    el('k-bank-num').textContent    = admin.bankNum    || '—';
+    if(el('k-bank-name'))   el('k-bank-name').textContent   = admin.bankName   || '—';
+    if(el('k-postnet-num')) el('k-postnet-num').textContent = admin.postnetNum || '—';
+    if(el('k-postnet-name'))el('k-postnet-name').textContent= admin.postnetName|| '—';
+  }
+  // Chat neu rendern
+  renderChatVerlauf();
+  // Global sync
+  const g = document.getElementById('k-global-admin-sel');
+  if (g && g.value !== adminId) g.value = adminId;
+  filterKupacByAdmin(adminId);
+}
+
+function toggleChatBank() {
+  const det = document.getElementById('k-chat-bank-detail');
+  const arr = document.getElementById('k-chat-bank-arrow');
+  if (!det) return;
+  const open = det.style.display !== 'none';
+  det.style.display = open ? 'none' : 'block';
+  if (arr) arr.textContent = open ? '▼' : '▲';
+}
+
+function toggleHauptBar() {
+  const exp = document.getElementById('k-haupt-expand');
+  const arr = document.getElementById('k-haupt-arrow');
+  if (!exp) return;
+  const open = exp.style.display !== 'none';
+  exp.style.display = open ? 'none' : 'block';
+  if (arr) arr.textContent = open ? '▶' : '▼';
+}
+
 function renderKPoruke(poruke) {
-  const el = document.getElementById('k-admin-poruke-list');
-  if (!el) return;
-  if (!poruke.length) { el.innerHTML = '<div style="text-align:center;color:var(--txt3);padding:20px;font-size:13px;">Nema poruka od admina.</div>'; return; }
-  el.innerHTML = poruke.sort((a,b) => b.vreme > a.vreme ? 1 : -1).map(p => {
-    const safeId = p.id.replace(/[^a-zA-Z0-9]/g,'_');
-    const isHaupt = p.od === 'haupt';
-    const st = getKStatusStyle(p.status);
-    const icon = isHaupt ? '👑 Haupt' : '👔 Admin';
-    return `<div style="background:${st.bg};border:1px solid ${st.border};border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;" onclick="toggleKReply('${safeId}')">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div style="font-weight:800;font-size:13px;color:${st.color};">${icon}</div>
-        <div style="display:flex;align-items:flex-start;gap:8px;">
-          <div style="text-align:right;">
-            <div style="font-size:10px;color:#888;">${(p.vreme||'').slice(0,16).replace('T',' ')}</div>
-            ${st.label ? `<div style="font-size:11px;font-weight:700;color:${st.color};margin-top:2px;">${st.label}</div>` : ''}
-          </div>
-          <button onclick="deleteKPoruka('${p.id}',event)" style="background:rgba(230,57,70,0.1);border:none;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;color:var(--red);flex-shrink:0;line-height:1;">🗑</button>
-        </div>
+  // poruke = Nachrichten vom Admin an Kunden (admin_poruke collection)
+  _allKupacPoruke = poruke;
+  renderChatVerlauf();
+}
+
+function renderChatVerlauf() {
+  const feed = document.getElementById('k-chat-feed');
+  if (!feed) return;
+  const u = window._currentUser;
+  const myId = u ? u.uid : null;
+
+  // Merge: empfangene (vom Admin) + gesendete (vom Kunden in poruke)
+  const empfangen = (_allKupacPoruke || []).map(p => ({
+    ...p,
+    _dir: 'in',
+    _vreme: p.vreme || ''
+  }));
+  const gesendet = (_allKupacSent || [])
+    .filter(p => p.adminId === _chatAdminId)
+    .map(p => ({
+      ...p,
+      _dir: 'out',
+      _vreme: p.vreme || ''
+    }));
+
+  // Wenn kein Admin gewählt
+  if (!_chatAdminId) {
+    feed.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:12px;">💬</div>
+      <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px;">Izaberite admina gore</div>
+      <div style="font-size:12px;color:var(--txt3);">Chat istorija će se pojaviti ovde</div>
+    </div>`;
+    return;
+  }
+
+  // Alle Nachrichten dieses Admins zusammenführen und sortieren
+  const alle = [...empfangen.filter(p => p.adminId === _chatAdminId || p.od === _chatAdminId), ...gesendet]
+    .sort((a,b) => a._vreme > b._vreme ? 1 : -1);
+
+  if (!alle.length) {
+    feed.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:10px;">✉️</div>
+      <div style="font-size:13px;color:var(--txt3);">Još nema poruka sa ovim adminom.<br>Pošaljite prvu poruku!</div>
+    </div>`;
+    return;
+  }
+
+  // Datum-Trennlinien
+  let lastDate = '';
+  const bubbles = alle.map(p => {
+    const isOut = p._dir === 'out';
+    const vreme = (p._vreme||'').slice(0,16).replace('T',' ');
+    const datum = vreme.slice(0,10);
+    let datumBar = '';
+    if (datum && datum !== lastDate) {
+      lastDate = datum;
+      const d = new Date(datum);
+      const heute = new Date(); heute.setHours(0,0,0,0);
+      const gestern = new Date(heute); gestern.setDate(gestern.getDate()-1);
+      let label = datum;
+      if (d.toDateString() === heute.toDateString()) label = 'Danas';
+      else if (d.toDateString() === gestern.toDateString()) label = 'Juče';
+      datumBar = `<div style="text-align:center;margin:10px 0 6px;">
+        <span style="background:rgba(255,255,255,0.08);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--txt3);">${label}</span>
+      </div>`;
+    }
+    const bubbleBg  = isOut ? 'var(--blue)' : 'rgba(255,255,255,0.09)';
+    const bubbleTxt = isOut ? '#fff' : 'var(--txt)';
+    const align     = isOut ? 'flex-end' : 'flex-start';
+    const radius    = isOut ? '18px 18px 4px 18px' : '18px 18px 18px 4px';
+    const sender    = isOut ? '' : `<div style="font-size:10px;font-weight:700;color:#93c5fd;margin-bottom:3px;">👔 Admin</div>`;
+    const statusDot = isOut ? (p.procitano ? ' ✓✓' : ' ✓') : '';
+    return `${datumBar}
+    <div style="display:flex;flex-direction:column;align-items:${align};gap:1px;">
+      ${sender}
+      <div style="max-width:80%;background:${bubbleBg};border-radius:${radius};padding:9px 13px;">
+        ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-width:200px;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:6px;cursor:pointer;display:block;" />` : ''}
+        <div style="font-size:14px;color:${bubbleTxt};line-height:1.45;white-space:pre-wrap;">${p.tekst||''}</div>
+        <div style="font-size:10px;color:${isOut ? 'rgba(255,255,255,0.6)' : 'var(--txt3)'};text-align:right;margin-top:4px;">${vreme.slice(11,16)}${statusDot}</div>
       </div>
-      <div style="font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
-      ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;display:block;" />` : ''}
-      ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
-        <textarea id="kreply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
-        ${fotoButtonsHtml('k'+safeId, true)}
-        <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📩 Pošalji odgovor</button>
-      </div>` : ''}
     </div>`;
   }).join('');
+
+  feed.innerHTML = bubbles;
+  // Scroll ans Ende
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 50);
+}
+
+async function chatSendMsg() {
+  const adminId = _chatAdminId;
+  if (!adminId) { showToast('⚠️ Izaberite admina!'); return; }
+  const ta = document.getElementById('k-poruka');
+  const tekst = ta ? ta.value.trim() : '';
+  const hasFoto = !!_fotoCache['kporuka'];
+  if (!tekst && !hasFoto) { showToast('⚠️ Unesite poruku'); return; }
+  if (!window._fb || !window._currentUser) { showToast('❌ Nisi prijavljen!'); return; }
+  const { db, collection, addDoc } = window._fb;
+  const u = window._currentUser;
+  let fotoUrl = null;
+  if (hasFoto) {
+    const path = 'poruke/' + u.uid + '/' + Date.now() + '.jpg';
+    fotoUrl = await uploadFotoToStorage(_fotoCache['kporuka'], path);
+    clearMsgFoto('kporuka');
+  }
+  const msg = {
+    od: u.uid,
+    odIme: u.name,
+    odTiktok: u.tiktokIme || '',
+    odNick: u.tiktokNick || '',
+    adminId, tekst: tekst || '', foto: fotoUrl,
+    vreme: new Date().toISOString(),
+    procitano: false
+  };
+  await addDoc(collection(db, 'poruke'), msg);
+  // Sofort lokal anzeigen
+  _allKupacSent = [...(_allKupacSent||[]), {...msg, id:'_tmp_'+Date.now(), _dir:'out', _vreme:msg.vreme}];
+  if (ta) { ta.value = ''; ta.style.height = 'auto'; }
+  renderChatVerlauf();
+  showToast('✅ Poruka poslata!');
+}
+
+// Beim Laden: gesendete Nachrichten des Kunden aus Firestore laden
+function loadKupacSentPoruke(uid) {
+  if (!window._fb) return;
+  const { db, collection, query, where, onSnapshot } = window._fb;
+  onSnapshot(query(collection(db, 'poruke'), where('od', '==', uid)), snap => {
+    _allKupacSent = [];
+    snap.forEach(d => _allKupacSent.push({id:d.id,...d.data(),_dir:'out',_vreme:d.data().vreme||''}));
+    renderChatVerlauf();
+  });
 }
 
 // Kupac sends message with tiktok info
