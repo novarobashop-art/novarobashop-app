@@ -80,7 +80,9 @@
   });
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -321,13 +323,15 @@ setTimeout(() => {
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Nunito', sans-serif;
   background: var(--ink);
   color: var(--txt);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  line-height: 1.5;
 }
 ::selection { background: rgba(232,160,32,0.25); color: var(--txt); }
 ::-webkit-scrollbar { width:3px; height:3px; }
@@ -346,12 +350,12 @@ body {
     var(--ink);
 }
 .loading-logo {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 24px; font-weight: 700; letter-spacing: -0.3px;
-  background: linear-gradient(120deg, #ffffff 0%, var(--amber3) 60%, var(--amber) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-family: 'Barlow', sans-serif;
+  font-size: 22px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--txt);
 }
-.loading-logo span { -webkit-text-fill-color: var(--amber3); }
+.loading-logo span { color: var(--amber); }
 .loading-spinner {
   width: 36px; height: 36px;
   border: 2.5px solid rgba(232,160,32,0.1);
@@ -379,22 +383,19 @@ body {
 .login-logo { text-align: center; margin-bottom: 36px; }
 .login-logo-wrap { text-align: center; margin-bottom: 36px; }
 .login-logo-text, .login-logo-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Barlow', sans-serif;
   font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1;
   background: linear-gradient(130deg, #ffffff 20%, var(--amber3) 70%, var(--amber) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-.login-logo-text span, .login-logo-title span {
-  background: linear-gradient(135deg, var(--amber3), var(--amber));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+
 .login-logo-sub {
   font-size: 9px; color: var(--txt3);
   letter-spacing: 3px; text-transform: uppercase;
   margin-top: 10px; font-weight: 600;
 }
-.login-title  { font-size: 22px; font-weight: 700; margin-bottom: 4px; color: var(--txt); letter-spacing: -0.3px; }
-.login-sub    { font-size: 13px; color: var(--txt2); margin-bottom: 22px; }
+.login-title  { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--txt); }
+.login-sub    { font-size: 13px; color: var(--txt3); margin-bottom: 20px; }
 .login-card {
   background: rgba(9,12,22,0.92);
   border: 1px solid rgba(255,255,255,0.08);
@@ -424,9 +425,8 @@ body {
 
 /* ── Form elements ── */
 .inp-label {
-  font-size: 10px; font-weight: 700; color: var(--txt3);
-  text-transform: uppercase; letter-spacing: 2px;
-  display: block; margin-bottom: 7px;
+  font-size: 12px; font-weight: 600; color: var(--txt2);
+  display: block; margin-bottom: 6px;
 }
 .inp {
   width: 100%;
@@ -435,7 +435,7 @@ body {
   border-radius: var(--r-sm);
   padding: 13px 16px;
   color: var(--txt); font-size: 15px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Nunito', sans-serif;
   outline: none; margin-bottom: 16px;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
@@ -452,7 +452,7 @@ body {
   border-radius: var(--r-xs);
   padding: 11px 14px;
   color: var(--txt); font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Nunito', sans-serif;
   outline: none; margin-bottom: 12px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
@@ -471,7 +471,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 14px; color: #0a0600;
   font-size: 15px; font-weight: 800;
-  cursor: pointer; font-family: 'Plus Jakarta Sans';
+  cursor: pointer; font-family: 'Barlow';
   box-shadow: 0 4px 14px var(--amber-glow);
   transition: all 0.25s; letter-spacing: 0.2px;
 }
@@ -489,7 +489,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 13px; color: #001a16;
   font-size: 15px; font-weight: 800;
-  cursor: pointer; font-family: 'Plus Jakarta Sans';
+  cursor: pointer; font-family: 'Barlow';
   box-shadow: 0 6px 24px var(--teal-glow);
   transition: all 0.25s;
 }
@@ -502,7 +502,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 14px; color: white;
   font-size: 16px; font-weight: 700;
-  cursor: pointer; font-family: 'Plus Jakarta Sans';
+  cursor: pointer; font-family: 'Barlow';
   box-shadow: 0 6px 24px rgba(79,142,247,0.35);
   transition: all 0.25s;
 }
@@ -517,7 +517,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   color: var(--txt); font-size: 15px; font-weight: 500;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: all 0.25s; font-family: 'Plus Jakarta Sans';
+  transition: all 0.25s; font-family: 'Barlow';
 }
 .btn-google:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
 
@@ -525,7 +525,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 7px 14px; border-radius: var(--r-xs);
   font-size: 12px; font-weight: 700;
   cursor: pointer; border: none;
-  font-family: 'Plus Jakarta Sans'; transition: all 0.18s;
+  font-family: 'Barlow'; transition: all 0.18s;
 }
 .btn-sm:hover { filter: brightness(1.15); transform: translateY(-1px); }
 .btn-sm:active { transform: translateY(0); }
@@ -542,7 +542,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: 1px solid rgba(240,64,96,0.2);
   border-radius: var(--r-xs); padding: 6px 13px;
   font-size: 12px; font-weight: 700;
-  cursor: pointer; font-family: 'Plus Jakarta Sans'; transition: all 0.2s;
+  cursor: pointer; font-family: 'Barlow'; transition: all 0.2s;
 }
 .logout-btn:hover { background: rgba(240,64,96,0.14); border-color: rgba(240,64,96,0.35); }
 
@@ -571,7 +571,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   position: sticky; top:0; z-index:50;
   box-shadow: 0 1px 0 rgba(255,255,255,0.04);
 }
-.h-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.8px; }
+.h-logo { font-family:'Barlow',sans-serif; font-size:18px; font-weight:700; letter-spacing:0.2px; text-transform:uppercase; }
 .h-logo span { color: var(--amber); }
 .h-badge {
   background: rgba(232,160,32,0.1); color: var(--amber);
@@ -606,8 +606,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   pointer-events: none;
 }
 .stat-card:hover { border-color: rgba(232,160,32,0.25); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
-.stat-num { font-size: 26px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; line-height: 1; font-family:'Inter',sans-serif; }
-.stat-lbl { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+.stat-num { font-size: 26px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; line-height: 1; font-family:'Nunito',sans-serif; }
+.stat-lbl { font-size: 11px; color: var(--txt3); font-weight: 500; margin-top: 2px; }
 
 /* Tabs */
 .h-tabs {
@@ -624,7 +624,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   white-space: nowrap;
   background: rgba(255,255,255,0.04); color: var(--txt3);
   border: 1px solid transparent;
-  font-family: 'Plus Jakarta Sans'; transition: all 0.22s; letter-spacing: 0.1px;
+  font-family: 'Barlow'; transition: all 0.22s; letter-spacing: 0.1px;
 }
 .h-tab:hover { background: rgba(255,255,255,0.08); color: var(--txt); }
 .h-tab.active {
@@ -655,7 +655,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 .h-search-bar:focus-within { border-color: rgba(232,160,32,0.5); box-shadow: none; }
-.h-search-bar input { flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:'Inter'; padding:11px 0; }
+.h-search-bar input { flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:'Nunito'; padding:11px 0; }
 .h-search-bar button { background:none; border:none; color:var(--txt3); font-size:16px; cursor:pointer; padding:4px; }
 
 /* ════════════════════════════════════════════
@@ -673,7 +673,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   position: sticky; top:0; z-index:50;
   box-shadow: 0 1px 0 rgba(255,255,255,0.04);
 }
-.a-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; letter-spacing:-0.5px; }
+.a-logo { font-family:'Barlow',sans-serif; font-size:16px; font-weight:700; letter-spacing:0.2px; text-transform:uppercase; }
 .a-logo span { color: var(--amber); }
 .a-header-right { display:flex; align-items:center; gap:10px; }
 .a-header-sub   { font-size:10px; color:var(--txt3); margin-top:2px; letter-spacing:0.3px; }
@@ -701,7 +701,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   white-space: nowrap;
   background: rgba(255,255,255,0.04); color: var(--txt3);
   border: 1px solid transparent;
-  font-family: 'Plus Jakarta Sans'; transition: all 0.22s; letter-spacing: 0.1px;
+  font-family: 'Barlow'; transition: all 0.22s; letter-spacing: 0.1px;
 }
 .a-tab:hover { background: rgba(255,255,255,0.08); color: var(--txt); }
 .a-tab.active {
@@ -744,7 +744,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .racun-date   { font-size:11px; color:var(--txt2); }
 .racun-kupac  { font-size:12px; color:var(--txt2); margin-bottom:8px; }
 .racun-bottom { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.racun-amt    { font-size: 20px; font-weight:800; letter-spacing:-0.5px; font-family:'Inter',sans-serif; }
+.racun-amt    { font-size: 20px; font-weight:800; letter-spacing:-0.5px; font-family:'Nunito',sans-serif; }
 .racun-badge  { border-radius:var(--r-pill); padding:4px 11px; font-size:10px; font-weight:800; letter-spacing:0.5px; }
 .rb-novo    { background:rgba(240,64,96,0.12);  color:#ff9aad; border:1px solid rgba(240,64,96,0.28); }
 .rb-ceka    { background:rgba(232,160,32,0.12);  color:#ffd07a; border:1px solid rgba(232,160,32,0.28); }
@@ -757,7 +757,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 7px 14px; border-radius: var(--r-xs);
   font-size: 11px; font-weight: 600; cursor: pointer;
   border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--txt2);
-  font-family: 'Plus Jakarta Sans'; transition: all 0.2s;
+  font-family: 'Barlow'; transition: all 0.2s;
 }
 .paket-btn:hover { background: rgba(255,255,255,0.09); }
 .sel-prep   { background:rgba(79,142,247,0.15);  color:#93c5fd;  border-color:rgba(79,142,247,0.35)!important; }
@@ -772,9 +772,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 18px; margin-bottom: 14px;
 }
 .form-section-title, .form-title {
-  font-size: 10px; font-weight: 800;
-  color: var(--teal); text-transform: uppercase;
-  letter-spacing: 2px; margin-bottom: 16px;
+  font-size: 12px; font-weight: 700;
+  color: var(--teal); margin-bottom: 14px;
 }
 
 /* Live portal */
@@ -792,7 +791,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .live-search {
   width:100%; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.08);
   border-radius:var(--r-sm); padding:12px 16px; color:var(--txt);
-  font-size:15px; font-family:'Inter'; outline:none; margin:12px 0;
+  font-size:15px; font-family:'Nunito'; outline:none; margin:12px 0;
   transition:border-color 0.25s, box-shadow 0.25s;
 }
 .live-search:focus { border-color: rgba(232,160,32,0.5); box-shadow: none; }
@@ -842,7 +841,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   backdrop-filter: blur(28px) saturate(1.5);
   box-shadow: 0 1px 0 rgba(255,255,255,0.05);
 }
-.k-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; color:var(--txt); letter-spacing:-0.5px; }
+.k-logo { font-family:'Barlow',sans-serif; font-size:16px; font-weight:700; color:var(--txt); letter-spacing:0.2px; text-transform:uppercase; }
 .k-logo span { color: var(--amber); }
 .k-header-sub { font-size:10px; color:var(--txt3); letter-spacing:0.3px; }
 .k-avatar {
@@ -871,7 +870,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 }
 .k-nav-item:hover { opacity:0.75; }
 .k-nav-icon { font-size:19px; }
-.k-nav-lbl  { font-size:9px; font-weight:700; color:var(--txt3); white-space:nowrap; }
+.k-nav-lbl  { font-size:10px; font-weight:600; color:var(--txt3); white-space:nowrap; }
 .k-racun-card {
   background: rgba(9,12,20,0.85);
   border-radius: var(--r-md);
@@ -961,14 +960,14 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .podrska-btn {
   width:100%; padding:14px; border-radius:var(--r-sm);
   font-size:14px; font-weight:700; cursor:pointer;
-  font-family:'Inter'; border:none; margin-bottom:10px;
+  font-family:'Nunito'; border:none; margin-bottom:10px;
   display:flex; align-items:center; gap:10px; justify-content:center;
   transition:all 0.25s;
 }
 .podrska-btn:hover { filter:brightness(1.1); transform:translateY(-2px); }
 
 /* Kalender btns */
-.kal-btn { padding:6px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:var(--txt2); font-family:'Inter'; transition:all 0.18s; }
+.kal-btn { padding:6px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:var(--txt2); font-family:'Nunito'; transition:all 0.18s; }
 .kal-btn:hover { background:rgba(255,255,255,0.09); }
 .kal-active { background:linear-gradient(135deg,var(--teal),var(--teal2))!important; color:#001a16!important; border-color:transparent!important; box-shadow:0 4px 16px var(--teal-glow); }
 
@@ -1020,7 +1019,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <label class="inp-label">Lozinka</label>
     <input type="password" class="inp" id="login-pass" placeholder="••••••••" />
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Prijavite se</button>
-    <button onclick="doForgot()" style="width:100%;background:rgba(14,196,172,0.09);border:1.5px solid rgba(14,196,172,0.22);border-radius:12px;padding:11px;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,184,166,0.13)'" onmouseout="this.style.background='rgba(20,184,166,0.07)'">
+    <button onclick="doForgot()" style="width:100%;background:rgba(14,196,172,0.09);border:1.5px solid rgba(14,196,172,0.22);border-radius:12px;padding:11px;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,184,166,0.13)'" onmouseout="this.style.background='rgba(20,184,166,0.07)'">
       🔑 Zaboravili ste lozinku? Kliknite ovde
     </button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">ili</span><div class="divider-line"></div></div>
@@ -1038,7 +1037,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 <!-- ===== REGISTRATION ===== -->
 <div id="reg-screen" style="display:none;min-height:100vh;background:radial-gradient(ellipse at top,#0d1f3c 0%,#040810 60%);overflow-y:auto;padding:24px 24px 40px;">
   <div style="text-align:center;margin-bottom:28px;padding-top:20px;">
-    <div style="font-family:'Inter',sans-serif;font-size:28px;font-weight:800;">Nova<span style="color:var(--gold);">roba</span>shop</div>
+    <div style="font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;">Nova<span style="color:var(--gold);">roba</span>shop</div>
     <div style="font-size:12px;color:var(--txt3);margin-top:4px;letter-spacing:2px;text-transform:uppercase;">Kompletan profil</div>
   </div>
   <div style="background:rgba(255,255,255,0.08);border-radius:10px;height:6px;margin-bottom:24px;">
@@ -1119,7 +1118,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="font-size:16px;font-weight:800;color:var(--txt);">🔔 Obaveštenja</div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="markAllAdminNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Inter';">Sve pročitano</button>
+        <button onclick="markAllAdminNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Nunito';">Sve pročitano</button>
         <button onclick="toggleAdminNotif()" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
       </div>
     </div>
@@ -1155,27 +1154,27 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="font-size:16px;font-weight:800;margin-bottom:16px;">📊 Statistike</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
         <div style="background:rgba(14,196,172,0.08);border:1px solid rgba(14,196,172,0.25);border-radius:16px;padding:16px;text-align:center;position:relative;overflow:hidden;">
-          <div style="font-size:24px;font-weight:700;color:var(--teal);font-family:'Inter',sans-serif;" id="dash-kupci">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--teal);font-family:'Nunito',sans-serif;" id="dash-kupci">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Kupci</div>
         </div>
         <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:24px;font-weight:700;color:var(--amber);font-family:'Inter',sans-serif;" id="dash-racuni">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--amber);font-family:'Nunito',sans-serif;" id="dash-racuni">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno Računa</div>
         </div>
         <div style="background:rgba(18,201,106,0.08);border:1px solid rgba(18,201,106,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:24px;font-weight:700;color:var(--emerald);font-family:'Inter',sans-serif;" id="dash-ukupno-rsd">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--emerald);font-family:'Nunito',sans-serif;" id="dash-ukupno-rsd">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno RSD</div>
         </div>
         <div style="background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:24px;font-weight:700;color:#7eb3ff;font-family:'Inter',sans-serif;" id="dash-placeno-rsd">—</div>
+          <div style="font-size:24px;font-weight:700;color:#7eb3ff;font-family:'Nunito',sans-serif;" id="dash-placeno-rsd">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Naplaćeno RSD</div>
         </div>
         <div style="background:rgba(240,64,96,0.08);border:1px solid rgba(240,64,96,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:24px;font-weight:700;color:var(--rose);font-family:'Inter',sans-serif;" id="dash-blokirani">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--rose);font-family:'Nunito',sans-serif;" id="dash-blokirani">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Blokirani</div>
         </div>
         <div style="background:rgba(255,122,48,0.08);border:1px solid rgba(255,122,48,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:24px;font-weight:700;color:var(--orange);font-family:'Inter',sans-serif;" id="dash-ceka">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--orange);font-family:'Nunito',sans-serif;" id="dash-ceka">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Čeka Plaćanje</div>
         </div>
       </div>
@@ -1196,7 +1195,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="racuni-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterRacuni(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('racuni-search').value='';filterRacuni('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div class="form-section">
@@ -1217,9 +1216,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="file" id="racun-foto-input" accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
         <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
-          <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Ukloni foto</button>
+          <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Ukloni foto</button>
         </div>
-        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Inter';margin-bottom:8px;">📷 Slikaj Foto</button>
+        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Nunito';margin-bottom:8px;">📷 Slikaj Foto</button>
         <button class="btn-teal" onclick="addRacun()">✓ Kreiraj račun</button>
       </div>
       <div id="a-racuni-list"></div>
@@ -1230,7 +1229,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placanja-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlacanja(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placanja-search').value='';filterPlacanja('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-placanja-list"></div>
@@ -1241,7 +1240,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placeno-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlaceno(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placeno-search').value='';filterPlaceno('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-placeno-list"></div>
@@ -1252,7 +1251,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="arhiva-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterArhiva(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('arhiva-search').value='';filterArhiva('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-arhiva-list"></div>
@@ -1278,19 +1277,19 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="file" id="proizvod-foto-inp" accept="image/*" style="display:none;" onchange="previewProizvodFoto(event)" />
         <div id="proizvod-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="proizvod-foto-img" onclick="openImgViewer(this.src)" style="max-height:100px;max-width:160px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
-          <button onclick="clearProizvodFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Ukloni foto</button>
+          <button onclick="clearProizvodFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Ukloni foto</button>
         </div>
-        <button onclick="document.getElementById('proizvod-foto-inp').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Inter';margin-bottom:12px;">🖼️ Dodaj Foto</button>
+        <button onclick="document.getElementById('proizvod-foto-inp').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Nunito';margin-bottom:12px;">🖼️ Dodaj Foto</button>
         <div style="display:flex;gap:8px;">
           <button class="btn-teal" id="proizvod-save-btn" onclick="saveProizvod()" style="flex:1;">✓ Sačuvaj Proizvod</button>
-          <button id="proizvod-cancel-btn" onclick="cancelEditProizvod()" style="display:none;flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px;color:var(--txt3);font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Otkaži</button>
+          <button id="proizvod-cancel-btn" onclick="cancelEditProizvod()" style="display:none;flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px;color:var(--txt3);font-size:15px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Otkaži</button>
         </div>
       </div>
       <!-- Pretraga proizvoda -->
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="proizvodi-search" placeholder="Pretraži proizvode..." oninput="filterProizvodi(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('proizvodi-search').value='';filterProizvodi('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-proizvodi-list"><div class="section-empty">Nema proizvoda.</div></div>
@@ -1423,8 +1422,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
             <!-- MODUS IZBOR -->
             <div style="display:flex;gap:6px;margin-bottom:10px;">
-              <button id="mode-narudzba" onclick="setLiveMode('narudzba')" style="flex:1;padding:8px;border-radius:10px;border:2px solid rgba(20,184,166,0.4);background:rgba(20,184,166,0.12);color:#5eead4;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter';">🛒 Narudžbina</button>
-              <button id="mode-aukcija" onclick="setLiveMode('aukcija')" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,0.04);color:var(--txt3);font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter';">🔨 Aukcija</button>
+              <button id="mode-narudzba" onclick="setLiveMode('narudzba')" style="flex:1;padding:8px;border-radius:10px;border:2px solid rgba(20,184,166,0.4);background:rgba(20,184,166,0.12);color:#5eead4;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito';">🛒 Narudžbina</button>
+              <button id="mode-aukcija" onclick="setLiveMode('aukcija')" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,0.04);color:var(--txt3);font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito';">🔨 Aukcija</button>
             </div>
 
             <!-- NARUDŽBINA MODE -->
@@ -1447,7 +1446,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
                 <button onclick="dodajAukArtikal()" style="background:rgba(244,63,94,0.15);color:#fda4af;border:1px solid rgba(244,63,94,0.3);border-radius:10px;padding:0 14px;font-size:18px;font-weight:800;cursor:pointer;">+</button>
               </div>
               <div id="auk-artikli-list" style="margin-bottom:8px;"></div>
-              <button onclick="startirajAukciju()" id="auk-btn" style="width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:10px;padding:10px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 4px 14px rgba(244,63,94,0.35);">
+              <button onclick="startirajAukciju()" id="auk-btn" style="width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:10px;padding:10px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 4px 14px rgba(244,63,94,0.35);">
                 🔨 Startuj Aukciju
               </button>
               <!-- Trenutno najviše -->
@@ -1456,7 +1455,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
                 <div style="font-size:24px;font-weight:700;color:var(--amber);letter-spacing:-1px;line-height:1;" id="auk-top-iznos">—</div>
                 <div style="font-size:14px;font-weight:700;color:white;margin-top:4px;" id="auk-top-kupac">—</div>
                 <div style="font-size:11px;color:var(--txt2);" id="auk-top-tiktok">—</div>
-                <button onclick="zakljuciAukciju()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:10px;padding:9px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Zaključi &amp; Pošalji Račun</button>
+                <button onclick="zakljuciAukciju()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:10px;padding:9px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';">✅ Zaključi &amp; Pošalji Račun</button>
               </div>
             </div>
 
@@ -1509,7 +1508,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div style="font-size:15px;font-weight:800;">💬 Poruke od Kupaca</div>
         <input type="text" id="admin-poruke-search" placeholder="🔍 @tiktok..." oninput="filterAdminPoruke(this.value)"
-          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Inter';outline:none;width:140px;" />
+          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Nunito';outline:none;width:140px;" />
       </div>
 
       <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
@@ -1550,7 +1549,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <!-- Admin izbor bar -->
   <div style="background:rgba(5,6,8,0.95);border-bottom:1px solid rgba(255,255,255,0.07);padding:10px 16px;display:flex;align-items:center;gap:10px;">
     <div style="font-size:12px;font-weight:700;color:var(--txt3);white-space:nowrap;">👤 Admin:</div>
-    <select id="k-global-admin-sel" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Inter';outline:none;color:var(--txt);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
+    <select id="k-global-admin-sel" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Nunito';outline:none;color:var(--txt);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
       <option value="">Izaberite admina...</option>
     </select>
   </div>
@@ -1576,7 +1575,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       </div>
       <div style="font-size:13px;opacity:0.8;" id="k-countdown-sub">Račun čeka plaćanje</div>
       <div id="k-countdown-iznos" style="font-size:22px;font-weight:800;margin-top:8px;"></div>
-      <button id="k-countdown-btn" onclick="kNavTab('racuni')" style="width:100%;margin-top:12px;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';">
+      <button id="k-countdown-btn" onclick="kNavTab('racuni')" style="width:100%;margin-top:12px;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';">
         📎 Idi na Račun
       </button>
     </div>
@@ -1655,25 +1654,25 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
       <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Pošalji poruku Adminu</div>
       <label style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
-      <select id="k-poruka-admin-sel" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;margin-bottom:10px;color:var(--txt);">
+      <select id="k-poruka-admin-sel" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;margin-bottom:10px;color:var(--txt);">
         <option value="">Izaberite admina...</option>
       </select>
-      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Vaša poruka..."></textarea>
+      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Vaša poruka..."></textarea>
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <div style="display:flex;gap:6px;margin-top:8px;">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';color:var(--txt2);">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';color:var(--txt2);">🖼️ Galerija</button>
+        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
+        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
       </div>
       <div id="foto-prev-kporuka"></div>
-      <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;">Pošalji Adminu</button>
+      <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Adminu</button>
     </div>
     <!-- Eskalacija - Haupt -->
     <div style="background:rgba(255,122,48,0.06);border:1px solid rgba(255,122,48,0.2);border-radius:16px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;">⚠️ Žalba - Kontaktiraj Haupt</div>
       <div style="font-size:11px;color:#888;margin-bottom:10px;">Koristite samo ako Admin nije rešio problem</div>
-      <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
-      <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;">Pošalji Hauptu</button>
+      <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
+      <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Hauptu</button>
     </div>
   </div>
 
@@ -1682,7 +1681,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-notif" style="padding:16px;display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="font-size:16px;font-weight:800;color:var(--txt);">🔔 Obaveštenja</div>
-      <button onclick="markAllNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Inter';">Označi sve kao pročitano</button>
+      <button onclick="markAllNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Nunito';">Označi sve kao pročitano</button>
     </div>
     <div id="k-notif-list"><div style="text-align:center;color:var(--txt3);padding:40px 0;font-size:13px;">Nema obaveštenja</div></div>
   </div>
@@ -1828,10 +1827,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <input type="password" class="inp-dark" id="set-new-pass" placeholder="Min. 6 karaktera..." />
     </div>
 
-    <button onclick="saveSettings()" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:14px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;">
+    <button onclick="saveSettings()" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:14px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;">
       ✓ Sačuvaj podešavanja
     </button>
-    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🚪 Odjavi se</button>
+    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">🚪 Odjavi se</button>
   </div>
 </div>
 
@@ -1966,10 +1965,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
 
     <!-- Save button -->
-    <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
+    <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
       📨 Pošalji zahtev za izmenu
     </button>
-    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🚪 Odjavi se</button>
+    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">🚪 Odjavi se</button>
   </div>
 </div>
 
@@ -1988,7 +1987,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <input type="number" class="inp-dark" id="qr-iznos" placeholder="1500" style="font-size:20px;font-weight:800;" />
     <label class="inp-label">Opis paketa</label>
     <input type="text" class="inp-dark" id="qr-opis" placeholder="Naziv paketa..." />
-    <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
+    <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
       ✓ Kreiraj Račun
     </button>
   </div>
@@ -2009,7 +2008,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
     <input type="hidden" id="notiz-kupac-id" />
     <textarea class="inp-dark" id="notiz-text" rows="4" placeholder="npr. VIP kupac, uvek plaća na vreme... ili kasni sa plaćanjem..." style="resize:none;margin-bottom:14px;"></textarea>
-    <button onclick="saveNotiz()" style="width:100%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 18px rgba(139,92,246,0.3);">
+    <button onclick="saveNotiz()" style="width:100%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 18px rgba(139,92,246,0.3);">
       💾 Sačuvaj Belešku
     </button>
   </div>
@@ -2060,7 +2059,7 @@ function initFaq() {
   if (!el || el.children.length > 0) return;
   el.innerHTML = _FAQS.map((f,i) =>
     '<div style="background:rgba(9,12,20,0.85);border-radius:16px;margin-bottom:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">' +
-      '<button onclick="toggleFaq(' + i + ')" style="width:100%;background:none;border:none;padding:15px 16px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:DM Sans,sans-serif;">' +
+      '<button onclick="toggleFaq(' + i + ')" style="width:100%;background:none;border:none;padding:15px 16px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:Nunito,sans-serif;">' +
         '<span style="font-size:14px;font-weight:700;color:var(--txt);">' + f.q + '</span>' +
         '<span id="faq-icon-' + i + '" style="font-size:16px;flex-shrink:0;color:#94a3b8;transition:transform 0.2s;">▼</span>' +
       '</button>' +
@@ -2796,7 +2795,7 @@ function renderProizvodi(list) {
         ${p.opis ? `<div style="font-size:12px;color:var(--txt3);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.opis}</div>` : ''}
         ${p.kolicina !== undefined ? `<div style="font-size:11px;color:${p.kolicina>0?'var(--green)':'var(--red)'};">📦 Stanje: ${p.kolicina}</div>` : ''}
         <div style="display:flex;gap:6px;margin-top:8px;">
-          <button onclick="editProizvod('${p.id}')" style="flex:1;background:rgba(46,107,230,0.15);color:#6B9FFF;border:1px solid rgba(46,107,230,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✏️ Uredi</button>
+          <button onclick="editProizvod('${p.id}')" style="flex:1;background:rgba(46,107,230,0.15);color:#6B9FFF;border:1px solid rgba(46,107,230,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">✏️ Uredi</button>
           <button onclick="deleteProizvod('${p.id}')" style="background:rgba(230,57,70,0.1);color:#FF6B76;border:1px solid rgba(230,57,70,0.2);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;">🗑️</button>
         </div>
       </div>
@@ -3122,8 +3121,8 @@ function renderAutoRacuni(list) {
         </div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button onclick="triggerAutoRacun('${a.id}')" style="flex:1;background:rgba(20,184,166,0.12);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">▶️ Pošalji sada</button>
-        <button onclick="toggleAutoRacun('${a.id}',${!a.aktivan})" style="flex:1;background:rgba(${a.aktivan?'239,68,68':'34,197,94'},0.1);color:${a.aktivan?'#fca5a5':'#86efac'};border:1px solid rgba(${a.aktivan?'239,68,68':'34,197,94'},0.2);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">${a.aktivan?'⏸ Pauziraj':'▶ Aktiviraj'}</button>
+        <button onclick="triggerAutoRacun('${a.id}')" style="flex:1;background:rgba(20,184,166,0.12);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">▶️ Pošalji sada</button>
+        <button onclick="toggleAutoRacun('${a.id}',${!a.aktivan})" style="flex:1;background:rgba(${a.aktivan?'239,68,68':'34,197,94'},0.1);color:${a.aktivan?'#fca5a5':'#86efac'};border:1px solid rgba(${a.aktivan?'239,68,68':'34,197,94'},0.2);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">${a.aktivan?'⏸ Pauziraj':'▶ Aktiviraj'}</button>
       </div>
     </div>`;
   }).join('');
@@ -3188,7 +3187,7 @@ function renderKIstorija(racuni) {
       ${r.stavke&&r.stavke.length ? `<div style="font-size:11px;color:#6b7280;">${r.stavke.map(s=>(s.kolicina&&s.kolicina>1?s.kolicina+'x ':'')+s.naziv).join(' · ')}</div>` : (r.opis?`<div style="font-size:11px;color:#6b7280;">${r.opis}</div>`:'')}
       <div style="font-size:10px;color:#bbb;margin-top:6px;font-family:'Courier New',monospace;">Tapni za detalje 🧾</div>
       ${r.ocena ? `<div style="font-size:13px;color:#d97706;margin-top:4px;">★ Vaša ocena: ${'⭐'.repeat(r.ocena)}</div>` : ''}
-      ${canRate ? `<button onclick="event.stopPropagation();openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">⭐ Ostavi ocenu</button>` : ''}
+      ${canRate ? `<button onclick="event.stopPropagation();openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">⭐ Ostavi ocenu</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -3234,7 +3233,7 @@ function renderKDugovi(racuni) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div style="font-size:12px;font-weight:700;color:${kasni?'#dc2626':urgent?'#d97706':'#16a34a'};">${kasni?`⚠️ Kasni ${Math.abs(diff)} dana`:diff===0?'🔥 Rok danas!':diff!==null?`⏰ Rok za ${diff} dana`:'—'}</div>
-        ${r.status==='novo'?`<button onclick="document.getElementById('uplatnica-input').setAttribute('data-racun-id','${r.id}');document.getElementById('uplatnica-input').click()" style="background:#2563eb;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">📎 Uplati</button>`:''}
+        ${r.status==='novo'?`<button onclick="document.getElementById('uplatnica-input').setAttribute('data-racun-id','${r.id}');document.getElementById('uplatnica-input').click()" style="background:#2563eb;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">📎 Uplati</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -3263,9 +3262,9 @@ function openRatingModal(racunId) {
       <div class="star-rating" style="justify-content:center;margin-bottom:20px;" id="star-row">
         ${[1,2,3,4,5].map(i=>`<span class="star" onclick="setRating(${i})" id="star-${i}" style="font-size:36px;cursor:pointer;transition:transform 0.1s;">☆</span>`).join('')}
       </div>
-      <textarea id="rating-komentar" placeholder="Komentar (opciono)..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;font-family:'Inter';resize:none;outline:none;margin-bottom:14px;" rows="3"></textarea>
-      <button onclick="submitRating()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:14px;color:#1a0e00;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">✓ Pošalji Ocenu</button>
-      <button onclick="document.getElementById('rating-modal-overlay').remove()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:14px;margin-top:8px;cursor:pointer;font-family:'Inter';">Otkaži</button>
+      <textarea id="rating-komentar" placeholder="Komentar (opciono)..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;font-family:'Nunito';resize:none;outline:none;margin-bottom:14px;" rows="3"></textarea>
+      <button onclick="submitRating()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:14px;color:#1a0e00;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">✓ Pošalji Ocenu</button>
+      <button onclick="document.getElementById('rating-modal-overlay').remove()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:14px;margin-top:8px;cursor:pointer;font-family:'Nunito';">Otkaži</button>
     </div>`;
   document.body.appendChild(overlay);
 }
@@ -3361,14 +3360,14 @@ function renderAdminPoruke(poruke) {
       ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />` : ''}
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(45,190,108,0.15);color:var(--green);border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';background:rgba(45,190,108,0.15);color:var(--green);border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
         </div>
-        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'Inter';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
+        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'Nunito';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
         ${fotoButtonsHtml('a'+safeId, false)}
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📩 Pošalji odgovor</button>
+          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📩 Pošalji odgovor</button>
           <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;">🗑️</button>
         </div>
       </div>
@@ -3880,7 +3879,7 @@ function renderLiveGrid(kupci) {
       <div class="live-ktik" style="color:var(--teal);font-weight:800;font-size:10px;margin-top:4px;">@${k.tiktokIme||'–'}</div>
       <div class="live-kname" style="font-size:9px;color:rgba(255,255,255,0.5);">${k.tiktokNick||k.name||''}</div>
       <div style="font-size:9px;margin-top:3px;color:${dotColor};">${statusText}</div>
-      <button onclick="openQuickRacun('${k.id}','${(k.name||'').replace(/'/g,'')}')" style="width:100%;margin-top:5px;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 2px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Inter';">⚡ Račun</button>
+      <button onclick="openQuickRacun('${k.id}','${(k.name||'').replace(/'/g,'')}')" style="width:100%;margin-top:5px;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 2px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Nunito';">⚡ Račun</button>
     </div>`;
   }).join('');
 }
@@ -4610,22 +4609,22 @@ function openKassenbon(racunId) {
           <img id="upl-img-kassenbon" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;" />
           <div style="font-size:12px;color:var(--txt2);margin-bottom:8px;font-weight:600;">Proveri sliku — da li je čitka?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}','kassenbon')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('kassenbon')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Otkaži</button>
+            <button onclick="confirmUplatnica('${r.id}','kassenbon')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('kassenbon')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Otkaži</button>
           </div>
         </div>
         <div id="upl-btns-kassenbon" style="display:flex;gap:8px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera','kassenbon')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kassenbon')" style="flex:1;background:rgba(5,6,8,0.98);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera','kassenbon')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kassenbon')" style="flex:1;background:rgba(5,6,8,0.98);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">🖼️ Galerija</button>
         </div>
-        ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">❌ Storno zahtev</button>` : ''}
+        ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">❌ Storno zahtev</button>` : ''}
       </div>`;
   }
 
   document.getElementById('kassenbon-content').innerHTML = `
     <!-- Header -->
     <div style="text-align:center;padding:10px 0 16px;border-bottom:2px dashed #ddd;">
-      <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-0.5px;">Nova<span style="color:#d97706;">roba</span>shop</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-0.5px;">Nova<span style="color:#d97706;">roba</span>shop</div>
       <div style="font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:2px;">Potvrda narudžbine</div>
     </div>
 
@@ -5173,16 +5172,16 @@ function kRacunCard(r, showUpload, showArhiva) {
           <img id="upl-img-${r.id}" style="max-height:180px;width:100%;object-fit:contain;border-radius:12px;border:2px solid #3b82f6;margin-bottom:10px;" />
           <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:10px;">Proveri — da li se vidi dobro?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✕</button>
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕</button>
           </div>
         </div>
         <!-- Dugmad -->
         <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#1d4ed8;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#1d4ed8;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">🖼️ Galerija</button>
         </div>
-        <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:10px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter';">Storno zahtev</button>
+        <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:10px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Nunito';">Storno zahtev</button>
       </div>
     </div>`;
   }
@@ -5210,13 +5209,13 @@ function kRacunCard(r, showUpload, showArhiva) {
           <img id="upl-img-${r.id}" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #f59e0b;margin-bottom:8px;" />
           <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:8px;">Proveri — da li se vidi dobro?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:13px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">✕</button>
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:13px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕</button>
           </div>
         </div>
         <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#d97706;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#d97706;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">🖼️ Galerija</button>
         </div>
       </div>
     </div>`;
@@ -5250,7 +5249,7 @@ function kRacunCard(r, showUpload, showArhiva) {
     ${stavkeHtml2}
     <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e5e7eb;padding-top:8px;margin-top:4px;">
       <div style="font-size:18px;font-weight:800;color:var(--txt);">${iznos} RSD</div>
-      ${(status==='placeno'||ps==='ship') ? `<button onclick="event.stopPropagation();shareRacunAsImage('${r.id}')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';">📸 Podeli</button>` : '<div style="font-size:11px;color:#888;">Tapni za detalje 🧾</div>'}
+      ${(status==='placeno'||ps==='ship') ? `<button onclick="event.stopPropagation();shareRacunAsImage('${r.id}')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';">📸 Podeli</button>` : '<div style="font-size:11px;color:#888;">Tapni za detalje 🧾</div>'}
     </div>
     ${(() => {
       // Löschen-Button: nur für bezahlte/gesendete Rechnungen älter als 30 Tage
@@ -5264,7 +5263,7 @@ function kRacunCard(r, showUpload, showArhiva) {
         </div>`;
       }
       return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;text-align:right;">
-        <button onclick="event.stopPropagation();kupacDeleteRacun('${r.id}')" style="background:none;color:#cbd5e1;border:1px solid #e2e8f0;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter';">🗑️ Obriši iz istorije</button>
+        <button onclick="event.stopPropagation();kupacDeleteRacun('${r.id}')" style="background:none;color:#cbd5e1;border:1px solid #e2e8f0;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">🗑️ Obriši iz istorije</button>
       </div>`;
     })()}
   </div>`;
@@ -5521,9 +5520,9 @@ function shareRacunAsImage(racunId) {
   const st = r.paketStatus==='ship'?{c:'#10b981',l:'📦 Poslato'}:r.status==='placeno'?{c:'#10b981',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:{c:'#ef4444',l:'🔴 Novo'};
 
   overlay.innerHTML = `
-    <div id="racun-share-card" style="background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;font-family:'Inter',sans-serif;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+    <div id="racun-share-card" style="background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;font-family:'Nunito',sans-serif;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
       <div style="text-align:center;margin-bottom:16px;">
-        <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--txt);">Nova<span style="color:#d97706;">roba</span>shop</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--txt);">Nova<span style="color:#d97706;">roba</span>shop</div>
         <div style="font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Potvrda Narudžbine</div>
       </div>
       <div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:14px;">
@@ -5543,8 +5542,8 @@ function shareRacunAsImage(racunId) {
       ${admin?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px;font-size:11px;color:#94a3b8;text-align:center;">Admin: ${admin.name||''}</div>`:''}
     </div>
     <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:340px;">
-      <button onclick="window._doShareRacun()" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">📤 Podeli</button>
-      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,0.12);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Zatvori</button>
+      <button onclick="window._doShareRacun()" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">📤 Podeli</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,0.12);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Zatvori</button>
     </div>`;
 
   window._doShareRacun = async function() {
@@ -5868,9 +5867,9 @@ function renderKPoruke(poruke) {
       <div style="font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
       ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;display:block;" />` : ''}
       ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
-        <textarea id="kreply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;font-family:'Inter';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
+        <textarea id="kreply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
         ${fotoButtonsHtml('k'+safeId, true)}
-        <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📩 Pošalji odgovor</button>
+        <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📩 Pošalji odgovor</button>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -6134,11 +6133,11 @@ function renderKNotif(notifs) {
     // Aktions-Button je nach Typ
     let actionBtn = '';
     if (n.tip === 'placeno')
-      actionBtn = `<button onclick="kNavTab('arhiva')" style="margin-top:8px;background:#dcfce7;color:#16a34a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj plaćene račune</button>`;
+      actionBtn = `<button onclick="kNavTab('arhiva')" style="margin-top:8px;background:#dcfce7;color:#16a34a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">→ Pogledaj plaćene račune</button>`;
     else if (n.tip === 'paket_poslat' || n.tip === 'poslato')
-      actionBtn = `<button onclick="kNavTab('poslato')" style="margin-top:8px;background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj poslate pakete</button>`;
+      actionBtn = `<button onclick="kNavTab('poslato')" style="margin-top:8px;background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">→ Pogledaj poslate pakete</button>`;
     else if (n.tip === 'nova_racun')
-      actionBtn = `<button onclick="kNavTab('racuni')" style="margin-top:8px;background:rgba(240,64,96,0.12);color:var(--rose);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj novi račun</button>`;
+      actionBtn = `<button onclick="kNavTab('racuni')" style="margin-top:8px;background:rgba(240,64,96,0.12);color:var(--rose);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">→ Pogledaj novi račun</button>`;
 
     return `<div style="background:${unread?'rgba(79,142,247,0.08)':'rgba(9,12,20,0.8)'};border:1px solid ${unread?'rgba(79,142,247,0.25)':'rgba(255,255,255,0.07)'};border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
       <div style="font-size:24px;flex-shrink:0;">${icon}</div>
