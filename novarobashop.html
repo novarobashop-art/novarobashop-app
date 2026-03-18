@@ -1683,201 +1683,218 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-poslato" style="padding:16px;display:none;">
     <div id="k-poslato-list"></div>
   </div>
-  <!-- ══ PODRŠKA TAB — Redesign 2026 ══ -->
+  <!-- ══ PODRŠKA TAB — v3 High Contrast ══ -->
   <style>
-    .pod-section {
-      border-radius: 20px;
-      padding: 18px;
-      margin-bottom: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    .pod-section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: 20px 20px 0 0;
-    }
-    .pod-sec-bank { background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(6,182,212,0.08)); border: 1.5px solid rgba(14,165,233,0.25); }
-    .pod-sec-bank::before { background: linear-gradient(90deg, #0ea5e9, #06b6d4); }
-    .pod-sec-inbox { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(168,85,247,0.08)); border: 1.5px solid rgba(139,92,246,0.28); }
-    .pod-sec-inbox::before { background: linear-gradient(90deg, #8b5cf6, #a855f7); }
-    .pod-sec-send { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08)); border: 1.5px solid rgba(16,185,129,0.28); }
-    .pod-sec-send::before { background: linear-gradient(90deg, #10b981, #059669); }
-    .pod-sec-haupt { background: linear-gradient(135deg, rgba(251,113,33,0.12), rgba(239,68,68,0.08)); border: 1.5px solid rgba(251,113,33,0.3); }
-    .pod-sec-haupt::before { background: linear-gradient(90deg, #fb7121, #ef4444); }
-
-    .pod-sec-title {
-      font-size: 13px;
-      font-weight: 800;
+    /* ── Card base ── */
+    .pod2-card {
+      border-radius: 18px;
+      padding: 16px;
       margin-bottom: 12px;
+      position: relative;
+    }
+    /* ── Jede Karte hat eigene Farbe ── */
+    .pod2-bank  { background: #0f2744; border: 2px solid #3b82f6; }
+    .pod2-inbox { background: #1a0f3a; border: 2px solid #a855f7; }
+    .pod2-send  { background: #062a1e; border: 2px solid #22c55e; }
+    .pod2-haupt { background: #2a0f0f; border: 2px solid #f97316; }
+
+    /* ── Header der Karte ── */
+    .pod2-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      letter-spacing: 0.2px;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .pod-sec-title .pod-icon {
-      width: 30px; height: 30px;
-      border-radius: 10px;
+    .pod2-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: 20px;
       flex-shrink: 0;
     }
-    .pod-bank-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .pod2-bank  .pod2-icon { background: rgba(59,130,246,0.25); }
+    .pod2-inbox .pod2-icon { background: rgba(168,85,247,0.25); }
+    .pod2-send  .pod2-icon { background: rgba(34,197,94,0.25); }
+    .pod2-haupt .pod2-icon { background: rgba(249,115,22,0.25); }
+
+    .pod2-title { font-size: 15px; font-weight: 900; }
+    .pod2-sub   { font-size: 11px; font-weight: 500; opacity: 0.6; margin-top: 1px; }
+    .pod2-bank  .pod2-title { color: #60a5fa; }
+    .pod2-inbox .pod2-title { color: #c084fc; }
+    .pod2-send  .pod2-title { color: #4ade80; }
+    .pod2-haupt .pod2-title { color: #fb923c; }
+
+    /* ── Bank Daten Felder ── */
+    .pod2-field {
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
     }
-    .pod-bank-item {
-      background: rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,0.07);
+    .pod2-field:last-child { margin-bottom: 0; }
+    .pod2-field .lbl2 {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      opacity: 0.5;
+      margin-bottom: 3px;
     }
-    .pod-bank-item .lbl { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-    .pod-bank-item .val { font-size: 13px; font-weight: 800; color: var(--txt); }
-    .pod-inp {
+    .pod2-field .val2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .pod2-bank .pod2-field .val2  { color: #93c5fd; }
+
+    /* ── Inputs ── */
+    .pod2-inp {
       width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
       border-radius: 12px;
-      padding: 11px 13px;
+      padding: 12px 14px;
       font-size: 14px;
       font-family: 'Nunito';
       outline: none;
-      color: var(--txt);
+      color: #ffffff;
       box-sizing: border-box;
-      transition: border-color 0.2s;
+      margin-bottom: 10px;
     }
-    .pod-inp:focus { border-color: rgba(255,255,255,0.25); }
-    .pod-btn-row { display: flex; gap: 8px; margin-top: 10px; }
-    .pod-btn-cam, .pod-btn-gal {
+    .pod2-inp::placeholder { color: rgba(255,255,255,0.35); }
+    .pod2-inp:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.11); }
+
+    /* ── Medien Buttons ── */
+    .pod2-media-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .pod2-media-btn {
       flex: 1;
-      background: rgba(255,255,255,0.07);
-      border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.1);
+      border: 1.5px solid rgba(255,255,255,0.18);
       border-radius: 10px;
-      padding: 9px;
-      font-size: 12px;
+      padding: 10px 6px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       font-family: 'Nunito';
-      color: var(--txt2);
-      transition: background 0.15s;
+      color: #ffffff;
     }
-    .pod-btn-cam:active, .pod-btn-gal:active { background: rgba(255,255,255,0.13); }
-    .pod-submit-btn {
+
+    /* ── Submit Buttons ── */
+    .pod2-btn {
       width: 100%;
       border: none;
       border-radius: 12px;
-      padding: 13px;
-      font-size: 14px;
-      font-weight: 800;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 900;
       cursor: pointer;
       font-family: 'Nunito';
-      margin-top: 10px;
       letter-spacing: 0.3px;
-      transition: filter 0.15s, transform 0.1s;
     }
-    .pod-submit-btn:active { filter: brightness(0.9); transform: scale(0.98); }
-    .pod-submit-green { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-    .pod-submit-orange { background: linear-gradient(135deg, #fb7121, #ef4444); color: white; }
-    .pod-step-badge {
-      background: rgba(255,255,255,0.12);
-      border-radius: 50%;
-      width: 22px; height: 22px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 800;
-      flex-shrink: 0;
+    .pod2-btn-blue   { background: #3b82f6; color: #fff; }
+    .pod2-btn-purple { background: #9333ea; color: #fff; }
+    .pod2-btn-green  { background: #16a34a; color: #fff; }
+    .pod2-btn-orange { background: #ea580c; color: #fff; }
+
+    /* ── Label ── */
+    .pod2-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.5);
+      display: block;
+      margin-bottom: 6px;
     }
   </style>
 
-  <div id="ktab-podrska" style="padding:14px 14px 80px;display:none;">
+  <div id="ktab-podrska" style="padding:14px 14px 80px; display:none;">
 
     <!-- Naslov -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-      <div style="font-size:18px;font-weight:900;color:var(--txt);">💬 Podrška</div>
-      <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(255,255,255,0.08),transparent);border-radius:2px;"></div>
+    <div style="font-size:20px;font-weight:900;color:#ffffff;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+      💬 <span>Podrška</span>
     </div>
 
     <!-- ① BANKDATEN -->
-    <div class="pod-section pod-sec-bank">
-      <div class="pod-sec-title" style="color:#38bdf8;">
-        <div class="pod-icon" style="background:rgba(14,165,233,0.18);">🏦</div>
+    <div class="pod2-card pod2-bank">
+      <div class="pod2-header">
+        <div class="pod2-icon">🏦</div>
         <div>
-          <div>Podaci za Uplatu</div>
-          <div style="font-size:10px;font-weight:500;color:var(--txt3);margin-top:1px;">Broj računa i PostNet</div>
+          <div class="pod2-title">Podaci za Uplatu</div>
+          <div class="pod2-sub">Broj računa i PostNet</div>
         </div>
       </div>
-      <div class="pod-bank-grid">
-        <div class="pod-bank-item" style="grid-column:1/-1;">
-          <div class="lbl">Broj računa</div>
-          <div class="val" id="k-bank-num" style="color:#38bdf8;">—</div>
-        </div>
-        <div class="pod-bank-item">
-          <div class="lbl">Vlasnik</div>
-          <div class="val" id="k-bank-name">—</div>
-        </div>
-        <div class="pod-bank-item">
-          <div class="lbl">PostNet broj</div>
-          <div class="val" id="k-postnet-num" style="color:#38bdf8;">—</div>
-        </div>
-        <div class="pod-bank-item" style="grid-column:1/-1;">
-          <div class="lbl">PostNet ime</div>
-          <div class="val" id="k-postnet-name">—</div>
-        </div>
+      <div class="pod2-field">
+        <div class="lbl2">Broj računa</div>
+        <div class="val2" id="k-bank-num">—</div>
+      </div>
+      <div class="pod2-field">
+        <div class="lbl2">Vlasnik</div>
+        <div class="val2" id="k-bank-name">—</div>
+      </div>
+      <div class="pod2-field">
+        <div class="lbl2">PostNet broj</div>
+        <div class="val2" id="k-postnet-num">—</div>
+      </div>
+      <div class="pod2-field">
+        <div class="lbl2">PostNet ime</div>
+        <div class="val2" id="k-postnet-name">—</div>
       </div>
     </div>
 
     <!-- ② PORUKE OD ADMINA -->
-    <div class="pod-section pod-sec-inbox">
-      <div class="pod-sec-title" style="color:#c4b5fd;">
-        <div class="pod-icon" style="background:rgba(139,92,246,0.2);">📬</div>
+    <div class="pod2-card pod2-inbox">
+      <div class="pod2-header">
+        <div class="pod2-icon">📬</div>
         <div>
-          <div>Poruke od Admina</div>
-          <div style="font-size:10px;font-weight:500;color:var(--txt3);margin-top:1px;">Primljene poruke</div>
+          <div class="pod2-title">Poruke od Admina</div>
+          <div class="pod2-sub">Primljene poruke</div>
         </div>
       </div>
       <div id="k-admin-poruke-list">
-        <div style="text-align:center;color:var(--txt3);padding:18px 0;font-size:13px;opacity:0.7;">Nema poruka od admina.</div>
+        <div style="text-align:center;color:rgba(255,255,255,0.4);padding:16px 0;font-size:13px;">Nema poruka od admina.</div>
       </div>
     </div>
 
     <!-- ③ POŠALJI PORUKU -->
-    <div class="pod-section pod-sec-send">
-      <div class="pod-sec-title" style="color:#6ee7b7;">
-        <div class="pod-icon" style="background:rgba(16,185,129,0.2);">📩</div>
+    <div class="pod2-card pod2-send">
+      <div class="pod2-header">
+        <div class="pod2-icon">📩</div>
         <div>
-          <div>Pošalji Poruku Adminu</div>
-          <div style="font-size:10px;font-weight:500;color:var(--txt3);margin-top:1px;">Direktna komunikacija</div>
+          <div class="pod2-title">Pošalji Poruku Adminu</div>
+          <div class="pod2-sub">Direktna komunikacija</div>
         </div>
       </div>
-      <label style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
-      <select id="k-poruka-admin-sel" class="pod-inp" style="margin-bottom:10px;">
+      <label class="pod2-label">Izaberi Admina</label>
+      <select id="k-poruka-admin-sel" class="pod2-inp">
         <option value="">Izaberite admina...</option>
       </select>
-      <textarea id="k-poruka" class="pod-inp" rows="3" placeholder="Vaša poruka..." style="resize:none;"></textarea>
+      <label class="pod2-label">Poruka</label>
+      <textarea id="k-poruka" class="pod2-inp" rows="3" placeholder="Vaša poruka..." style="resize:none;"></textarea>
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <div class="pod-btn-row">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" class="pod-btn-cam">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" class="pod-btn-gal">🖼️ Galerija</button>
+      <div class="pod2-media-row">
+        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" class="pod2-media-btn">📷 Kamera</button>
+        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" class="pod2-media-btn">🖼️ Galerija</button>
       </div>
       <div id="foto-prev-kporuka"></div>
-      <button onclick="posaljiPoruku('admin')" class="pod-submit-btn pod-submit-green">✉️ Pošalji Adminu</button>
+      <button onclick="posaljiPoruku('admin')" class="pod2-btn pod2-btn-green">✉️ Pošalji Adminu</button>
     </div>
 
     <!-- ④ ŽALBA HAUPT -->
-    <div class="pod-section pod-sec-haupt">
-      <div class="pod-sec-title" style="color:#fdba74;">
-        <div class="pod-icon" style="background:rgba(251,113,33,0.2);">⚠️</div>
+    <div class="pod2-card pod2-haupt">
+      <div class="pod2-header">
+        <div class="pod2-icon">⚠️</div>
         <div>
-          <div>Žalba — Kontaktiraj Haupt</div>
-          <div style="font-size:10px;font-weight:500;color:var(--txt3);margin-top:1px;">Samo ako Admin nije rešio problem</div>
+          <div class="pod2-title">Žalba — Kontaktiraj Haupt</div>
+          <div class="pod2-sub">Samo ako Admin nije rešio problem</div>
         </div>
       </div>
-      <textarea id="k-poruka-haupt" class="pod-inp" rows="3" placeholder="Opišite problem..." style="resize:none;border-color:rgba(251,113,33,0.3);background:rgba(251,113,33,0.06);"></textarea>
-      <button onclick="posaljiPoruku('haupt')" class="pod-submit-btn pod-submit-orange">🚨 Pošalji Hauptu</button>
+      <label class="pod2-label">Opis problema</label>
+      <textarea id="k-poruka-haupt" class="pod2-inp" rows="3" placeholder="Opišite problem..." style="resize:none;"></textarea>
+      <button onclick="posaljiPoruku('haupt')" class="pod2-btn pod2-btn-orange">🚨 Pošalji Hauptu</button>
     </div>
 
   </div>
@@ -5897,7 +5914,7 @@ function kNavTab(name) {
     if (lbl) lbl.style.color = '#aaa';
   });
   const tab = document.getElementById('ktab-' + name);
-  if(tab) tab.style.display = (name === 'podrska') ? 'flex' : 'block';
+  if(tab) tab.style.display = 'block';
   const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', chat:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name]||'var(--blue)';
