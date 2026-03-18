@@ -5467,6 +5467,8 @@ function onGlobalAdminChange(adminId) {
     const el = document.getElementById(id);
     if (el) el.value = adminId;
   });
+  // Chat Admin auch setzen
+  onChatAdminChange(adminId);
 
   // Filtriraj racune
   filterKupacByAdmin(adminId);
@@ -5750,6 +5752,20 @@ function kNavTab(name) {
   if (name === 'dugovi')   { const r=window._kAllRacuni||[]; renderKDugovi(r); }
   if (name === 'home')     renderKHome();
   if (name === 'faq')      initFaq();
+  if (name === 'podrska') {
+    // Sync: wenn globaler Admin gewählt, Chat-Admin übernehmen
+    const globalSel = document.getElementById('k-global-admin-sel');
+    const chatSel   = document.getElementById('k-poruka-admin-sel');
+    if (globalSel && globalSel.value && chatSel && !chatSel.value) {
+      chatSel.value = globalSel.value;
+    }
+    const activeAdminId = (chatSel && chatSel.value) || (globalSel && globalSel.value) || '';
+    if (activeAdminId && activeAdminId !== _chatAdminId) {
+      onChatAdminChange(activeAdminId);
+    } else {
+      renderChatVerlauf();
+    }
+  }
 }
 
 
@@ -6444,6 +6460,7 @@ async function chatSendMsg() {
   }
   const msg = {
     od: u.uid,
+    kupacId: u.uid,
     odIme: u.name,
     odTiktok: u.tiktokIme || '',
     odNick: u.tiktokNick || '',
@@ -6451,23 +6468,35 @@ async function chatSendMsg() {
     vreme: new Date().toISOString(),
     procitano: false
   };
-  await addDoc(collection(db, 'poruke'), msg);
-  // Sofort lokal anzeigen
-  _allKupacSent = [...(_allKupacSent||[]), {...msg, id:'_tmp_'+Date.now(), _dir:'out', _vreme:msg.vreme}];
-  if (ta) { ta.value = ''; ta.style.height = 'auto'; }
-  renderChatVerlauf();
-  showToast('✅ Poruka poslata!');
+  try {
+    await addDoc(collection(db, 'poruke'), msg);
+    // Sofort lokal anzeigen
+    _allKupacSent = [...(_allKupacSent||[]), {...msg, id:'_tmp_'+Date.now(), _dir:'out', _vreme:msg.vreme}];
+    if (ta) { ta.value = ''; ta.style.height = 'auto'; }
+    renderChatVerlauf();
+    showToast('✅ Poruka poslata!');
+  } catch(err) {
+    console.error('chatSendMsg error:', err);
+    showToast('❌ Greška: ' + (err.code || err.message), 5000);
+  }
 }
 
 // Beim Laden: gesendete Nachrichten des Kunden aus Firestore laden
 function loadKupacSentPoruke(uid) {
   if (!window._fb) return;
   const { db, collection, query, where, onSnapshot } = window._fb;
-  onSnapshot(query(collection(db, 'poruke'), where('od', '==', uid)), snap => {
-    _allKupacSent = [];
-    snap.forEach(d => _allKupacSent.push({id:d.id,...d.data(),_dir:'out',_vreme:d.data().vreme||''}));
-    renderChatVerlauf();
-  });
+  try {
+    onSnapshot(query(collection(db, 'poruke'), where('od', '==', uid)), snap => {
+      _allKupacSent = [];
+      snap.forEach(d => _allKupacSent.push({id:d.id,...d.data(),_dir:'out',_vreme:d.data().vreme||''}));
+      renderChatVerlauf();
+    }, err => {
+      console.error('loadKupacSentPoruke error:', err.code, err.message);
+      showToast('⚠️ Greška pri učitavanju poruka: ' + err.code, 4000);
+    });
+  } catch(e) {
+    console.error('loadKupacSentPoruke setup error:', e);
+  }
 }
 
 // Kupac sends message with tiktok info
