@@ -2372,6 +2372,12 @@ function _showPortalByRole(role) {
     setTimeout(() => kNavTab('home'), 100);
   }
   // Push notification permission
+  // Firebase Messaging SW registrieren
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/novarobashop-app/firebase-messaging-sw.js', { scope: '/novarobashop-app/' })
+    .then(reg => console.log('Firebase SW registered:', reg.scope))
+    .catch(err => console.log('Firebase SW error:', err));
+}
   setTimeout(initPushNotifications, 2000);
 }
 
