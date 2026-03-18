@@ -1615,23 +1615,31 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-racuni" style="padding:16px;display:none;">
     <div style="background:rgba(79,142,247,0.07);border:1.5px solid rgba(79,142,247,0.22);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
       <div style="font-size:14px;font-weight:800;color:var(--blue);margin-bottom:4px;">📸 Kako platiti račun?</div>
-      <div style="font-size:13px;color:#1e40af;line-height:1.7;">1. Uplati iznos u banci ili pošti<br>2. Tapni <b>📷 Kamera</b> ili <b>🖼️ Galerija</b> ispod<br>3. Pošalji sliku potvrde — gotovo! ✅</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.7;">1. Uplati iznos u banci ili pošti<br>2. Tapni <b>📷 Kamera</b> ili <b>🖼️ Galerija</b> ispod<br>3. Pošalji sliku potvrde — gotovo! ✅</div>
+    </div>
+    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:0 12px;margin-bottom:12px;transition:border-color 0.2s;" onfocusin="this.style.borderColor='rgba(91,141,238,0.4)'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)'">
+      <span style="color:var(--txt3);font-size:15px;margin-right:8px;">🔍</span>
+      <input type="text" id="k-racuni-search" placeholder="Pretraži po broju, opisu..." oninput="filterKRacuni(this.value)" style="flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-size:13px;font-family:'Nunito';padding:11px 0;" />
+      <button onclick="document.getElementById('k-racuni-search').value='';filterKRacuni('')" style="background:none;border:none;color:var(--txt3);font-size:14px;cursor:pointer;padding:4px;">✕</button>
     </div>
     <div id="k-racuni-list"></div>
   </div>
   <div id="ktab-ceka" style="padding:16px;display:none;">
-    <div style="background:linear-gradient(135deg,#fffbeb,#fff);border:1.5px solid #fde68a;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
-      <div style="font-size:13px;font-weight:800;color:#92400e;">⏳ Čeka potvrdu admina</div>
-      <div style="font-size:12px;color:#b45309;margin-top:3px;">Uplata je primljena. Ako slika nije čitka, možeš poslati novu ispod.</div>
+    <div style="background:rgba(212,146,42,0.07);border:1.5px solid rgba(212,146,42,0.22);border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:800;color:var(--amber);">⏳ Čeka potvrdu admina</div>
+      <div style="font-size:12px;color:var(--txt2);margin-top:3px;">Uplata je primljena. Ako slika nije čitka, možeš poslati novu ispod.</div>
     </div>
     <div id="k-ceka-list"></div>
   </div>
   <div id="ktab-arhiva" style="padding:16px;display:none;">
-    <div style="font-size:13px;font-weight:700;color:#1A8B4D;margin-bottom:12px;">🟢 Plaćeno</div>
+    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:0 12px;margin-bottom:12px;transition:border-color 0.2s;" onfocusin="this.style.borderColor='rgba(34,181,160,0.4)'" onfocusout="this.style.borderColor='rgba(255,255,255,0.08)'">
+      <span style="color:var(--txt3);font-size:15px;margin-right:8px;">🔍</span>
+      <input type="text" id="k-arhiva-search" placeholder="Pretraži plaćene račune..." oninput="filterKArhiva(this.value)" style="flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-size:13px;font-family:'Nunito';padding:11px 0;" />
+      <button onclick="document.getElementById('k-arhiva-search').value='';filterKArhiva('')" style="background:none;border:none;color:var(--txt3);font-size:14px;cursor:pointer;padding:4px;">✕</button>
+    </div>
     <div id="k-arhiva-list"></div>
   </div>
   <div id="ktab-poslato" style="padding:16px;display:none;">
-    <div style="font-size:13px;font-weight:700;color:#4ECDC4;margin-bottom:12px;">📦 Poslato</div>
     <div id="k-poslato-list"></div>
   </div>
   <div id="ktab-podrska" style="padding:16px;display:none;">
@@ -2425,22 +2433,49 @@ async function checkOverdueRacuni(racuni) {
     if (rok <= heute) { // Frist abgelaufen
       try {
         const { db, doc, updateDoc, collection, addDoc } = window._fb;
-        await updateDoc(doc(db, 'users', r.kupacId), { blocked: true, blockedAt: new Date().toISOString() });
+
+        // 1. Kupac sperren
+        await updateDoc(doc(db, 'users', r.kupacId), {
+          blocked: true,
+          blockedAt: new Date().toISOString(),
+          blockedReason: `Neplaćen račun #${r.broj}`
+        });
         await updateDoc(doc(db, 'racuni', r.id), { blocked: true });
+
+        // 2. Kupac benachrichtigen
+        await addDoc(collection(db, 'notifikacije'), {
+          userId: r.kupacId,
+          tip: 'nalog_blokiran',
+          racunId: r.id,
+          poruka: `🔒 Vaš nalog je automatski blokiran zbog neplaćenog računa #${r.broj} (${(r.iznos||0).toLocaleString()} RSD). Kontaktirajte admina.`,
+          vreme: new Date().toISOString(),
+          procitano: false
+        });
+
+        // 3. Push an Kunden
+        await sendPushToUser(r.kupacId,
+          '🔒 Nalog blokiran',
+          `Račun #${r.broj} nije plaćen na vreme. Nalog je blokiran.`
+        );
+
+        // 4. Haupt benachrichtigen
         await addDoc(collection(db, 'haupt_notifikacije'), {
           tip: 'blokiran_kupac',
           kupacId: r.kupacId,
           kupacName: r.kupacName,
           adminId: window._currentUser?.uid || '',
           adminName: window._currentUser?.name || '',
-          poruka: 'Kupac ' + r.kupacName + ' je automatski blokiran zbog neplacene racune ' + r.broj,
+          poruka: `Kupac ${r.kupacName} je automatski blokiran zbog neplaćene račune #${r.broj}`,
           vreme: new Date().toISOString(),
           procitano: false
         });
+
         await _warnOtherAdminsAboutBlock(
           r.kupacId, r.kupacName,
           window._currentUser?.uid || '', window._currentUser?.name || ''
         );
+
+        showToast(`🔒 ${r.kupacName} automatski blokiran — račun #${r.broj}`);
       } catch(e) {
         console.error('checkOverdueRacuni error for', r.id, e.message);
       }
@@ -5086,14 +5121,16 @@ function onGlobalAdminChange(adminId) {
 }
 
 function checkKupacOverdue(racuni) {
-  const today = new Date();
-  racuni.forEach(r => {
-    if (r.status === 'novo' && r.datum) {
-      const diff = Math.floor((today - new Date(r.datum)) / (1000*60*60*24));
-      if (diff === 1) showToast('⚠️ Imate otvorenu računu! Molimo platite.', 5000);
-      else if (diff === 2) showToast('⚠️ Podsetnik – računa još nije plaćena!', 5000);
-      else if (diff === 3) showToast('🚨 Poslednje upozorenje – sutra blokada naloga!', 6000);
-    }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const noviRacuni = racuni.filter(r => r.status === 'novo' && r.datum);
+
+  noviRacuni.forEach(r => {
+    const rok = _getRok(r, racuni);
+    if (!rok) return;
+    const daysLeft = Math.ceil((rok - today) / (1000*60*60*24));
+    if (daysLeft <= 0)       showToast('🔒 Rok za plaćanje je istekao! Nalog može biti blokiran.', 7000);
+    else if (daysLeft === 1) showToast('🚨 Poslednje upozorenje – sutra blokada naloga!', 6000);
+    else if (daysLeft === 2) showToast('⚠️ Podsetnik – računa još nije plaćena!', 5000);
   });
 }
 
@@ -5271,20 +5308,43 @@ function kRacunCard(r, showUpload, showArhiva) {
 
 function renderKNove(racuni) {
   const el = document.getElementById('k-racuni-list');
-  if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema novih računa!</div>'; return; }
-  el.innerHTML = racuni.map(r => kRacunCard(r, true, false)).join('');
+  if (!el) return;
+  window._kNoveRacuni = racuni;
+  const q = (document.getElementById('k-racuni-search')?.value || '').toLowerCase();
+  const list = q ? racuni.filter(r =>
+    (r.broj||'').toString().includes(q) ||
+    (r.opis||'').toLowerCase().includes(q) ||
+    (r.iznos||'').toString().includes(q)
+  ) : racuni;
+  if (!list.length) { el.innerHTML = `<div class="section-empty">${q ? '🔍 Nema rezultata za "'+q+'"' : 'Nema novih računa ✅'}</div>`; return; }
+  el.innerHTML = list.map(r => kRacunCard(r, true, false)).join('');
 }
-
-function renderKCeka(racuni) {
-  const el = document.getElementById('k-ceka-list');
-  if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema računa koji čekaju.</div>'; return; }
-  el.innerHTML = racuni.map(r => kRacunCard(r, true, false)).join('');
+function filterKRacuni(val) {
+  renderKNove(window._kNoveRacuni || []);
 }
 
 function renderKArhiva(racuni) {
   const el = document.getElementById('k-arhiva-list');
-  if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema plaćenih računa.</div>'; return; }
-  el.innerHTML = racuni.map(r => kRacunCard(r, false, true)).join('');
+  if (!el) return;
+  window._kArhivaRacuni = racuni;
+  const q = (document.getElementById('k-arhiva-search')?.value || '').toLowerCase();
+  const list = q ? racuni.filter(r =>
+    (r.broj||'').toString().includes(q) ||
+    (r.opis||'').toLowerCase().includes(q) ||
+    (r.iznos||'').toString().includes(q) ||
+    (r.datum||'').includes(q)
+  ) : racuni;
+  if (!list.length) { el.innerHTML = `<div class="section-empty">${q ? '🔍 Nema rezultata za "'+q+'"' : 'Nema plaćenih računa'}</div>`; return; }
+  el.innerHTML = list.map(r => kRacunCard(r, false, true)).join('');
+}
+function filterKArhiva(val) {
+  renderKArhiva(window._kArhivaRacuni || []);
+}
+
+function renderKCeka(racuni) {
+  const el = document.getElementById('k-ceka-list');
+  if (!racuni.length) { el.innerHTML = '<div class="section-empty">Nema računa koji čekaju.</div>'; return; }
+  el.innerHTML = racuni.map(r => kRacunCard(r, true, false)).join('');
 }
 
 function renderKPoslato(racuni) {
