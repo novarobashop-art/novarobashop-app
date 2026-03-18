@@ -72,11 +72,19 @@ const connections = {};
 const MAX_RECONNECT_ATTEMPTS = 3;
 const RECONNECT_DELAY_MS = 5000;
 
-// ── Datum-Diff in Tagen (DST-sicher) ──
+// ── Datum-Diff in Tagen (DST-sicher) — identisch mit Frontend _diffDays() ──
 function diffInDays(dateA, dateB) {
   const a = new Date(dateA); a.setHours(0, 0, 0, 0);
   const b = new Date(dateB); b.setHours(0, 0, 0, 0);
   return Math.round((a - b) / (1000 * 60 * 60 * 24));
+}
+
+// Kasni wenn heute >= datum + 3 Tage (gleiche Logik wie im Frontend)
+function istKasni(datumStr) {
+  if (!datumStr) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const datum = new Date(datumStr); datum.setHours(0,0,0,0);
+  return diffInDays(today, datum) >= 3;
 }
 
 // ── TikTok Verbindung aufbauen ──
@@ -105,15 +113,24 @@ function buildConnection(adminId, tiktokUsername) {
       let tiktokNick  = '';
 
       if (db) {
-        const snap = await db.collection('users')
+        // BUGFIX Nr.8: Probaj i lowercase i originalni tiktokId (Firestore nema case-insensitive where)
+        const tiktokLower = tiktokId.toLowerCase();
+        let userSnap = await db.collection('users')
           .where('role', '==', 'kupac')
-          .where('tiktokIme', '==', tiktokId.toLowerCase())
+          .where('tiktokIme', '==', tiktokLower)
           .limit(1).get();
+        // Ako nije pronašao lowercase, probaj originalni
+        if (userSnap.empty) {
+          userSnap = await db.collection('users')
+            .where('role', '==', 'kupac')
+            .where('tiktokIme', '==', tiktokId)
+            .limit(1).get();
+        }
 
-        if (!snap.empty) {
-          const kupac = snap.docs[0].data();
+        if (!userSnap.empty) {
+          const kupac = userSnap.docs[0].data();
           kupacName  = kupac.name || kupac.tiktokNick || '';
-          kupacId    = snap.docs[0].id;
+          kupacId    = userSnap.docs[0].id;
           tiktokNick = kupac.tiktokNick || '';
 
           const racuniSnap = await db.collection('racuni')
@@ -122,14 +139,10 @@ function buildConnection(adminId, tiktokUsername) {
             .where('status', '==', 'novo')
             .limit(5).get();
 
-          const today = new Date();
           let kasni = false;
           racuniSnap.forEach(r => {
             const d = r.data();
-            if (d.datum) {
-              const diff = diffInDays(today, new Date(d.datum));
-              if (diff >= 3) kasni = true;
-            }
+            if (istKasni(d.datum)) kasni = true;
           });
           statusColor = kasni ? 'orange' : 'green';
         }
@@ -170,8 +183,9 @@ function buildConnection(adminId, tiktokUsername) {
 
     const attempts = connections[adminId].reconnectAttempts || 0;
     if (attempts >= MAX_RECONNECT_ATTEMPTS) {
-      console.warn(`⛔ Max. Reconnect-Versuche für admin ${adminId} erreicht. Aufgegeben.`);
-      delete connections[adminId];
+      console.warn(`⛔ Max. Reconnect-Versuche für admin ${adminId} erreicht. Warte auf manuellen Restart.`);
+      // BUGFIX: Nicht löschen — nur als "disconnected" markieren, damit /start-live wieder funktioniert
+      connections[adminId].disconnectedPermanent = true;
       return;
     }
 
@@ -181,9 +195,11 @@ function buildConnection(adminId, tiktokUsername) {
     connections[adminId].reconnectAttempts = attempts + 1;
     connections[adminId].reconnectTimer = setTimeout(async () => {
       if (!connections[adminId]) return;
+      if (connections[adminId].disconnectedPermanent) return;
       try {
         await connections[adminId].connection.connect();
         connections[adminId].reconnectAttempts = 0;
+        connections[adminId].disconnectedPermanent = false;
         console.log(`✅ Reconnect erfolgreich für admin ${adminId}`);
       } catch(e) {
         console.error(`❌ Reconnect fehlgeschlagen für admin ${adminId}:`, e.message);

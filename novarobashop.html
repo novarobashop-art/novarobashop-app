@@ -1144,8 +1144,14 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div style="padding:16px;">
     <!-- KUPCI TAB -->
     <div id="atab-kupci">
-      <div style="margin-bottom:12px;">
-        <input type="text" class="inp-dark" id="kupci-search" placeholder="🔍 Pretraži kupce..." oninput="filterKupci(this.value)" />
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+        <input type="text" class="inp-dark" id="kupci-search" placeholder="🔍 Pretraži kupce..." oninput="filterKupci(this.value)" style="flex:1;margin-bottom:0;" />
+        <select id="kupci-sort" onchange="filterKupci(document.getElementById('kupci-search').value)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;">
+          <option value="tiktok-az">@TikTok A–Z</option>
+          <option value="name-az">Ime A–Z</option>
+          <option value="status">Po statusu</option>
+          <option value="dugovi-desc">Dugovi ↓</option>
+        </select>
       </div>
       <div id="a-kupci-list"></div>
     </div>
@@ -1193,11 +1199,21 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
     <!-- RAČUNI TAB -->
     <div id="atab-racuni" style="display:none;">
-      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
-        <span style="font-size:16px;margin-right:8px;">🔍</span>
-        <input type="text" id="racuni-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterRacuni(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
-        <button onclick="document.getElementById('racuni-search').value='';filterRacuni('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
+          <span style="font-size:16px;margin-right:8px;">🔍</span>
+          <input type="text" id="racuni-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterRacuni(this.value)"
+            style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
+          <button onclick="document.getElementById('racuni-search').value='';filterRacuni('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+        </div>
+        <select id="racuni-sort" onchange="filterRacuni(document.getElementById('racuni-search').value)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;white-space:nowrap;">
+          <option value="novo-first">🔴 Novo prvo</option>
+          <option value="date-desc">📅 Najnoviji</option>
+          <option value="date-asc">📅 Najstariji</option>
+          <option value="iznos-desc">💰 Iznos ↓</option>
+          <option value="iznos-asc">💰 Iznos ↑</option>
+          <option value="tiktok-az">@TikTok A–Z</option>
+        </select>
       </div>
       <div class="form-section">
         <div class="form-section-title">➕ Nova Račun</div>
@@ -2782,14 +2798,31 @@ function renderAKupci(kupci) {
 }
 
 function filterKupci(val) {
-  if (!val) { renderAKupci(_allKupci); return; }
-  const s = val.toLowerCase();
-  renderAKupci(_allKupci.filter(k =>
+  const s = (val||'').toLowerCase();
+  const sortEl = document.getElementById('kupci-sort');
+  const sort = sortEl ? sortEl.value : 'tiktok-az';
+  let lista = s ? _allKupci.filter(k =>
     (k.name||'').toLowerCase().includes(s) ||
     (k.email||'').toLowerCase().includes(s) ||
     (k.tiktokIme||'').toLowerCase().includes(s) ||
     (k.tiktokNick||'').toLowerCase().includes(s)
-  ));
+  ) : [..._allKupci];
+  lista.sort((a, b) => {
+    if (sort === 'tiktok-az') return (a.tiktokIme||'').localeCompare(b.tiktokIme||'');
+    if (sort === 'name-az')   return (a.name||'').localeCompare(b.name||'');
+    if (sort === 'status') {
+      const sa = getKupacStatus(a, _allRacuni), sb = getKupacStatus(b, _allRacuni);
+      const ord = {kasni:0, reg:1, noreg:2};
+      return (ord[sa]||3) - (ord[sb]||3);
+    }
+    if (sort === 'dugovi-desc') {
+      const dugA = _allRacuni.filter(r=>r.kupacId===a.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
+      const dugB = _allRacuni.filter(r=>r.kupacId===b.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
+      return dugB - dugA;
+    }
+    return 0;
+  });
+  renderAKupci(lista);
 }
 
 function adminRacunCard(r) {
@@ -2940,12 +2973,31 @@ function _matchRacun(r, s) {
 }
 
 function filterRacuni(val) {
-  const s = val.replace('@','').toLowerCase();
-  const aktivni = _allRacuni.filter(r => r.status === 'novo' || r.status === 'ceka');
-  const filtered = s ? aktivni.filter(r => _matchRacun(r, s)) : aktivni;
+  const s = (val||'').replace('@','').toLowerCase();
+  const sortEl = document.getElementById('racuni-sort');
+  const sort = sortEl ? sortEl.value : 'novo-first';
+  let aktivni = _allRacuni.filter(r => r.status === 'novo' || r.status === 'ceka');
+  if (s) aktivni = aktivni.filter(r => _matchRacun(r, s));
+  // Sortiranje
+  aktivni.sort((a, b) => {
+    if (sort === 'novo-first') {
+      const statusOrder = {novo:0, ceka:1};
+      return (statusOrder[a.status]||2) - (statusOrder[b.status]||2);
+    }
+    if (sort === 'date-desc') return (b.createdAt||b.datum||'') > (a.createdAt||a.datum||'') ? 1 : -1;
+    if (sort === 'date-asc')  return (a.createdAt||a.datum||'') > (b.createdAt||b.datum||'') ? 1 : -1;
+    if (sort === 'iznos-desc') return (b.iznos||0) - (a.iznos||0);
+    if (sort === 'iznos-asc')  return (a.iznos||0) - (b.iznos||0);
+    if (sort === 'tiktok-az') {
+      const kupacA = (_allKupci||[]).find(k => k.id === a.kupacId);
+      const kupacB = (_allKupci||[]).find(k => k.id === b.kupacId);
+      return (kupacA?.tiktokIme||'').localeCompare(kupacB?.tiktokIme||'');
+    }
+    return 0;
+  });
   const el = document.getElementById('a-racuni-list');
-  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
-  el.innerHTML = filtered.map(r => adminRacunCard(r)).join('');
+  if (!aktivni.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = aktivni.map(r => adminRacunCard(r)).join('');
 }
 
 function filterPlacanja(val) {
@@ -3994,7 +4046,14 @@ function aTab(name, el) {
     if (div) div.style.display = 'none';
   });
   document.getElementById('atab-' + name).style.display = (name === 'podrska-admin') ? 'flex' : 'block';
-  if (name === 'live') renderLiveGrid(window._allKupciGlobal || []);
+  if (name === 'live') {
+    // Uvek osvezi listu kupaca i racuna kad se otvori Live tab
+    renderLiveGrid(window._allKupciGlobal || []);
+    renderLnArtikli();
+    renderLnKorpe();
+    // Ako je Live aktivan i mode je aukcija — osvezi ponude
+    if (_isLive && _liveMode === 'aukcija') renderAukPonude();
+  }
   if (name === 'dashboard') renderDashboard();
   if (name === 'proizvodi') loadProizvodi();
   if (name === 'kalender') renderKalender('all');
@@ -4537,7 +4596,7 @@ async function toggleLive() {
 
     // Reset korpe i gesendet — artikli ostaju (admin ih dodaje pre ili tokom livea)
     _lnKorpe = {};
-    _lnRacunGesendet = new Set();
+    _lnResetGesendet();
     renderLnKorpe();
 
     startLiveRealtime();
@@ -4616,7 +4675,7 @@ async function toggleLive() {
 
     // Reset korpe za sledeći live — artikli ostaju za ponovnu upotrebu
     _lnKorpe = {};
-    _lnRacunGesendet = new Set();
+    _lnResetGesendet();
     renderLnKorpe();
   }
 }
@@ -4639,6 +4698,14 @@ function setLiveMode(mode) {
   // Update column 3 header label
   const h = document.getElementById('ln-col3-lbl');
   if (h) h.textContent = isAuk ? '🔨 Ponude' : '📋 Narudžbine';
+  // BUGFIX: osiguraj da _allKupciGlobal nije izgubljen pri promeni moda
+  if (!window._allKupciGlobal || window._allKupciGlobal.length === 0) {
+    window._allKupciGlobal = _allKupci || [];
+  }
+  // Osvezi live grid sa aktuelnim kupacima
+  renderLiveGrid(window._allKupciGlobal || []);
+  if (isAuk) renderAukPonude();
+  else renderLnKorpe();
 }
 
 // ═══════════════════════════════════════════════════
@@ -4703,35 +4770,63 @@ async function zakljuciAukciju() {
   const { kupac, iznos } = _aukWinner;
   const opisArtikli = _aukArtikli.map(a => a.naziv).join(', ');
   if (!confirm('Zaključiti aukciju?\n\nPobednik: ' + (kupac.tiktokNick||kupac.name) + '\nPonuda: ' + iznos.toLocaleString() + ' RSD\nArtikli: ' + opisArtikli)) return;
+
   const { db, collection, addDoc } = window._fb;
-  const broj = Math.floor(1000 + Math.random()*9000);
-  await addDoc(collection(db,'racuni'), {
-    adminId: window._currentUser.uid,
-    kupacId: kupac.id, kupacName: kupac.name||'',
-    iznos, opis: opisArtikli,
-    stavke: _aukArtikli.map(a => ({ naziv: a.naziv, cena: iznos })),
-    status: 'novo', paketStatus: 'prep',
-    datum: new Date().toISOString().slice(0,10),
-    broj, createdAt: new Date().toISOString(), sourceAukcija: true
-  });
-  await addDoc(collection(db,'notifikacije'), {
-    userId: kupac.id, tip: 'nova_racun',
-    poruka: '🏆 Pobedili ste aukciju!\n' + opisArtikli + '\nVaša ponuda: ' + iznos.toLocaleString() + ' RSD',
-    vreme: new Date().toISOString(), procitano: false
-  });
-  // Obavesti gubitnike
-  for (const p of Object.values(_aukPonude)) {
-    if (p.kupac.id === kupac.id) continue;
-    await addDoc(collection(db,'notifikacije'), {
-      userId: p.kupac.id, tip: 'info',
-      poruka: '😔 Aukcija završena. Pobedila ponuda: ' + iznos.toLocaleString() + ' RSD za: ' + opisArtikli,
-      vreme: new Date().toISOString(), procitano: false
+  const btn = document.getElementById('auk-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Šaljem...'; }
+
+  try {
+    const broj = Math.floor(1000 + Math.random()*9000);
+    await addDoc(collection(db,'racuni'), {
+      adminId: window._currentUser.uid,
+      kupacId: kupac.id, kupacName: kupac.name||'',
+      iznos, opis: opisArtikli,
+      stavke: _aukArtikli.map(a => ({ naziv: a.naziv, cena: iznos })),
+      status: 'novo', paketStatus: 'prep',
+      datum: new Date().toISOString().slice(0,10),
+      broj, createdAt: new Date().toISOString(), sourceAukcija: true
     });
+
+    // Pobednik notifikacija
+    try {
+      await addDoc(collection(db,'notifikacije'), {
+        userId: kupac.id, tip: 'nova_racun',
+        poruka: '🏆 Pobedili ste aukciju!\n' + opisArtikli + '\nVaša ponuda: ' + iznos.toLocaleString() + ' RSD',
+        vreme: new Date().toISOString(), procitano: false
+      });
+    } catch(e) { console.warn('Pobednik notif error:', e.message); }
+
+    // Gubitnici notifikacije — svaka zasebno, greška ne blokira
+    const gubitnici = Object.values(_aukPonude).filter(p => p.kupac.id !== kupac.id);
+    let notifOk = 0, notifErr = 0;
+    for (const p of gubitnici) {
+      try {
+        await addDoc(collection(db,'notifikacije'), {
+          userId: p.kupac.id, tip: 'info',
+          poruka: '😔 Aukcija završena. Pobedila ponuda: ' + iznos.toLocaleString() + ' RSD za: ' + opisArtikli,
+          vreme: new Date().toISOString(), procitano: false
+        });
+        notifOk++;
+      } catch(e) {
+        notifErr++;
+        console.warn('Gubitnik notif error za', p.kupac.id, e.message);
+      }
+    }
+
+    _aukAktivna = false;
+    const iznosEl = document.getElementById('auk-top-iznos');
+    if (iznosEl) iznosEl.style.color = '#6ee7b7';
+    if (btn) btn.style.display = 'none';
+
+    let msg = '✅ Aukcija zaključena! Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + iznos.toLocaleString() + ' RSD';
+    if (notifErr > 0) msg += ' (' + notifErr + ' notif nije stiglo)';
+    showToast(msg, 5000);
+
+  } catch(e) {
+    console.error('zakljuciAukciju error:', e);
+    showToast('❌ Greška pri zaključivanju: ' + e.message, 6000);
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Zaključi & Pošalji Račun'; }
   }
-  _aukAktivna = false;
-  document.getElementById('auk-top-iznos').style.color = '#6ee7b7';
-  document.getElementById('auk-btn').style.display = 'none';
-  showToast('✅ Aukcija zaključena! Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + iznos.toLocaleString() + ' RSD', 5000);
 }
 
 function renderAukPonude() {
@@ -4757,7 +4852,18 @@ function renderAukPonude() {
 }
 let _lnArtikli = [];  // [{ naziv, cena }] — aktivni artikli koje admin dodaje
 let _lnKorpe   = {};  // { kupacId: { kupac, stavke:[{naziv,cena}], racunSent } }
-let _lnRacunGesendet = new Set(); // kupacId-evi koji su VEC dobili racun ovog livea — ne mogu vise naručiti
+// BUGFIX: Koristi sessionStorage da sačuvamo gesendet set pri promeni taba
+let _lnRacunGesendet = new Set(
+  JSON.parse(sessionStorage.getItem('_lnRacunGesendet') || '[]')
+);
+function _lnMarkGesendet(kupacId) {
+  _lnRacunGesendet.add(kupacId);
+  try { sessionStorage.setItem('_lnRacunGesendet', JSON.stringify([..._lnRacunGesendet])); } catch(e) {}
+}
+function _lnResetGesendet() {
+  _lnRacunGesendet = new Set();
+  try { sessionStorage.removeItem('_lnRacunGesendet'); } catch(e) {}
+}
 
 // Admin dodaje artikal sa cenom i ukupnom kolicinom na stanju
 function dodajLnArtikal() {
@@ -4803,9 +4909,42 @@ function renderLnArtikli() {
       + '<span style="font-size:12px;font-weight:700;color:white;flex:1;">' + a.naziv + '</span>'
       + '<span style="font-size:11px;font-weight:800;color:' + boja + ';background:rgba(255,255,255,0.06);border-radius:6px;padding:2px 7px;flex-shrink:0;">' + dostupno + '/' + (a.stanje||1) + '</span>'
       + '<span style="font-size:12px;font-weight:800;color:var(--amber);flex-shrink:0;">' + a.cena.toLocaleString() + ' RSD</span>'
-      + '<button onclick="_lnArtikli.splice('+i+',1);renderLnArtikli();" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>'
+      + '<button onclick="editLnArtikal('+i+')" style="background:rgba(212,146,42,0.12);border:1px solid rgba(212,146,42,0.3);color:var(--amber);cursor:pointer;font-size:11px;padding:2px 7px;border-radius:6px;">✏️</button>'
+      + '<button onclick="deleteLnArtikal('+i+')" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>'
       + '</div>';
   }).join('');
+}
+
+function editLnArtikal(i) {
+  const a = _lnArtikli[i];
+  if (!a) return;
+  const noviNaziv = prompt('Naziv artikla:', a.naziv);
+  if (noviNaziv === null) return;
+  const novaCena = parseFloat(prompt('Cena (RSD):', a.cena));
+  if (!novaCena || isNaN(novaCena)) { showToast('⚠️ Neispravna cena'); return; }
+  const novoStanje = parseInt(prompt('Količina na stanju:', a.stanje||1));
+  if (isNaN(novoStanje) || novoStanje < 1) { showToast('⚠️ Neispravna količina'); return; }
+  const staroNaziv = a.naziv, staraCena = a.cena;
+  _lnArtikli[i] = { naziv: noviNaziv.trim(), cena: novaCena, stanje: novoStanje };
+  Object.values(_lnKorpe).forEach(korpa => {
+    if (korpa.racunSent) return;
+    korpa.stavke.forEach(s => {
+      if (s.naziv === staroNaziv && s.cena === staraCena) { s.naziv = noviNaziv.trim(); s.cena = novaCena; }
+    });
+  });
+  renderLnArtikli();
+  renderLnKorpe();
+  showToast('✅ Artikal izmenjen — korpe ažurirane');
+}
+
+function deleteLnArtikal(i) {
+  const a = _lnArtikli[i];
+  if (!a) return;
+  const uKorpi = Object.values(_lnKorpe).some(k => !k.racunSent && k.stavke.some(s => s.naziv === a.naziv && s.cena === a.cena));
+  if (uKorpi && !confirm('Artikal "' + a.naziv + '" je već u korpi nekog kupca.\nObrišem svejedno?')) return;
+  _lnArtikli.splice(i, 1);
+  renderLnArtikli();
+  showToast('🗑️ Artikal uklonjen');
 }
 
 // Svaki chat komentar — provjeri mode
@@ -5061,7 +5200,7 @@ async function posaljiLnRacun(kupacId) {
     console.log('posaljiLnRacun notif saved ✅');
 
     korpa.racunSent = true;
-    _lnRacunGesendet.add(kupacId);
+    _lnMarkGesendet(kupacId);
     renderLnKorpe();
     showToast('✅ Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + ukupno.toLocaleString() + ' RSD');
   } catch(e) {
