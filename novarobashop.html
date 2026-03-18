@@ -1720,13 +1720,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       </div>
     </div>
 
-    <!-- ── 2. ADMIN AUSWAHL (falls nötig) ── -->
-    <div style="margin:10px 16px 0;">
-      <select id="k-poruka-admin-sel" onchange="onChatAdminChange(this.value)"
-        style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 14px;font-size:13px;font-family:'Nunito';outline:none;color:var(--txt);">
-        <option value="">— Izaberite admina —</option>
-      </select>
-    </div>
+    <!-- hidden sync für k-poruka-admin-sel (wird durch globalen Admin-Bar gesetzt) -->
+    <select id="k-poruka-admin-sel" style="display:none;"></select>
 
     <!-- ── 3. CHAT VERLAUF ── -->
     <div style="margin:10px 16px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;">
@@ -6231,6 +6226,7 @@ async function posaljiPoruku(tip) {
     clearMsgFoto('kporuka');
     await addDoc(collection(db, 'poruke'), {
       od: window._currentUser.uid,
+      kupacId: window._currentUser.uid,
       odIme: window._currentUser.name,
       odTiktok: window._currentUser.tiktokIme || '',
       odNick: window._currentUser.tiktokNick || '',
@@ -6458,7 +6454,7 @@ function renderChatVerlauf() {
 
   feed.innerHTML = bubbles;
   // Scroll ans Ende
-  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 50);
+  requestAnimationFrame(() => { feed.scrollTop = feed.scrollHeight; });
 }
 
 async function chatSendMsg() {
@@ -6489,10 +6485,8 @@ async function chatSendMsg() {
   };
   try {
     await addDoc(collection(db, 'poruke'), msg);
-    // Sofort lokal anzeigen
-    _allKupacSent = [...(_allKupacSent||[]), {...msg, id:'_tmp_'+Date.now(), _dir:'out', _vreme:msg.vreme}];
+    // Input leeren — Firestore onSnapshot rendert automatisch
     if (ta) { ta.value = ''; ta.style.height = 'auto'; }
-    renderChatVerlauf();
     showToast('✅ Poruka poslata!');
   } catch(err) {
     console.error('chatSendMsg error:', err);
@@ -6506,8 +6500,12 @@ function loadKupacSentPoruke(uid) {
   const { db, collection, query, where, onSnapshot } = window._fb;
   try {
     onSnapshot(query(collection(db, 'poruke'), where('od', '==', uid)), snap => {
+      // Nur echte Firestore-Docs, keine Duplikate
       _allKupacSent = [];
-      snap.forEach(d => _allKupacSent.push({id:d.id,...d.data(),_dir:'out',_vreme:d.data().vreme||''}));
+      snap.forEach(d => {
+        const data = d.data();
+        _allKupacSent.push({id:d.id,...data,_dir:'out',_vreme:data.vreme||''});
+      });
       renderChatVerlauf();
     }, err => {
       console.error('loadKupacSentPoruke error:', err.code, err.message);
