@@ -1684,9 +1684,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div id="k-poslato-list"></div>
   </div>
   <div id="ktab-podrska" style="padding:16px;display:none;">
-    <div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px;">💬 Podrška i Uplata <span style="font-size:9px;background:#2563eb;color:white;border-radius:4px;padding:2px 5px;vertical-align:middle;">v4</span></div>
+    <div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px;">💬 Podrška i Uplata</div>
 
-    <!-- Bankdaten — original style -->
+    <!-- Bankdaten -->
     <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.07);">
       <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">🏦 Podaci za uplatu</div>
       <div style="margin-bottom:8px;"><div style="font-size:10px;color:var(--txt3);">Broj računa</div><div style="font-weight:700;" id="k-bank-num">—</div></div>
@@ -1695,37 +1695,13 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div><div style="font-size:10px;color:var(--txt3);">PostNet ime</div><div style="font-weight:700;" id="k-postnet-name">—</div></div>
     </div>
 
-    <!-- Chat Verlauf -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📬 Poruke od Admina</div>
-      <div id="k-chat-feed" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
-        <div style="text-align:center;color:var(--txt3);padding:20px;font-size:13px;">Nema poruka od admina.</div>
-      </div>
-    </div>
-
-    <!-- Pošalji poruku — identično originalu, sve untereinander -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Pošalji poruku Adminu</div>
-      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="3" placeholder="Vaša poruka..."></textarea>
-      <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
-      </div>
-      <div id="foto-prev-kporuka"></div>
-      <button onclick="chatSendMsg()" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Adminu</button>
-    </div>
-
-    <!-- Eskalacija - Haupt — original style -->
+    <!-- Žalba Haupt -->
     <div style="background:rgba(255,122,48,0.06);border:1px solid rgba(255,122,48,0.2);border-radius:16px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;">⚠️ Žalba - Kontaktiraj Haupt</div>
       <div style="font-size:11px;color:#888;margin-bottom:10px;">Koristite samo ako Admin nije rešio problem</div>
       <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
       <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Hauptu</button>
     </div>
-
-    <!-- hidden selectors -->
     <select id="k-poruka-admin-sel" style="display:none;"></select>
   </div>
 
@@ -1783,6 +1759,37 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
   </div>
 
+  <!-- ══ CHAT TAB ══ -->
+  <div id="ktab-chat" style="display:none;padding:16px;">
+    <div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:12px;">💬 Chat sa Adminom</div>
+
+    <!-- Nachrichten-Verlauf -->
+    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
+      <div id="k-chat-feed" style="min-height:200px;max-height:350px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;color:var(--txt3);padding:20px;font-size:13px;">Nema poruka.</div>
+      </div>
+    </div>
+
+    <!-- Schreiben -->
+    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Napiši poruku</div>
+      <textarea id="k-poruka" rows="3" placeholder="Vaša poruka..."
+        style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;"></textarea>
+      <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
+        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
+      </div>
+      <div id="foto-prev-kporuka"></div>
+      <button onclick="chatSendMsg()"
+        style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Adminu</button>
+    </div>
+  </div>
+
+
   <div class="k-bottom-nav" style="overflow-x:auto;">
     <div class="k-nav-item active" id="knav-home" onclick="kNavTab('home')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🏠</div>
@@ -1816,8 +1823,13 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div class="k-nav-lbl" id="knav-lbl-notif" style="color:var(--txt3);">Notif</div>
     </div>
     <div class="k-nav-item" id="knav-podrska" onclick="kNavTab('podrska')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
-      <div class="k-nav-icon">💬</div>
+      <div class="k-nav-icon">🏦</div>
       <div class="k-nav-lbl" id="knav-lbl-podrska" style="color:var(--txt3);">Podrška</div>
+    </div>
+    <div class="k-nav-item" id="knav-chat" onclick="kNavTab('chat')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+      <div class="k-nav-icon">💬</div>
+      <div id="k-chat-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--rose);color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;"></div>
+      <div class="k-nav-lbl" id="knav-lbl-chat" style="color:var(--txt3);">Chat</div>
     </div>
     <div class="k-nav-item" id="knav-faq" onclick="kNavTab('faq')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">❓</div>
@@ -5703,7 +5715,7 @@ function renderKPoslato(racuni) {
 }
 
 function kNavTab(name) {
-  ['home','racuni','ceka','arhiva','poslato','notif','podrska','istorija','dugovi','faq'].forEach(n => {
+  ['home','racuni','ceka','arhiva','poslato','notif','podrska','chat','istorija','dugovi','faq'].forEach(n => {
     const tab = document.getElementById('ktab-' + n);
     if(tab) tab.style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
@@ -5711,7 +5723,7 @@ function kNavTab(name) {
   });
   const tab = document.getElementById('ktab-' + name);
   if(tab) tab.style.display = (name === 'podrska') ? 'flex' : 'block';
-  const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
+  const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', chat:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name]||'var(--blue)';
   if (name === 'notif') markAllNotifRead();
@@ -5719,6 +5731,12 @@ function kNavTab(name) {
   if (name === 'dugovi')   { const r=window._kAllRacuni||[]; renderKDugovi(r); }
   if (name === 'home')     renderKHome();
   if (name === 'faq')      initFaq();
+  if (name === 'chat') {
+    const g = document.getElementById('k-global-admin-sel');
+    const id = (g && g.value) || _chatAdminId || '';
+    if (id) onChatAdminChange(id);
+    else renderChatVerlauf();
+  }
   if (name === 'podrska') {
     const g = document.getElementById('k-global-admin-sel');
     const activeId = (g && g.value) || _chatAdminId || '';
@@ -6305,6 +6323,10 @@ function toggleHauptBar() {
 function renderKPoruke(poruke) {
   // poruke = Nachrichten vom Admin an Kunden (admin_poruke collection)
   _allKupacPoruke = poruke;
+  // Badge auf Chat-Tab wenn neue Nachricht
+  const unread = poruke.filter(p => !p.procitano).length;
+  const badge = document.getElementById('k-chat-badge');
+  if (badge) { badge.style.display = unread ? 'flex' : 'none'; badge.textContent = unread > 9 ? '9+' : unread; }
   renderChatVerlauf();
 }
 
