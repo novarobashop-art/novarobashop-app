@@ -1914,31 +1914,56 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   </div>
 
   <!-- ══ CHAT TAB ══ -->
-  <div id="ktab-chat" style="display:none;padding:16px;">
-    <div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:12px;">💬 Chat sa Adminom</div>
+  <div id="ktab-chat" style="display:none;padding:14px 14px 80px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:900;color:#ffffff;">💬 Chat sa Adminom</div>
+    </div>
+
+    <!-- Status Buttons -->
+    <div style="background:#0f1a2e;border:2px solid #3b82f6;border-radius:16px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Promeni Status Poruke</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="kupacSetPorukaStatus('hitno')"
+          style="flex:1;background:#3d0f0f;border:2px solid #ef4444;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';color:#fca5a5;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          🔴<span style="font-size:10px;">Hitno</span>
+        </button>
+        <button onclick="kupacSetPorukaStatus('proverava')"
+          style="flex:1;background:#2a1f00;border:2px solid #f59e0b;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';color:#fcd34d;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          🟡<span style="font-size:10px;">Proverava</span>
+        </button>
+        <button onclick="kupacSetPorukaStatus('reseno')"
+          style="flex:1;background:#062a1a;border:2px solid #22c55e;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';color:#86efac;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          🟢<span style="font-size:10px;">Rešeno</span>
+        </button>
+      </div>
+      <!-- Aktualni status prikaz -->
+      <div id="k-chat-current-status" style="margin-top:8px;text-align:center;font-size:11px;color:rgba(255,255,255,0.4);"></div>
+    </div>
 
     <!-- Nachrichten-Verlauf -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
-      <div id="k-chat-feed" style="min-height:200px;max-height:350px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
-        <div style="text-align:center;color:var(--txt3);padding:20px;font-size:13px;">Nema poruka.</div>
+    <div style="background:#0a0f1a;border:2px solid #1e3a5f;border-radius:16px;padding:14px;margin-bottom:12px;">
+      <div id="k-chat-feed" style="min-height:200px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;color:rgba(255,255,255,0.3);padding:20px;font-size:13px;">Nema poruka.</div>
       </div>
     </div>
 
     <!-- Schreiben -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,0.07);">
-      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Napiši poruku</div>
+    <div style="background:#0f1a0f;border:2px solid #22c55e;border-radius:16px;padding:14px;">
+      <div style="font-size:12px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📩 Napiši Poruku</div>
       <textarea id="k-poruka" rows="3" placeholder="Vaša poruka..."
-        style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;"></textarea>
+        style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(34,197,94,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:#fff;box-sizing:border-box;"></textarea>
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <div style="display:flex;gap:6px;margin-top:8px;">
+      <div style="display:flex;gap:8px;margin-top:8px;">
         <button type="button" onclick="triggerFoto('kporuka',true)"
-          style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
+          style="flex:1;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:#fff;">📷 Kamera</button>
         <button type="button" onclick="triggerFoto('kporuka',false)"
-          style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
+          style="flex:1;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:#fff;">🖼️ Galerija</button>
       </div>
       <div id="foto-prev-kporuka"></div>
       <button onclick="chatSendMsg()"
-        style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';margin-top:8px;">Pošalji Adminu</button>
+        style="width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito';margin-top:10px;letter-spacing:0.3px;">✉️ Pošalji Adminu</button>
     </div>
   </div>
 
@@ -5889,6 +5914,8 @@ function kNavTab(name) {
     const id = (g && g.value) || _chatAdminId || '';
     if (id) onChatAdminChange(id);
     else renderChatVerlauf();
+    // Badge sofort leeren
+    markKupacMsgsRead();
   }
   if (name === 'podrska') {
     const g = document.getElementById('k-global-admin-sel');
@@ -6450,9 +6477,36 @@ function onChatAdminChange(adminId) {
     if(el('k-postnet-name')) el('k-postnet-name').textContent = admin.postnetName || '—';
   }
   renderChatVerlauf();
+  // Badge leeren + alle ungelesenen Nachrichten als gelesen markieren
+  markKupacMsgsRead();
   const g = document.getElementById('k-global-admin-sel');
   if (g && g.value !== adminId) g.value = adminId;
   filterKupacByAdmin(adminId);
+}
+
+function markKupacMsgsRead() {
+  try {
+    const { db, doc, updateDoc, collection } = window._fb;
+    (_allKupacPoruke || []).filter(p => !p.procitano).forEach(p => {
+      try { updateDoc(doc(db, 'admin_poruke', p.id), { procitano: true }); } catch(e) {}
+    });
+    // Badge sofort auf 0 setzen
+    const badge = document.getElementById('k-chat-badge');
+    if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+  } catch(e) {}
+}
+
+async function kupacSetPorukaStatus(status) {
+  // Kupac ändert den Status der letzten Poruka (als Reaktion)
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    // Letzte empfangene Nachricht von diesem Admin nehmen
+    const poruke = (_allKupacPoruke || []).filter(p => p.adminId === _chatAdminId || p.od === _chatAdminId);
+    if (!poruke.length) return;
+    const last = poruke[poruke.length - 1];
+    await updateDoc(doc(db, 'admin_poruke', last.id), { status });
+    renderChatVerlauf();
+  } catch(e) { console.error('kupacSetPorukaStatus:', e); }
 }
 function toggleChatBank() {
   const det = document.getElementById('k-chat-bank-detail');
@@ -6561,6 +6615,14 @@ function renderChatVerlauf() {
   }).join('');
 
   feed.innerHTML = bubbles;
+  // Aktuellen Status anzeigen
+  const statusEl = document.getElementById('k-chat-current-status');
+  if (statusEl) {
+    const lastP = alle.filter(p => p._dir === 'in').slice(-1)[0];
+    const st = lastP && lastP.status;
+    const stMap = { hitno: '🔴 Aktualni status: Hitno', proverava: '🟡 Aktualni status: Proverava se', reseno: '🟢 Aktualni status: Rešeno' };
+    statusEl.textContent = stMap[st] || '';
+  }
   // Scroll ans Ende
   requestAnimationFrame(() => { feed.scrollTop = feed.scrollHeight; });
 }
