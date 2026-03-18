@@ -16,6 +16,6 @@ messaging.onBackgroundMessage(payload => {
   const { title, body } = payload.notification || {};
   self.registration.showNotification(title || 'Novarobashop', {
     body: body || '',
-    icon: '/icon-192.png'
+    icon: '/novarobashop-app/icon-192.png'
   });
 });
