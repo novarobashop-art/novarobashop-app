@@ -2385,7 +2385,7 @@ function _diffDays(dateA, dateB) {
 
 // Gibt den Fälligkeitstag (Date) für eine Rechnung zurück
 // Regeln:
-//   - Neukunde (1. Rechnung überhaupt): 1 Werktag
+//   - Neukunde (1. Rechnung überhaupt): 2 Werktage
 //   - Stammkunde: 4 Werktage (Sa+So zählen nicht)
 // "Werktag" = Mo–Fr, Sa+So werden übersprungen
 function _getRok(r, alleKupacRacuni) {
@@ -2401,7 +2401,7 @@ function _getRok(r, alleKupacRacuni) {
     (x.createdAt || x.datum || '') < (r.createdAt || r.datum || '')
   );
   const istNeukunde = frühereRacuni.length === 0;
-  const fristTage = istNeukunde ? 1 : 3;
+  const fristTage = istNeukunde ? 2 : 3;
 
   // Werktage vorwärts zählen (Sa=6, So=0 überspringen)
   let datum = new Date(start);
@@ -2970,7 +2970,7 @@ function renderKalender(f) {
 
   let items = racuni.map(r => {
     const k = kupci.find(x => x.id === r.kupacId);
-    const rokDatum = _getRok(r, _allRacuni || []); // Neukunde=1 Werktag, Stammkunde=4 Werktage
+    const rokDatum = _getRok(r, _allRacuni || []); // Neukunde=2 Werktage, Stammkunde=3 Werktage
     const diffDays = rokDatum ? Math.ceil((rokDatum - today) / (1000*60*60*24)) : null;
     return { r, k, rokDatum, diffDays };
   }).sort((a,b) => (a.diffDays??999) - (b.diffDays??999));
@@ -5412,7 +5412,7 @@ function renderKHome() {
     if (unpaid.length) {
       const oldest = unpaid[0];
       const today  = new Date(); today.setHours(0,0,0,0);
-      const rok    = _getRok(oldest, alleRacuni); // Neukunde=1 Werktag, Stammkunde=4 Werktage
+      const rok    = _getRok(oldest, alleRacuni); // Neukunde=2 Werktage, Stammkunde=3 Werktage
       const diff   = rok ? Math.ceil((rok - today)/(1000*60*60*24)) : 4;
       const kasni  = diff < 0;
       const danas  = diff === 0;
