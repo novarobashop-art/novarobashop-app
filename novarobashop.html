@@ -80,7 +80,7 @@
   });
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -256,49 +256,49 @@ setTimeout(() => {
 
 :root {
   /* ── Surfaces ── */
-  --ink:      #050608;
-  --ink2:     #090c14;
-  --ink3:     #0d1220;
-  --surface:  rgba(9,12,20,0.96);
-  --surface2: rgba(13,18,32,0.80);
-  --glass:    rgba(255,255,255,0.035);
+  --ink:      #0a0b0f;
+  --ink2:     #0f1117;
+  --ink3:     #13161e;
+  --surface:  rgba(15,17,23,0.96);
+  --surface2: rgba(19,22,30,0.80);
+  --glass:    rgba(255,255,255,0.03);
 
-  /* ── Brand — warm electric gold ── */
-  --amber:    #f5a623;
-  --amber2:   #e08800;
-  --amber3:   #ffcc55;
-  --amber-glow: rgba(245,166,35,0.35);
+  /* ── Brand — warm understated gold ── */
+  --amber:    #d4922a;
+  --amber2:   #b87820;
+  --amber3:   #e8aa46;
+  --amber-glow: rgba(212,146,42,0.22);
 
   /* ── Semantic colors ── */
-  --teal:     #00d4b8;
-  --teal2:    #00a896;
-  --teal-glow: rgba(0,212,184,0.3);
-  --blue:     #4f8ef7;
-  --blue2:    #2563d9;
-  --violet:   #9b6dff;
-  --violet2:  #7c3aed;
-  --rose:     #ff4d6d;
-  --rose2:    #e11d48;
-  --emerald:  #00e07a;
-  --emerald2: #00b863;
-  --orange:   #ff7a30;
+  --teal:     #22b5a0;
+  --teal2:    #1a9080;
+  --teal-glow: rgba(34,181,160,0.14);
+  --blue:     #5b8dee;
+  --blue2:    #3060c8;
+  --violet:   #8b68e8;
+  --violet2:  #7040d0;
+  --rose:     #d84060;
+  --rose2:    #b82840;
+  --emerald:  #28b86a;
+  --emerald2: #20985a;
+  --orange:   #e07030;
 
   /* ── Text ── */
-  --txt:   #edf2f7;
-  --txt2:  #8899aa;
-  --txt3:  #566070;
+  --txt:   #d8dde8;
+  --txt2:  #7888a0;
+  --txt3:  #4a5568;
 
   /* ── Borders ── */
-  --brd:   rgba(255,255,255,0.07);
-  --brd2:  rgba(255,255,255,0.04);
-  --brd3:  rgba(255,255,255,0.13);
+  --brd:   rgba(255,255,255,0.06);
+  --brd2:  rgba(255,255,255,0.03);
+  --brd3:  rgba(255,255,255,0.10);
 
-  /* ── Radius ── */
-  --r-xs:   8px;
-  --r-sm:   14px;
-  --r-md:   20px;
-  --r-lg:   26px;
-  --r-xl:   32px;
+  /* ── Radius — rounded but not bubbly ── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   18px;
+  --r-xl:   22px;
   --r-pill: 999px;
 
   /* ── Backwards-compat aliases ── */
@@ -321,7 +321,7 @@ setTimeout(() => {
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: var(--ink);
   color: var(--txt);
   min-height: 100vh;
@@ -329,37 +329,37 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-::selection { background: rgba(245,166,35,0.25); color: var(--txt); }
+::selection { background: rgba(232,160,32,0.25); color: var(--txt); }
 ::-webkit-scrollbar { width:3px; height:3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.25); border-radius:4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.45); }
+::-webkit-scrollbar-thumb { background: rgba(232,160,32,0.25); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(232,160,32,0.45); }
 
 /* ════════════════════════════════════════════
    LOADING
    ════════════════════════════════════════════ */
 #loading {
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(245,166,35,0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 80%, rgba(0,212,184,0.08) 0%, transparent 55%),
-    radial-gradient(ellipse at 60% 40%, rgba(79,142,247,0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 30% 20%, rgba(232,160,32,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 80%, rgba(14,196,172,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 40%, rgba(79,142,247,0.04) 0%, transparent 45%),
     var(--ink);
 }
 .loading-logo {
-  font-family: 'Syne', sans-serif;
-  font-size: 34px; font-weight: 800; letter-spacing: -1.5px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 24px; font-weight: 700; letter-spacing: -0.3px;
   background: linear-gradient(120deg, #ffffff 0%, var(--amber3) 60%, var(--amber) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .loading-logo span { -webkit-text-fill-color: var(--amber3); }
 .loading-spinner {
   width: 36px; height: 36px;
-  border: 2.5px solid rgba(245,166,35,0.1);
+  border: 2.5px solid rgba(232,160,32,0.1);
   border-top-color: var(--amber);
-  border-right-color: rgba(245,166,35,0.4);
+  border-right-color: rgba(232,160,32,0.4);
   border-radius: 50%;
   animation: spin 0.75s cubic-bezier(0.5,0,0.5,1) infinite;
-  box-shadow: 0 0 20px rgba(245,166,35,0.2);
+  box-shadow: 0 0 20px rgba(232,160,32,0.2);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -369,9 +369,9 @@ body {
 #login-screen {
   display: none; min-height: 100vh;
   background:
-    radial-gradient(ellipse at 15% 15%, rgba(245,166,35,0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 85%, rgba(79,142,247,0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 60%, rgba(0,212,184,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 15% 15%, rgba(232,160,32,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(79,142,247,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 60%, rgba(14,196,172,0.05) 0%, transparent 50%),
     linear-gradient(160deg, #0a0f1e 0%, var(--ink) 100%);
   align-items: center; justify-content: center;
   flex-direction: column; padding: 24px;
@@ -379,52 +379,43 @@ body {
 .login-logo { text-align: center; margin-bottom: 36px; }
 .login-logo-wrap { text-align: center; margin-bottom: 36px; }
 .login-logo-text, .login-logo-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 46px; font-weight: 800; letter-spacing: -2.5px; line-height: 1;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1;
   background: linear-gradient(130deg, #ffffff 20%, var(--amber3) 70%, var(--amber) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  filter: drop-shadow(0 0 30px rgba(245,166,35,0.25));
-}
+  }
 .login-logo-text span, .login-logo-title span {
   background: linear-gradient(135deg, var(--amber3), var(--amber));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .login-logo-sub {
   font-size: 9px; color: var(--txt3);
-  letter-spacing: 5px; text-transform: uppercase;
+  letter-spacing: 3px; text-transform: uppercase;
   margin-top: 10px; font-weight: 600;
 }
 .login-title  { font-size: 22px; font-weight: 700; margin-bottom: 4px; color: var(--txt); letter-spacing: -0.3px; }
 .login-sub    { font-size: 13px; color: var(--txt2); margin-bottom: 22px; }
 .login-card {
   background: rgba(9,12,22,0.92);
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--r-xl);
   padding: 36px 30px;
   width: 100%; max-width: 420px;
   backdrop-filter: blur(32px) saturate(1.5);
   box-shadow:
-    0 32px 80px rgba(0,0,0,0.7),
-    0 0 0 1px rgba(245,166,35,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 0 80px rgba(245,166,35,0.04);
+    0 16px 48px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.06);
   position: relative; overflow: hidden;
 }
 .login-card::before {
   content: ''; position: absolute;
   top: 0; left: 10%; right: 10%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(245,166,35,0.7), rgba(0,212,184,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(212,146,42,0.35), transparent);
 }
-.login-card::after {
-  content: ''; position: absolute;
-  bottom: -60px; right: -60px;
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
+
 .login-error {
-  background: rgba(255,77,109,0.08);
-  border: 1px solid rgba(255,77,109,0.28);
+  background: rgba(240,64,96,0.08);
+  border: 1px solid rgba(240,64,96,0.28);
   border-radius: var(--r-xs);
   padding: 10px 14px; font-size: 13px; color: #ff9aad;
   margin-bottom: 14px; display: none;
@@ -444,14 +435,14 @@ body {
   border-radius: var(--r-sm);
   padding: 13px 16px;
   color: var(--txt); font-size: 15px;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   outline: none; margin-bottom: 16px;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 .inp:focus {
-  border-color: rgba(245,166,35,0.6);
-  background: rgba(245,166,35,0.04);
-  box-shadow: 0 0 0 3px rgba(245,166,35,0.12), 0 0 20px rgba(245,166,35,0.06);
+  border-color: rgba(232,160,32,0.6);
+  background: rgba(232,160,32,0.04);
+  box-shadow: 0 0 0 3px rgba(232,160,32,0.12), 0 0 20px rgba(232,160,32,0.06);
 }
 .inp::placeholder { color: var(--txt3); }
 .inp-dark {
@@ -461,13 +452,13 @@ body {
   border-radius: var(--r-xs);
   padding: 11px 14px;
   color: var(--txt); font-size: 14px;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   outline: none; margin-bottom: 12px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 .inp-dark:focus {
-  border-color: rgba(0,212,184,0.5);
-  box-shadow: 0 0 0 3px rgba(0,212,184,0.1), 0 0 15px rgba(0,212,184,0.05);
+  border-color: rgba(14,196,172,0.5);
+  box-shadow: 0 0 0 3px rgba(14,196,172,0.1), 0 0 15px rgba(14,196,172,0.05);
 }
 .inp-dark::placeholder { color: var(--txt3); }
 select.inp-dark option { background: var(--ink2); color: var(--txt); }
@@ -480,13 +471,13 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 14px; color: #0a0600;
   font-size: 15px; font-weight: 800;
-  cursor: pointer; font-family: 'Outfit';
-  box-shadow: 0 6px 28px var(--amber-glow), 0 2px 0 rgba(255,255,255,0.1) inset;
+  cursor: pointer; font-family: 'Plus Jakarta Sans';
+  box-shadow: 0 4px 14px var(--amber-glow);
   transition: all 0.25s; letter-spacing: 0.2px;
 }
 .btn-gold:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 40px rgba(245,166,35,0.55), 0 2px 0 rgba(255,255,255,0.15) inset;
+  box-shadow: 0 6px 20px rgba(212,146,42,0.3);
   background-position: right;
 }
 .btn-gold:active { transform: translateY(0); box-shadow: 0 4px 16px var(--amber-glow); }
@@ -498,12 +489,12 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 13px; color: #001a16;
   font-size: 15px; font-weight: 800;
-  cursor: pointer; font-family: 'Outfit';
+  cursor: pointer; font-family: 'Plus Jakarta Sans';
   box-shadow: 0 6px 24px var(--teal-glow);
   transition: all 0.25s;
 }
-.btn-teal:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,212,184,0.45); }
-.btn-teal:active { transform: translateY(0); }
+
+.btn-teal:hover { opacity: 0.9; } .btn-teal:active { opacity: 1; }
 
 .btn-primary {
   width: 100%;
@@ -511,7 +502,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border: none; border-radius: var(--r-sm);
   padding: 14px; color: white;
   font-size: 16px; font-weight: 700;
-  cursor: pointer; font-family: 'Outfit';
+  cursor: pointer; font-family: 'Plus Jakarta Sans';
   box-shadow: 0 6px 24px rgba(79,142,247,0.35);
   transition: all 0.25s;
 }
@@ -526,7 +517,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   color: var(--txt); font-size: 15px; font-weight: 500;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: all 0.25s; font-family: 'Outfit';
+  transition: all 0.25s; font-family: 'Plus Jakarta Sans';
 }
 .btn-google:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
 
@@ -534,26 +525,26 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 7px 14px; border-radius: var(--r-xs);
   font-size: 12px; font-weight: 700;
   cursor: pointer; border: none;
-  font-family: 'Outfit'; transition: all 0.18s;
+  font-family: 'Plus Jakarta Sans'; transition: all 0.18s;
 }
 .btn-sm:hover { filter: brightness(1.15); transform: translateY(-1px); }
 .btn-sm:active { transform: translateY(0); }
 
-.btn-block   { background:rgba(255,77,109,0.1);  color:#ff9aad; border:1px solid rgba(255,77,109,0.25)!important;  cursor:pointer; }
-.btn-unblock { background:rgba(0,224,122,0.1);   color:#5dffa0; border:1px solid rgba(0,224,122,0.25)!important;   cursor:pointer; }
+.btn-block   { background:rgba(240,64,96,0.1);  color:#ff9aad; border:1px solid rgba(240,64,96,0.25)!important;  cursor:pointer; }
+.btn-unblock { background:rgba(18,201,106,0.1);   color:#5dffa0; border:1px solid rgba(18,201,106,0.25)!important;   cursor:pointer; }
 .btn-blue    { background:rgba(79,142,247,0.1);  color:#93c5fd; border:1px solid rgba(79,142,247,0.25)!important;  cursor:pointer; }
 .btn-detail  { background:rgba(79,142,247,0.1);  color:#93c5fd; border:1px solid rgba(79,142,247,0.25)!important; }
-.btn-red     { background:rgba(255,77,109,0.1);  color:#ff9aad; border:1px solid rgba(255,77,109,0.25)!important;  cursor:pointer; }
+.btn-red     { background:rgba(240,64,96,0.1);  color:#ff9aad; border:1px solid rgba(240,64,96,0.25)!important;  cursor:pointer; }
 .btn-purple  { background:rgba(155,109,255,0.1); color:#c4b5fd; border:1px solid rgba(155,109,255,0.25)!important; cursor:pointer; }
 
 .logout-btn {
-  background: rgba(255,77,109,0.07); color: #ff9aad;
-  border: 1px solid rgba(255,77,109,0.2);
+  background: rgba(240,64,96,0.07); color: #ff9aad;
+  border: 1px solid rgba(240,64,96,0.2);
   border-radius: var(--r-xs); padding: 6px 13px;
   font-size: 12px; font-weight: 700;
-  cursor: pointer; font-family: 'Outfit'; transition: all 0.2s;
+  cursor: pointer; font-family: 'Plus Jakarta Sans'; transition: all 0.2s;
 }
-.logout-btn:hover { background: rgba(255,77,109,0.14); border-color: rgba(255,77,109,0.35); }
+.logout-btn:hover { background: rgba(240,64,96,0.14); border-color: rgba(240,64,96,0.35); }
 
 .divider { display:flex; align-items:center; gap:10px; margin:14px 0; }
 .divider-line { flex:1; height:1px; background: var(--brd); }
@@ -567,8 +558,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 #haupt-screen {
   display: none; min-height: 100vh;
   background:
-    radial-gradient(ellipse at 5% 0%, rgba(245,166,35,0.09) 0%, transparent 45%),
-    radial-gradient(ellipse at 95% 100%, rgba(79,142,247,0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 5% 0%, rgba(232,160,32,0.09) 0%, transparent 45%),
+    radial-gradient(ellipse at 95% 100%, rgba(79,142,247,0.04) 0%, transparent 45%),
     linear-gradient(180deg, #080c18 0%, var(--ink) 100%);
 }
 .h-header {
@@ -580,14 +571,14 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   position: sticky; top:0; z-index:50;
   box-shadow: 0 1px 0 rgba(255,255,255,0.04);
 }
-.h-logo { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.8px; }
+.h-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.8px; }
 .h-logo span { color: var(--amber); }
 .h-badge {
-  background: rgba(245,166,35,0.1); color: var(--amber);
-  border: 1px solid rgba(245,166,35,0.3);
+  background: rgba(232,160,32,0.1); color: var(--amber);
+  border: 1px solid rgba(232,160,32,0.3);
   border-radius: var(--r-pill);
   padding: 5px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
-  box-shadow: 0 0 18px rgba(245,166,35,0.15);
+  box-shadow: 0 0 18px rgba(232,160,32,0.15);
 }
 
 /* Stats */
@@ -607,15 +598,15 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 }
 .stat-card::before {
   content:''; position:absolute; top:0; left:0; right:0; height:1px;
-  background: linear-gradient(90deg, transparent, rgba(245,166,35,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(232,160,32,0.3), transparent);
 }
 .stat-card::after {
   content:''; position:absolute; inset:0;
   background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent);
   pointer-events: none;
 }
-.stat-card:hover { border-color: rgba(245,166,35,0.25); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 20px rgba(245,166,35,0.06); }
-.stat-num { font-size: 30px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; line-height: 1; font-family:'Syne',sans-serif; }
+.stat-card:hover { border-color: rgba(232,160,32,0.25); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+.stat-num { font-size: 26px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; line-height: 1; font-family:'Inter',sans-serif; }
 .stat-lbl { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
 
 /* Tabs */
@@ -633,7 +624,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   white-space: nowrap;
   background: rgba(255,255,255,0.04); color: var(--txt3);
   border: 1px solid transparent;
-  font-family: 'Outfit'; transition: all 0.22s; letter-spacing: 0.1px;
+  font-family: 'Plus Jakarta Sans'; transition: all 0.22s; letter-spacing: 0.1px;
 }
 .h-tab:hover { background: rgba(255,255,255,0.08); color: var(--txt); }
 .h-tab.active {
@@ -650,7 +641,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 16px; margin-bottom: 10px;
   transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
 }
-.admin-card:hover { border-color: rgba(245,166,35,0.22); box-shadow: 0 8px 32px rgba(0,0,0,0.4); transform: translateY(-1px); }
+.admin-card:hover { border-color: rgba(232,160,32,0.22); box-shadow: 0 8px 32px rgba(0,0,0,0.4); transform: translateY(-1px); }
 .admin-name  { font-weight:700; font-size:15px; }
 .admin-email { font-size:11px; color:var(--txt2); margin-top:2px; }
 
@@ -663,18 +654,15 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 0 14px; margin-bottom: 14px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
-.h-search-bar:focus-within { border-color: rgba(245,166,35,0.5); box-shadow: 0 0 0 3px rgba(245,166,35,0.1); }
-.h-search-bar input { flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:'Outfit'; padding:11px 0; }
+.h-search-bar:focus-within { border-color: rgba(232,160,32,0.5); box-shadow: none; }
+.h-search-bar input { flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:'Inter'; padding:11px 0; }
 .h-search-bar button { background:none; border:none; color:var(--txt3); font-size:16px; cursor:pointer; padding:4px; }
 
 /* ════════════════════════════════════════════
    ADMIN SCREEN
    ════════════════════════════════════════════ */
 #admin-screen {
-  background:
-    radial-gradient(ellipse at 5% 0%, rgba(0,212,184,0.07) 0%, transparent 42%),
-    radial-gradient(ellipse at 95% 100%, rgba(79,142,247,0.05) 0%, transparent 42%),
-    linear-gradient(180deg, #080c18 0%, var(--ink) 100%);
+  background: var(--ink);
 }
 .a-header {
   display:flex; align-items:center; justify-content:space-between;
@@ -685,7 +673,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   position: sticky; top:0; z-index:50;
   box-shadow: 0 1px 0 rgba(255,255,255,0.04);
 }
-.a-logo { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; letter-spacing:-0.5px; }
+.a-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; letter-spacing:-0.5px; }
 .a-logo span { color: var(--amber); }
 .a-header-right { display:flex; align-items:center; gap:10px; }
 .a-header-sub   { font-size:10px; color:var(--txt3); margin-top:2px; letter-spacing:0.3px; }
@@ -694,10 +682,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   background: linear-gradient(135deg, var(--teal), var(--teal2));
   color:#001a16; display:flex; align-items:center; justify-content:center;
   font-weight:800; font-size:13px; cursor:pointer;
-  box-shadow: 0 0 0 2px rgba(0,212,184,0.3), 0 0 16px rgba(0,212,184,0.15);
+  box-shadow: 0 0 0 2px rgba(14,196,172,0.3);
   transition: box-shadow 0.25s;
 }
-.a-avatar:hover { box-shadow: 0 0 0 3px rgba(0,212,184,0.45), 0 0 24px rgba(0,212,184,0.2); }
+.a-avatar:hover { box-shadow: 0 0 0 3px rgba(14,196,172,0.45); }
 
 /* Admin tabs */
 .a-tabs {
@@ -713,7 +701,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   white-space: nowrap;
   background: rgba(255,255,255,0.04); color: var(--txt3);
   border: 1px solid transparent;
-  font-family: 'Outfit'; transition: all 0.22s; letter-spacing: 0.1px;
+  font-family: 'Plus Jakarta Sans'; transition: all 0.22s; letter-spacing: 0.1px;
 }
 .a-tab:hover { background: rgba(255,255,255,0.08); color: var(--txt); }
 .a-tab.active {
@@ -729,7 +717,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 16px; margin-bottom: 10px;
   transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
 }
-.kupac-card:hover { border-color: rgba(0,212,184,0.25); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(0,212,184,0.04); transform: translateY(-1px); }
+.kupac-card:hover { border-color: rgba(14,196,172,0.25); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(14,196,172,0.04); transform: translateY(-1px); }
 .kupac-top    { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
 .kupac-name   { font-weight:700; font-size:15px; }
 .kupac-email  { font-size:11px; color:var(--txt2); margin-top:2px; }
@@ -737,8 +725,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .kupac-actions { display:flex; gap:7px; flex-wrap:wrap; }
 
 /* Badges */
-.badge-aktivan  { background:rgba(0,224,122,0.1);   color:#5dffa0; border:1px solid rgba(0,224,122,0.28);  border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; letter-spacing:0.3px; }
-.badge-blokiran { background:rgba(255,77,109,0.1);   color:#ff9aad; border:1px solid rgba(255,77,109,0.28); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
+.badge-aktivan  { background:rgba(18,201,106,0.1);   color:#5dffa0; border:1px solid rgba(18,201,106,0.28);  border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; letter-spacing:0.3px; }
+.badge-blokiran { background:rgba(240,64,96,0.1);   color:#ff9aad; border:1px solid rgba(240,64,96,0.28); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
 .badge-kasni    { background:rgba(255,122,48,0.12);  color:#ffb088; border:1px solid rgba(255,122,48,0.28); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
 .badge-expiring { background:rgba(255,122,48,0.12);  color:#ffb088; border:1px solid rgba(255,122,48,0.28); border-radius:var(--r-pill); padding:3px 11px; font-size:10px; font-weight:700; }
 
@@ -756,11 +744,11 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .racun-date   { font-size:11px; color:var(--txt2); }
 .racun-kupac  { font-size:12px; color:var(--txt2); margin-bottom:8px; }
 .racun-bottom { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.racun-amt    { font-size:22px; font-weight:800; letter-spacing:-0.5px; font-family:'Syne',sans-serif; }
+.racun-amt    { font-size: 20px; font-weight:800; letter-spacing:-0.5px; font-family:'Inter',sans-serif; }
 .racun-badge  { border-radius:var(--r-pill); padding:4px 11px; font-size:10px; font-weight:800; letter-spacing:0.5px; }
-.rb-novo    { background:rgba(255,77,109,0.12);  color:#ff9aad; border:1px solid rgba(255,77,109,0.28); }
-.rb-ceka    { background:rgba(245,166,35,0.12);  color:#ffd07a; border:1px solid rgba(245,166,35,0.28); }
-.rb-placeno { background:rgba(0,224,122,0.12);   color:#5dffa0; border:1px solid rgba(0,224,122,0.28); }
+.rb-novo    { background:rgba(240,64,96,0.12);  color:#ff9aad; border:1px solid rgba(240,64,96,0.28); }
+.rb-ceka    { background:rgba(232,160,32,0.12);  color:#ffd07a; border:1px solid rgba(232,160,32,0.28); }
+.rb-placeno { background:rgba(18,201,106,0.12);   color:#5dffa0; border:1px solid rgba(18,201,106,0.28); }
 .rb-storno  { background:rgba(255,255,255,0.06); color:var(--txt2); border:1px solid rgba(255,255,255,0.12); }
 
 /* Paket btns */
@@ -769,12 +757,12 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   padding: 7px 14px; border-radius: var(--r-xs);
   font-size: 11px; font-weight: 600; cursor: pointer;
   border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--txt2);
-  font-family: 'Outfit'; transition: all 0.2s;
+  font-family: 'Plus Jakarta Sans'; transition: all 0.2s;
 }
 .paket-btn:hover { background: rgba(255,255,255,0.09); }
 .sel-prep   { background:rgba(79,142,247,0.15);  color:#93c5fd;  border-color:rgba(79,142,247,0.35)!important; }
-.sel-ship   { background:rgba(0,212,184,0.15);   color:#5ffae0;  border-color:rgba(0,212,184,0.35)!important; }
-.sel-cancel { background:rgba(255,77,109,0.15);  color:#ff9aad;  border-color:rgba(255,77,109,0.35)!important; }
+.sel-ship   { background:rgba(14,196,172,0.15);   color:#5ffae0;  border-color:rgba(14,196,172,0.35)!important; }
+.sel-cancel { background:rgba(240,64,96,0.15);  color:#ff9aad;  border-color:rgba(240,64,96,0.35)!important; }
 
 /* Form sections */
 .form-section {
@@ -796,37 +784,37 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   border-radius: var(--r-pill); padding: 5px 15px;
   font-size: 12px; font-weight: 800; letter-spacing: 1px;
-  box-shadow: 0 4px 24px rgba(220,38,38,0.65), 0 0 40px rgba(220,38,38,0.2);
+  box-shadow: 0 4px 24px rgba(220,38,38,0.65);
   animation: live-glow 2s ease-in-out infinite;
 }
-@keyframes live-glow { 0%,100%{box-shadow:0 4px 20px rgba(220,38,38,0.4)} 50%{box-shadow:0 4px 36px rgba(220,38,38,0.8)} }
+@keyframes live-glow { 0%,100%{box-shadow:0 2px 10px rgba(220,38,38,0.3)} 50%{box-shadow:0 2px 18px rgba(220,38,38,0.5)} }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .live-search {
   width:100%; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.08);
   border-radius:var(--r-sm); padding:12px 16px; color:var(--txt);
-  font-size:15px; font-family:'Outfit'; outline:none; margin:12px 0;
+  font-size:15px; font-family:'Inter'; outline:none; margin:12px 0;
   transition:border-color 0.25s, box-shadow 0.25s;
 }
-.live-search:focus { border-color: rgba(245,166,35,0.5); box-shadow: 0 0 0 3px rgba(245,166,35,0.1); }
+.live-search:focus { border-color: rgba(232,160,32,0.5); box-shadow: none; }
 .live-result { padding:11px 14px; border-radius:var(--r-sm); display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; margin-bottom:8px; }
-.live-reg    { background:rgba(0,224,122,0.07); border:1.5px solid rgba(0,224,122,0.3); }
-.live-noreg  { background:rgba(255,77,109,0.07);  border:1.5px solid rgba(255,77,109,0.3);  }
+.live-reg    { background:rgba(18,201,106,0.07); border:1.5px solid rgba(18,201,106,0.3); }
+.live-noreg  { background:rgba(240,64,96,0.07);  border:1.5px solid rgba(240,64,96,0.3);  }
 .live-dot     { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.live-dot-g   { background:#00e07a; box-shadow:0 0 10px #00e07a; }
-.live-dot-r   { background:#ff4d6d; box-shadow:0 0 10px #ff4d6d; }
-.live-dot-o   { background:#ff7a30; box-shadow:0 0 10px #ff7a30; }
+.live-dot-g   { background:#12c96a; ; }
+.live-dot-r   { background:#f04060; ; }
+.live-dot-o   { background:#ff7a30; ; }
 .live-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:10px; margin-top:16px; }
 .live-card {
-  background: rgba(0,224,122,0.04);
-  border: 1.5px solid rgba(0,224,122,0.18);
+  background: rgba(18,201,106,0.04);
+  border: 1.5px solid rgba(18,201,106,0.18);
   border-radius: var(--r-md); padding:14px; text-align:center;
   transition: all 0.25s;
 }
-.live-card:hover { border-color: rgba(0,224,122,0.4); transform:translateY(-2px); box-shadow: 0 8px 24px rgba(0,224,122,0.06); }
+.live-card:hover { border-color: rgba(18,201,106,0.4); transform:translateY(-2px); box-shadow: 0 8px 24px rgba(18,201,106,0.06); }
 .live-card.kasni { background:rgba(255,122,48,0.04); border-color:rgba(255,122,48,0.22); }
 .live-avatar {
   width:44px; height:44px; border-radius:50%;
-  background:rgba(0,224,122,0.12); color:#5dffa0;
+  background:rgba(18,201,106,0.12); color:#5dffa0;
   display:flex; align-items:center; justify-content:center;
   font-size:16px; font-weight:800; margin:0 auto 8px;
 }
@@ -841,10 +829,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
    KUPAC SCREEN
    ════════════════════════════════════════════ */
 #kupac-screen {
-  background:
-    radial-gradient(ellipse at 10% 5%, rgba(79,142,247,0.08) 0%, transparent 45%),
-    radial-gradient(ellipse at 90% 90%, rgba(245,166,35,0.06) 0%, transparent 45%),
-    #050608;
+  background: var(--ink);
   color: var(--txt);
   padding-bottom: 80px;
 }
@@ -855,9 +840,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border-bottom: 1px solid rgba(255,255,255,0.07);
   position:sticky; top:0; z-index:10;
   backdrop-filter: blur(28px) saturate(1.5);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05);
 }
-.k-logo { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--txt); letter-spacing:-0.5px; }
+.k-logo { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; color:var(--txt); letter-spacing:-0.5px; }
 .k-logo span { color: var(--amber); }
 .k-header-sub { font-size:10px; color:var(--txt3); letter-spacing:0.3px; }
 .k-avatar {
@@ -865,7 +850,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   background: linear-gradient(135deg, var(--blue), var(--blue2));
   color:white; display:flex; align-items:center; justify-content:center;
   font-weight:800; font-size:13px;
-  box-shadow: 0 0 0 2px rgba(79,142,247,0.3), 0 4px 14px rgba(79,142,247,0.3);
+  box-shadow: 0 0 0 2px rgba(91,141,238,0.2);
 }
 .k-bottom-nav {
   position:fixed; bottom:0; left:0; right:0;
@@ -897,9 +882,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 }
 .k-racun-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.45); transform: translateY(-2px); border-color: rgba(79,142,247,0.2); }
 .k-paket-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.k-paket-dot.prep   { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
-.k-paket-dot.ship   { background: var(--teal); box-shadow: 0 0 6px var(--teal); }
-.k-paket-dot.cancel { background: var(--rose); box-shadow: 0 0 6px var(--rose); }
+.k-paket-dot.prep   { background: var(--blue);  }
+.k-paket-dot.ship   { background: var(--teal);  }
+.k-paket-dot.cancel { background: var(--rose);  }
 
 /* ════════════════════════════════════════════
    MODAL
@@ -918,14 +903,14 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   padding: 28px; width:100%; max-height:92vh; overflow-y:auto;
   border-top: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 -32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
   position: relative;
   backdrop-filter: blur(32px);
 }
 .modal-box::before {
   content:''; display:block;
   width:40px; height:4px;
-  background: linear-gradient(90deg, rgba(245,166,35,0.5), rgba(0,212,184,0.5));
+  background: rgba(255,255,255,0.12);
   border-radius:4px; margin: -8px auto 20px;
 }
 
@@ -945,7 +930,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
   z-index:9999; white-space:nowrap;
   backdrop-filter: blur(20px);
-  box-shadow: 0 16px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.1);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
   pointer-events: none;
 }
 .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
@@ -961,7 +946,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   width:7px; height:7px; background:var(--rose);
   border-radius:50%; display:inline-block;
   margin-left:4px; vertical-align:middle;
-  box-shadow: 0 0 8px rgba(255,77,109,0.8);
+  box-shadow: 0 0 8px rgba(240,64,96,0.8);
 }
 .poruka-card {
   background:rgba(9,12,20,0.85); border:1px solid rgba(255,255,255,0.07);
@@ -969,21 +954,21 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   transition:border-color 0.25s, box-shadow 0.25s; cursor:pointer;
 }
 .poruka-card:hover { border-color:rgba(255,255,255,0.14); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-.poruka-card.notif-new { border-color:rgba(245,166,35,0.35)!important; background:rgba(245,166,35,0.04)!important; }
+.poruka-card.notif-new { border-color:rgba(232,160,32,0.35)!important; background:rgba(232,160,32,0.04)!important; }
 .notif-card { background:rgba(255,122,48,0.04); border:1px solid rgba(255,122,48,0.18); border-radius:var(--r-md); padding:14px; margin-bottom:8px; }
-.notif-new  { background:rgba(255,77,109,0.05)!important; border-color:rgba(255,77,109,0.22)!important; }
+.notif-new  { background:rgba(240,64,96,0.05)!important; border-color:rgba(240,64,96,0.22)!important; }
 
 .podrska-btn {
   width:100%; padding:14px; border-radius:var(--r-sm);
   font-size:14px; font-weight:700; cursor:pointer;
-  font-family:'Outfit'; border:none; margin-bottom:10px;
+  font-family:'Inter'; border:none; margin-bottom:10px;
   display:flex; align-items:center; gap:10px; justify-content:center;
   transition:all 0.25s;
 }
 .podrska-btn:hover { filter:brightness(1.1); transform:translateY(-2px); }
 
 /* Kalender btns */
-.kal-btn { padding:6px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:var(--txt2); font-family:'Outfit'; transition:all 0.18s; }
+.kal-btn { padding:6px 14px; border-radius:var(--r-pill); font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:var(--txt2); font-family:'Inter'; transition:all 0.18s; }
 .kal-btn:hover { background:rgba(255,255,255,0.09); }
 .kal-active { background:linear-gradient(135deg,var(--teal),var(--teal2))!important; color:#001a16!important; border-color:transparent!important; box-shadow:0 4px 16px var(--teal-glow); }
 
@@ -996,158 +981,16 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 .screen { display:none; width:100%; min-height:100vh; }
 
 /* Extra polish */
-.stat-num { text-shadow: 0 0 30px rgba(245,166,35,0.12); }
+.stat-num {  }
 
-/* ════════════════════════════════════════════
-   ANIMATIONS & MICRO-INTERACTIONS
-   ════════════════════════════════════════════ */
+/* ── Minimal transitions ── */
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.login-card { animation: fadeIn 0.3s ease; }
+.screen { transition: opacity 0.2s ease; }
+.btn-gold, .btn-teal, .btn-primary { transition: opacity 0.15s, transform 0.15s; }
+.btn-gold:hover, .btn-teal:hover, .btn-primary:hover { transform: translateY(-1px); opacity: 0.92; }
 
-/* Screen fade-in */
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity:0; }
-  to   { opacity:1; }
-}
-@keyframes scaleIn {
-  from { opacity:0; transform:scale(0.96); }
-  to   { opacity:1; transform:scale(1); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes glowPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
-  50%     { box-shadow: 0 0 20px 4px rgba(245,166,35,0.18); }
-}
-
-/* Apply to screens */
-#login-screen, #kupac-screen, #admin-screen, #haupt-screen {
-  animation: fadeIn 0.4s ease both;
-}
-.login-card { animation: scaleIn 0.45s cubic-bezier(0.34,1.4,0.64,1) both; }
-
-/* Card hover lift */
-.kupac-card, .racun-card, .admin-card, .k-racun-card, .stat-card {
-  will-change: transform;
-}
-
-/* Active nav item indicator */
-.k-nav-item.active .k-nav-icon {
-  filter: drop-shadow(0 0 8px rgba(245,166,35,0.7));
-  transform: scale(1.12);
-}
-.k-nav-item.active .k-nav-lbl {
-  color: var(--amber) !important;
-}
-.k-nav-item {
-  transition: all 0.2s cubic-bezier(0.34,1.4,0.64,1);
-}
-.k-nav-item:active { transform: scale(0.9); }
-
-/* Glow on gold button */
-.btn-gold:focus-visible { outline: 2px solid rgba(245,166,35,0.5); outline-offset: 2px; }
-
-/* Input focus glow animation */
-.inp:focus, .inp-dark:focus, .live-search:focus {
-  animation: glowPulse 2s ease infinite;
-}
-
-/* Tab slide indicator */
-.a-tab.active, .h-tab.active {
-  position: relative;
-}
-
-/* Badge pulse */
-#a-notif-badge, #k-notif-badge {
-  animation: live-glow 2s ease-in-out infinite;
-}
-
-/* Scrollable content smooth fade */
-.screen { transition: opacity 0.3s ease; }
-
-/* Quick stat card shimmer on hover */
-.stat-card:hover .stat-num {
-  background: linear-gradient(120deg, var(--txt) 0%, var(--amber3) 40%, var(--txt) 60%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 1.5s linear;
-}
-
-/* Page content area */
-.tab-content-wrap {
-  animation: fadeUp 0.3s ease both;
-}
-
-/* Loading dots */
-@keyframes loadDot {
-  0%,80%,100% { transform:scale(0.6); opacity:0.4; }
-  40%         { transform:scale(1.1); opacity:1; }
-}
-
-/* Skeleton loader */
-.skel {
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: var(--r-xs);
-}
-
-/* Smooth page padding */
-#ktab-home, #ktab-racuni, #ktab-ceka, #ktab-arhiva, #ktab-poslato,
-#ktab-dugovi, #ktab-notif, #ktab-podrska, #ktab-faq,
-#atab-kupci, #atab-dashboard, #atab-racuni, #atab-placanja,
-#atab-placeno, #atab-arhiva, #atab-chart, #atab-live {
-  animation: fadeUp 0.28s ease both;
-}
-
-/* ════════════════════════════════════════════
-   TYPOGRAPHY POLISH
-   ════════════════════════════════════════════ */
-.racun-amt, .stat-num, #k-countdown-days {
-  font-family: 'Syne', sans-serif;
-}
-
-/* Kupac home welcome card */
-#k-home-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px;
-  letter-spacing: -0.5px;
-  background: linear-gradient(120deg, var(--txt), var(--amber3));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ════════════════════════════════════════════
-   AMBIENT BACKGROUND ORBS
-   ════════════════════════════════════════════ */
-#kupac-screen::before, #admin-screen::before {
-  content: '';
-  position: fixed;
-  top: -100px; right: -100px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(245,166,35,0.04) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
-}
-#kupac-screen > *, #admin-screen > * { position: relative; z-index: 1; }
-
-/* ════════════════════════════════════════════
-   SCROLLBAR AMBER TINT FOR PORTALS
-   ════════════════════════════════════════════ */
-#kupac-screen::-webkit-scrollbar-thumb,
-#admin-screen::-webkit-scrollbar-thumb {
-  background: rgba(245,166,35,0.2);
-}
-
-/* ════════════════════════════════════════════
-   MOBILE SAFE AREAS
-   ════════════════════════════════════════════ */
+/* ── Mobile Safe Areas ── */
 .k-bottom-nav {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -1157,7 +1000,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 </head>
 <body>
 
-<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:radial-gradient(ellipse at 30% 20%,rgba(245,166,35,0.12) 0%,rgba(0,212,184,0.06) 50%,#050608 80%);">
+<div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:var(--ink);">
   <div class="loading-logo">Nova<span>roba</span>shop</div>
   <div class="loading-spinner"></div>
 </div>
@@ -1177,7 +1020,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <label class="inp-label">Lozinka</label>
     <input type="password" class="inp" id="login-pass" placeholder="••••••••" />
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Prijavite se</button>
-    <button onclick="doForgot()" style="width:100%;background:rgba(0,212,184,0.09);border:1.5px solid rgba(0,212,184,0.22);border-radius:12px;padding:11px;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';margin-top:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,184,166,0.13)'" onmouseout="this.style.background='rgba(20,184,166,0.07)'">
+    <button onclick="doForgot()" style="width:100%;background:rgba(14,196,172,0.09);border:1.5px solid rgba(14,196,172,0.22);border-radius:12px;padding:11px;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,184,166,0.13)'" onmouseout="this.style.background='rgba(20,184,166,0.07)'">
       🔑 Zaboravili ste lozinku? Kliknite ovde
     </button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">ili</span><div class="divider-line"></div></div>
@@ -1195,7 +1038,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 <!-- ===== REGISTRATION ===== -->
 <div id="reg-screen" style="display:none;min-height:100vh;background:radial-gradient(ellipse at top,#0d1f3c 0%,#040810 60%);overflow-y:auto;padding:24px 24px 40px;">
   <div style="text-align:center;margin-bottom:28px;padding-top:20px;">
-    <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;">Nova<span style="color:var(--gold);">roba</span>shop</div>
+    <div style="font-family:'Inter',sans-serif;font-size:28px;font-weight:800;">Nova<span style="color:var(--gold);">roba</span>shop</div>
     <div style="font-size:12px;color:var(--txt3);margin-top:4px;letter-spacing:2px;text-transform:uppercase;">Kompletan profil</div>
   </div>
   <div style="background:rgba(255,255,255,0.08);border-radius:10px;height:6px;margin-bottom:24px;">
@@ -1276,7 +1119,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="font-size:16px;font-weight:800;color:var(--txt);">🔔 Obaveštenja</div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="markAllAdminNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Outfit';">Sve pročitano</button>
+        <button onclick="markAllAdminNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Inter';">Sve pročitano</button>
         <button onclick="toggleAdminNotif()" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
       </div>
     </div>
@@ -1311,28 +1154,28 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div id="atab-dashboard" style="display:none;">
       <div style="font-size:16px;font-weight:800;margin-bottom:16px;">📊 Statistike</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="background:rgba(0,212,184,0.08);border:1px solid rgba(0,212,184,0.25);border-radius:16px;padding:16px;text-align:center;position:relative;overflow:hidden;">
-          <div style="font-size:30px;font-weight:800;color:var(--teal);font-family:Syne,sans-serif;" id="dash-kupci">—</div>
+        <div style="background:rgba(14,196,172,0.08);border:1px solid rgba(14,196,172,0.25);border-radius:16px;padding:16px;text-align:center;position:relative;overflow:hidden;">
+          <div style="font-size:24px;font-weight:700;color:var(--teal);font-family:'Inter',sans-serif;" id="dash-kupci">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Kupci</div>
         </div>
-        <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;color:var(--amber);font-family:Syne,sans-serif;" id="dash-racuni">—</div>
+        <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:var(--amber);font-family:'Inter',sans-serif;" id="dash-racuni">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno Računa</div>
         </div>
-        <div style="background:rgba(0,224,122,0.08);border:1px solid rgba(0,224,122,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;color:var(--emerald);font-family:Syne,sans-serif;" id="dash-ukupno-rsd">—</div>
+        <div style="background:rgba(18,201,106,0.08);border:1px solid rgba(18,201,106,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:var(--emerald);font-family:'Inter',sans-serif;" id="dash-ukupno-rsd">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Ukupno RSD</div>
         </div>
         <div style="background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;color:#7eb3ff;font-family:Syne,sans-serif;" id="dash-placeno-rsd">—</div>
+          <div style="font-size:24px;font-weight:700;color:#7eb3ff;font-family:'Inter',sans-serif;" id="dash-placeno-rsd">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Naplaćeno RSD</div>
         </div>
-        <div style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;color:var(--rose);font-family:Syne,sans-serif;" id="dash-blokirani">—</div>
+        <div style="background:rgba(240,64,96,0.08);border:1px solid rgba(240,64,96,0.25);border-radius:16px;padding:16px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:var(--rose);font-family:'Inter',sans-serif;" id="dash-blokirani">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Blokirani</div>
         </div>
         <div style="background:rgba(255,122,48,0.08);border:1px solid rgba(255,122,48,0.25);border-radius:16px;padding:16px;text-align:center;">
-          <div style="font-size:30px;font-weight:800;color:var(--orange);font-family:Syne,sans-serif;" id="dash-ceka">—</div>
+          <div style="font-size:24px;font-weight:700;color:var(--orange);font-family:'Inter',sans-serif;" id="dash-ceka">—</div>
           <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Čeka Plaćanje</div>
         </div>
       </div>
@@ -1353,7 +1196,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="racuni-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterRacuni(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('racuni-search').value='';filterRacuni('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div class="form-section">
@@ -1374,9 +1217,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="file" id="racun-foto-input" accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
         <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
-          <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕ Ukloni foto</button>
+          <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Ukloni foto</button>
         </div>
-        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Outfit';margin-bottom:8px;">📷 Slikaj Foto</button>
+        <button onclick="document.getElementById('racun-foto-input').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Inter';margin-bottom:8px;">📷 Slikaj Foto</button>
         <button class="btn-teal" onclick="addRacun()">✓ Kreiraj račun</button>
       </div>
       <div id="a-racuni-list"></div>
@@ -1387,7 +1230,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placanja-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlacanja(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placanja-search').value='';filterPlacanja('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-placanja-list"></div>
@@ -1398,7 +1241,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placeno-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlaceno(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placeno-search').value='';filterPlaceno('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-placeno-list"></div>
@@ -1409,7 +1252,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="arhiva-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterArhiva(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('arhiva-search').value='';filterArhiva('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-arhiva-list"></div>
@@ -1435,19 +1278,19 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="file" id="proizvod-foto-inp" accept="image/*" style="display:none;" onchange="previewProizvodFoto(event)" />
         <div id="proizvod-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="proizvod-foto-img" onclick="openImgViewer(this.src)" style="max-height:100px;max-width:160px;object-fit:contain;border-radius:10px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
-          <button onclick="clearProizvodFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕ Ukloni foto</button>
+          <button onclick="clearProizvodFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Ukloni foto</button>
         </div>
-        <button onclick="document.getElementById('proizvod-foto-inp').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Outfit';margin-bottom:12px;">🖼️ Dodaj Foto</button>
+        <button onclick="document.getElementById('proizvod-foto-inp').click()" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px dashed rgba(255,255,255,0.2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;font-family:'Inter';margin-bottom:12px;">🖼️ Dodaj Foto</button>
         <div style="display:flex;gap:8px;">
           <button class="btn-teal" id="proizvod-save-btn" onclick="saveProizvod()" style="flex:1;">✓ Sačuvaj Proizvod</button>
-          <button id="proizvod-cancel-btn" onclick="cancelEditProizvod()" style="display:none;flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px;color:var(--txt3);font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕ Otkaži</button>
+          <button id="proizvod-cancel-btn" onclick="cancelEditProizvod()" style="display:none;flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px;color:var(--txt3);font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Otkaži</button>
         </div>
       </div>
       <!-- Pretraga proizvoda -->
       <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="proizvodi-search" placeholder="Pretraži proizvode..." oninput="filterProizvodi(this.value)"
-          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:11px 0;" />
+          style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Inter',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('proizvodi-search').value='';filterProizvodi('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-proizvodi-list"><div class="section-empty">Nema proizvoda.</div></div>
@@ -1580,8 +1423,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
             <!-- MODUS IZBOR -->
             <div style="display:flex;gap:6px;margin-bottom:10px;">
-              <button id="mode-narudzba" onclick="setLiveMode('narudzba')" style="flex:1;padding:8px;border-radius:10px;border:2px solid rgba(20,184,166,0.4);background:rgba(20,184,166,0.12);color:#5eead4;font-size:12px;font-weight:800;cursor:pointer;font-family:'Outfit';">🛒 Narudžbina</button>
-              <button id="mode-aukcija" onclick="setLiveMode('aukcija')" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,0.04);color:var(--txt3);font-size:12px;font-weight:800;cursor:pointer;font-family:'Outfit';">🔨 Aukcija</button>
+              <button id="mode-narudzba" onclick="setLiveMode('narudzba')" style="flex:1;padding:8px;border-radius:10px;border:2px solid rgba(20,184,166,0.4);background:rgba(20,184,166,0.12);color:#5eead4;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter';">🛒 Narudžbina</button>
+              <button id="mode-aukcija" onclick="setLiveMode('aukcija')" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,0.04);color:var(--txt3);font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter';">🔨 Aukcija</button>
             </div>
 
             <!-- NARUDŽBINA MODE -->
@@ -1604,16 +1447,16 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
                 <button onclick="dodajAukArtikal()" style="background:rgba(244,63,94,0.15);color:#fda4af;border:1px solid rgba(244,63,94,0.3);border-radius:10px;padding:0 14px;font-size:18px;font-weight:800;cursor:pointer;">+</button>
               </div>
               <div id="auk-artikli-list" style="margin-bottom:8px;"></div>
-              <button onclick="startirajAukciju()" id="auk-btn" style="width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:10px;padding:10px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:'Outfit';box-shadow:0 4px 14px rgba(244,63,94,0.35);">
+              <button onclick="startirajAukciju()" id="auk-btn" style="width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:10px;padding:10px;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 4px 14px rgba(244,63,94,0.35);">
                 🔨 Startuj Aukciju
               </button>
               <!-- Trenutno najviše -->
               <div id="auk-top-box" style="display:none;background:rgba(245,158,11,0.1);border:2px solid rgba(245,158,11,0.35);border-radius:12px;padding:12px;text-align:center;margin-top:8px;">
                 <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px;">🏆 Trenutno najviše</div>
-                <div style="font-size:30px;font-weight:800;color:var(--amber);letter-spacing:-1px;line-height:1;" id="auk-top-iznos">—</div>
+                <div style="font-size:24px;font-weight:700;color:var(--amber);letter-spacing:-1px;line-height:1;" id="auk-top-iznos">—</div>
                 <div style="font-size:14px;font-weight:700;color:white;margin-top:4px;" id="auk-top-kupac">—</div>
                 <div style="font-size:11px;color:var(--txt2);" id="auk-top-tiktok">—</div>
-                <button onclick="zakljuciAukciju()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:10px;padding:9px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Outfit';">✅ Zaključi &amp; Pošalji Račun</button>
+                <button onclick="zakljuciAukciju()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:10px;padding:9px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Zaključi &amp; Pošalji Račun</button>
               </div>
             </div>
 
@@ -1666,7 +1509,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div style="font-size:15px;font-weight:800;">💬 Poruke od Kupaca</div>
         <input type="text" id="admin-poruke-search" placeholder="🔍 @tiktok..." oninput="filterAdminPoruke(this.value)"
-          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Outfit';outline:none;width:140px;" />
+          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:6px 10px;color:white;font-size:12px;font-family:'Inter';outline:none;width:140px;" />
       </div>
 
       <div id="admin-poruke-list"><div class="section-empty">Nema poruka.</div></div>
@@ -1698,7 +1541,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <!-- Zahnrad overlay -->
         <div style="position:absolute;bottom:-3px;right:-3px;width:18px;height:18px;background:var(--blue);border-radius:50%;border:2px solid rgba(5,6,8,0.9);display:flex;align-items:center;justify-content:center;font-size:10px;">⚙️</div>
         <!-- Red badge if data missing -->
-        <div id="k-settings-badge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ff4d6d;border-radius:50%;border:2px solid rgba(5,6,8,0.9);box-shadow:0 0 6px rgba(239,68,68,0.6);"></div>
+        <div id="k-settings-badge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#f04060;border-radius:50%;border:2px solid rgba(5,6,8,0.9);box-shadow:0 0 6px rgba(239,68,68,0.6);"></div>
       </div>
       <div style="font-size:8px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;">Podešavanja</div>
     </div>
@@ -1707,7 +1550,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <!-- Admin izbor bar -->
   <div style="background:rgba(5,6,8,0.95);border-bottom:1px solid rgba(255,255,255,0.07);padding:10px 16px;display:flex;align-items:center;gap:10px;">
     <div style="font-size:12px;font-weight:700;color:var(--txt3);white-space:nowrap;">👤 Admin:</div>
-    <select id="k-global-admin-sel" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Outfit';outline:none;color:var(--txt);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
+    <select id="k-global-admin-sel" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;font-size:14px;font-family:'Inter';outline:none;color:var(--txt);font-weight:600;" onchange="onGlobalAdminChange(this.value)">
       <option value="">Izaberite admina...</option>
     </select>
   </div>
@@ -1717,11 +1560,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <!-- DASHBOARD TAB — DEFAULT -->
   <div id="ktab-home" style="padding:16px;">
     <!-- Pozdrav -->
-    <div style="background:linear-gradient(135deg,rgba(9,12,22,0.97),rgba(13,20,42,0.9));border:1px solid rgba(79,142,247,0.22);border-radius:22px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;">
-      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.12),transparent 70%);pointer-events:none;"></div>
-      <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.1),transparent 70%);pointer-events:none;"></div>
+    <div style="background:var(--surface);border:1px solid var(--brd3);border-radius:var(--r-md);padding:16px;margin-bottom:12px;position:relative;overflow:hidden;">
+      
       <div style="font-size:10px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">👋 Dobrodošli</div>
-      <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;" id="k-home-name">Moj Nalog</div>
+      <div style="font-size:18px;font-weight:700;" id="k-home-name">Moj Nalog</div>
       <div style="font-size:12px;color:var(--teal);margin-top:4px;font-weight:600;" id="k-home-tiktok">@—</div>
     </div>
 
@@ -1729,29 +1571,29 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div id="k-countdown-box" style="display:none;border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;" id="k-countdown-label">⏰ Rok plaćanja</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
-        <div style="font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1;" id="k-countdown-days">—</div>
+        <div style="font-size:32px;font-weight:700;letter-spacing:-1px;line-height:1;" id="k-countdown-days">—</div>
         <div style="font-size:14px;font-weight:700;" id="k-countdown-unit">dana</div>
       </div>
       <div style="font-size:13px;opacity:0.8;" id="k-countdown-sub">Račun čeka plaćanje</div>
       <div id="k-countdown-iznos" style="font-size:22px;font-weight:800;margin-top:8px;"></div>
-      <button id="k-countdown-btn" onclick="kNavTab('racuni')" style="width:100%;margin-top:12px;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Outfit';">
+      <button id="k-countdown-btn" onclick="kNavTab('racuni')" style="width:100%;margin-top:12px;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';">
         📎 Idi na Račun
       </button>
     </div>
 
     <!-- Brzi pregled (4 karte) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <div onclick="kNavTab('racuni')" style="background:rgba(255,77,109,0.09);border:1.5px solid rgba(255,77,109,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <div onclick="kNavTab('racuni')" style="background:rgba(240,64,96,0.09);border:1.5px solid rgba(240,64,96,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
         <div style="font-size:24px;margin-bottom:4px;">🔴</div>
         <div style="font-size:22px;font-weight:800;color:#ff9aad;" id="kh-stat-novo">0</div>
         <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Novi Računi</div>
       </div>
-      <div onclick="kNavTab('ceka')" style="background:rgba(245,166,35,0.09);border:1.5px solid rgba(245,166,35,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <div onclick="kNavTab('ceka')" style="background:rgba(232,160,32,0.09);border:1.5px solid rgba(232,160,32,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
         <div style="font-size:24px;margin-bottom:4px;">🟡</div>
         <div style="font-size:22px;font-weight:800;color:#ffd07a;" id="kh-stat-ceka">0</div>
         <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Čeka Potvrdu</div>
       </div>
-      <div onclick="kNavTab('poslato')" style="background:rgba(0,212,184,0.09);border:1.5px solid rgba(0,212,184,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <div onclick="kNavTab('poslato')" style="background:rgba(14,196,172,0.09);border:1.5px solid rgba(14,196,172,0.22);border-radius:16px;padding:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
         <div style="font-size:24px;margin-bottom:4px;">📦</div>
         <div style="font-size:22px;font-weight:800;color:#5ffae0;" id="kh-stat-poslato">0</div>
         <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Poslato</div>
@@ -1813,25 +1655,25 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div style="background:rgba(9,12,20,0.85);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
       <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;">📩 Pošalji poruku Adminu</div>
       <label style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Izaberi Admina</label>
-      <select id="k-poruka-admin-sel" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Outfit';outline:none;margin-bottom:10px;color:var(--txt);">
+      <select id="k-poruka-admin-sel" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;margin-bottom:10px;color:var(--txt);">
         <option value="">Izaberite admina...</option>
       </select>
-      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Outfit';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Vaša poruka..."></textarea>
+      <textarea id="k-poruka" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Vaša poruka..."></textarea>
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <div style="display:flex;gap:6px;margin-top:8px;">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';color:var(--txt2);">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';color:var(--txt2);">🖼️ Galerija</button>
+        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';color:var(--txt2);">📷 Kamera</button>
+        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';color:var(--txt2);">🖼️ Galerija</button>
       </div>
       <div id="foto-prev-kporuka"></div>
-      <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';margin-top:8px;">Pošalji Adminu</button>
+      <button onclick="posaljiPoruku('admin')" style="width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;">Pošalji Adminu</button>
     </div>
     <!-- Eskalacija - Haupt -->
     <div style="background:rgba(255,122,48,0.06);border:1px solid rgba(255,122,48,0.2);border-radius:16px;padding:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px;">⚠️ Žalba - Kontaktiraj Haupt</div>
       <div style="font-size:11px;color:#888;margin-bottom:10px;">Koristite samo ako Admin nije rešio problem</div>
-      <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Outfit';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
-      <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';margin-top:8px;">Pošalji Hauptu</button>
+      <textarea id="k-poruka-haupt" style="width:100%;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:12px;font-size:14px;font-family:'Inter';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
+      <button onclick="posaljiPoruku('haupt')" style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';margin-top:8px;">Pošalji Hauptu</button>
     </div>
   </div>
 
@@ -1840,7 +1682,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-notif" style="padding:16px;display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="font-size:16px;font-weight:800;color:var(--txt);">🔔 Obaveštenja</div>
-      <button onclick="markAllNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Outfit';">Označi sve kao pročitano</button>
+      <button onclick="markAllNotifRead()" style="background:none;border:none;font-size:11px;color:var(--blue);font-weight:700;cursor:pointer;font-family:'Inter';">Označi sve kao pročitano</button>
     </div>
     <div id="k-notif-list"><div style="text-align:center;color:var(--txt3);padding:40px 0;font-size:13px;">Nema obaveštenja</div></div>
   </div>
@@ -1986,10 +1828,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <input type="password" class="inp-dark" id="set-new-pass" placeholder="Min. 6 karaktera..." />
     </div>
 
-    <button onclick="saveSettings()" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:14px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Outfit';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;">
+    <button onclick="saveSettings()" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:14px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;">
       ✓ Sačuvaj podešavanja
     </button>
-    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">🚪 Odjavi se</button>
+    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🚪 Odjavi se</button>
   </div>
 </div>
 
@@ -2124,10 +1966,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
 
     <!-- Save button -->
-    <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Outfit';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
+    <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
       📨 Pošalji zahtev za izmenu
     </button>
-    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">🚪 Odjavi se</button>
+    <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🚪 Odjavi se</button>
   </div>
 </div>
 
@@ -2146,7 +1988,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <input type="number" class="inp-dark" id="qr-iznos" placeholder="1500" style="font-size:20px;font-weight:800;" />
     <label class="inp-label">Opis paketa</label>
     <input type="text" class="inp-dark" id="qr-opis" placeholder="Naziv paketa..." />
-    <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'Outfit';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
+    <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
       ✓ Kreiraj Račun
     </button>
   </div>
@@ -2167,7 +2009,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
     <input type="hidden" id="notiz-kupac-id" />
     <textarea class="inp-dark" id="notiz-text" rows="4" placeholder="npr. VIP kupac, uvek plaća na vreme... ili kasni sa plaćanjem..." style="resize:none;margin-bottom:14px;"></textarea>
-    <button onclick="saveNotiz()" style="width:100%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit';box-shadow:0 6px 18px rgba(139,92,246,0.3);">
+    <button onclick="saveNotiz()" style="width:100%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:14px;padding:13px;color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';box-shadow:0 6px 18px rgba(139,92,246,0.3);">
       💾 Sačuvaj Belešku
     </button>
   </div>
@@ -2954,7 +2796,7 @@ function renderProizvodi(list) {
         ${p.opis ? `<div style="font-size:12px;color:var(--txt3);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.opis}</div>` : ''}
         ${p.kolicina !== undefined ? `<div style="font-size:11px;color:${p.kolicina>0?'var(--green)':'var(--red)'};">📦 Stanje: ${p.kolicina}</div>` : ''}
         <div style="display:flex;gap:6px;margin-top:8px;">
-          <button onclick="editProizvod('${p.id}')" style="flex:1;background:rgba(46,107,230,0.15);color:#6B9FFF;border:1px solid rgba(46,107,230,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">✏️ Uredi</button>
+          <button onclick="editProizvod('${p.id}')" style="flex:1;background:rgba(46,107,230,0.15);color:#6B9FFF;border:1px solid rgba(46,107,230,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">✏️ Uredi</button>
           <button onclick="deleteProizvod('${p.id}')" style="background:rgba(230,57,70,0.1);color:#FF6B76;border:1px solid rgba(230,57,70,0.2);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;">🗑️</button>
         </div>
       </div>
@@ -3280,8 +3122,8 @@ function renderAutoRacuni(list) {
         </div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button onclick="triggerAutoRacun('${a.id}')" style="flex:1;background:rgba(20,184,166,0.12);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">▶️ Pošalji sada</button>
-        <button onclick="toggleAutoRacun('${a.id}',${!a.aktivan})" style="flex:1;background:rgba(${a.aktivan?'239,68,68':'34,197,94'},0.1);color:${a.aktivan?'#fca5a5':'#86efac'};border:1px solid rgba(${a.aktivan?'239,68,68':'34,197,94'},0.2);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">${a.aktivan?'⏸ Pauziraj':'▶ Aktiviraj'}</button>
+        <button onclick="triggerAutoRacun('${a.id}')" style="flex:1;background:rgba(20,184,166,0.12);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">▶️ Pošalji sada</button>
+        <button onclick="toggleAutoRacun('${a.id}',${!a.aktivan})" style="flex:1;background:rgba(${a.aktivan?'239,68,68':'34,197,94'},0.1);color:${a.aktivan?'#fca5a5':'#86efac'};border:1px solid rgba(${a.aktivan?'239,68,68':'34,197,94'},0.2);border-radius:10px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">${a.aktivan?'⏸ Pauziraj':'▶ Aktiviraj'}</button>
       </div>
     </div>`;
   }).join('');
@@ -3346,7 +3188,7 @@ function renderKIstorija(racuni) {
       ${r.stavke&&r.stavke.length ? `<div style="font-size:11px;color:#6b7280;">${r.stavke.map(s=>(s.kolicina&&s.kolicina>1?s.kolicina+'x ':'')+s.naziv).join(' · ')}</div>` : (r.opis?`<div style="font-size:11px;color:#6b7280;">${r.opis}</div>`:'')}
       <div style="font-size:10px;color:#bbb;margin-top:6px;font-family:'Courier New',monospace;">Tapni za detalje 🧾</div>
       ${r.ocena ? `<div style="font-size:13px;color:#d97706;margin-top:4px;">★ Vaša ocena: ${'⭐'.repeat(r.ocena)}</div>` : ''}
-      ${canRate ? `<button onclick="event.stopPropagation();openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">⭐ Ostavi ocenu</button>` : ''}
+      ${canRate ? `<button onclick="event.stopPropagation();openRatingModal('${r.id}')" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">⭐ Ostavi ocenu</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -3392,7 +3234,7 @@ function renderKDugovi(racuni) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div style="font-size:12px;font-weight:700;color:${kasni?'#dc2626':urgent?'#d97706':'#16a34a'};">${kasni?`⚠️ Kasni ${Math.abs(diff)} dana`:diff===0?'🔥 Rok danas!':diff!==null?`⏰ Rok za ${diff} dana`:'—'}</div>
-        ${r.status==='novo'?`<button onclick="document.getElementById('uplatnica-input').setAttribute('data-racun-id','${r.id}');document.getElementById('uplatnica-input').click()" style="background:#2563eb;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">📎 Uplati</button>`:''}
+        ${r.status==='novo'?`<button onclick="document.getElementById('uplatnica-input').setAttribute('data-racun-id','${r.id}');document.getElementById('uplatnica-input').click()" style="background:#2563eb;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">📎 Uplati</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -3421,9 +3263,9 @@ function openRatingModal(racunId) {
       <div class="star-rating" style="justify-content:center;margin-bottom:20px;" id="star-row">
         ${[1,2,3,4,5].map(i=>`<span class="star" onclick="setRating(${i})" id="star-${i}" style="font-size:36px;cursor:pointer;transition:transform 0.1s;">☆</span>`).join('')}
       </div>
-      <textarea id="rating-komentar" placeholder="Komentar (opciono)..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;font-family:'Outfit';resize:none;outline:none;margin-bottom:14px;" rows="3"></textarea>
-      <button onclick="submitRating()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:14px;color:#1a0e00;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit';">✓ Pošalji Ocenu</button>
-      <button onclick="document.getElementById('rating-modal-overlay').remove()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:14px;margin-top:8px;cursor:pointer;font-family:'Outfit';">Otkaži</button>
+      <textarea id="rating-komentar" placeholder="Komentar (opciono)..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;font-family:'Inter';resize:none;outline:none;margin-bottom:14px;" rows="3"></textarea>
+      <button onclick="submitRating()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:14px;color:#1a0e00;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">✓ Pošalji Ocenu</button>
+      <button onclick="document.getElementById('rating-modal-overlay').remove()" style="width:100%;background:none;border:none;color:#94a3b8;font-size:14px;margin-top:8px;cursor:pointer;font-family:'Inter';">Otkaži</button>
     </div>`;
   document.body.appendChild(overlay);
 }
@@ -3519,14 +3361,14 @@ function renderAdminPoruke(poruke) {
       ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />` : ''}
       <div id="areply-box-${safeId}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit';background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
-          <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit';background:rgba(45,190,108,0.15);color:var(--green);border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','hitno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);">🔴 Hitno</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','proverava')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(255,184,0,0.15);color:#FFB800;border:1px solid rgba(255,184,0,0.3);">🟡 Proverava</button>
+          <button onclick="setAdminPorukaStatus('${p.id}','reseno')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';background:rgba(45,190,108,0.15);color:var(--green);border:1px solid rgba(45,190,108,0.3);">🟢 Rešeno</button>
         </div>
-        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'Outfit';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
+        <textarea id="areply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px;color:white;font-size:13px;font-family:'Inter';resize:none;outline:none;box-sizing:border-box;" rows="2" placeholder="Odgovori ${p.odTiktok?'@'+p.odTiktok:p.odIme||'kupcu'}..."></textarea>
         ${fotoButtonsHtml('a'+safeId, false)}
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">📩 Pošalji odgovor</button>
+          <button data-kid="${p.od}" data-kname="${(p.odIme||'').replace(/"/g,'')}" data-sid="${safeId}" data-pid="${p.id}" onclick="replyToKupacBtn(this)" style="flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📩 Pošalji odgovor</button>
           <button onclick="deleteAdminPoruka('${p.id}','${p.vreme||''}','${p.status||''}',event)" style="background:rgba(230,57,70,0.15);color:var(--red);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;">🗑️</button>
         </div>
       </div>
@@ -4038,7 +3880,7 @@ function renderLiveGrid(kupci) {
       <div class="live-ktik" style="color:var(--teal);font-weight:800;font-size:10px;margin-top:4px;">@${k.tiktokIme||'–'}</div>
       <div class="live-kname" style="font-size:9px;color:rgba(255,255,255,0.5);">${k.tiktokNick||k.name||''}</div>
       <div style="font-size:9px;margin-top:3px;color:${dotColor};">${statusText}</div>
-      <button onclick="openQuickRacun('${k.id}','${(k.name||'').replace(/'/g,'')}')" style="width:100%;margin-top:5px;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 2px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Outfit';">⚡ Račun</button>
+      <button onclick="openQuickRacun('${k.id}','${(k.name||'').replace(/'/g,'')}')" style="width:100%;margin-top:5px;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 2px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Inter';">⚡ Račun</button>
     </div>`;
   }).join('');
 }
@@ -4757,7 +4599,7 @@ function openKassenbon(racunId) {
     const isCeka = status === 'ceka';
     const uploadLabel = isCeka ? '🔄 Pošalji novu sliku (zameni staru):' : '📎 Pošalji potvrdu o uplati:';
     const uploadBg = isCeka ? 'rgba(245,158,11,0.07)' : 'rgba(59,130,246,0.06)';
-    const uploadBorder = isCeka ? 'rgba(245,166,35,0.35)' : 'rgba(255,255,255,0.12)';
+    const uploadBorder = isCeka ? 'rgba(232,160,32,0.35)' : 'rgba(255,255,255,0.12)';
     uploadHtml = `
       <div style="margin-top:14px;">
         <div style="background:${uploadBg};border:1px solid ${uploadBorder};border-radius:12px;padding:12px 14px;margin-bottom:10px;">
@@ -4768,22 +4610,22 @@ function openKassenbon(racunId) {
           <img id="upl-img-kassenbon" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;" />
           <div style="font-size:12px;color:var(--txt2);margin-bottom:8px;font-weight:600;">Proveri sliku — da li je čitka?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}','kassenbon')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('kassenbon')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕ Otkaži</button>
+            <button onclick="confirmUplatnica('${r.id}','kassenbon')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('kassenbon')" style="flex:1;background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Otkaži</button>
           </div>
         </div>
         <div id="upl-btns-kassenbon" style="display:flex;gap:8px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera','kassenbon')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kassenbon')" style="flex:1;background:rgba(5,6,8,0.98);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera','kassenbon')" style="flex:1;background:#2563eb;color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kassenbon')" style="flex:1;background:rgba(5,6,8,0.98);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
         </div>
-        ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">❌ Storno zahtev</button>` : ''}
+        ${!isCeka ? `<button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:rgba(244,63,94,0.07);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">❌ Storno zahtev</button>` : ''}
       </div>`;
   }
 
   document.getElementById('kassenbon-content').innerHTML = `
     <!-- Header -->
     <div style="text-align:center;padding:10px 0 16px;border-bottom:2px dashed #ddd;">
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-0.5px;">Nova<span style="color:#d97706;">roba</span>shop</div>
+      <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-0.5px;">Nova<span style="color:#d97706;">roba</span>shop</div>
       <div style="font-size:9px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:2px;">Potvrda narudžbine</div>
     </div>
 
@@ -5331,16 +5173,16 @@ function kRacunCard(r, showUpload, showArhiva) {
           <img id="upl-img-${r.id}" style="max-height:180px;width:100%;object-fit:contain;border-radius:12px;border:2px solid #3b82f6;margin-bottom:10px;" />
           <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:10px;">Proveri — da li se vidi dobro?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕</button>
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✕</button>
           </div>
         </div>
         <!-- Dugmad -->
         <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#1d4ed8;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Outfit';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#1d4ed8;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:12px;padding:16px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
         </div>
-        <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:10px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit';">Storno zahtev</button>
+        <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:10px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter';">Storno zahtev</button>
       </div>
     </div>`;
   }
@@ -5368,13 +5210,13 @@ function kRacunCard(r, showUpload, showArhiva) {
           <img id="upl-img-${r.id}" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #f59e0b;margin-bottom:8px;" />
           <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:8px;">Proveri — da li se vidi dobro?</div>
           <div style="display:flex;gap:8px;">
-            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Outfit';">✅ Pošalji!</button>
-            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:13px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕</button>
+            <button onclick="confirmUplatnica('${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter';">✅ Pošalji!</button>
+            <button onclick="cancelUplatnicaPreview('${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:13px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">✕</button>
           </div>
         </div>
         <div id="upl-btns-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#d97706;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">📷 Kamera</button>
-          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">🖼️ Galerija</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','camera')" style="background:#d97706;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">📷 Kamera</button>
+          <button onclick="openUplatnicaWithPreview('${r.id}','gallery')" style="background:#374151;color:white;border:none;border-radius:10px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">🖼️ Galerija</button>
         </div>
       </div>
     </div>`;
@@ -5408,7 +5250,7 @@ function kRacunCard(r, showUpload, showArhiva) {
     ${stavkeHtml2}
     <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #e5e7eb;padding-top:8px;margin-top:4px;">
       <div style="font-size:18px;font-weight:800;color:var(--txt);">${iznos} RSD</div>
-      ${(status==='placeno'||ps==='ship') ? `<button onclick="event.stopPropagation();shareRacunAsImage('${r.id}')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit';">📸 Podeli</button>` : '<div style="font-size:11px;color:#888;">Tapni za detalje 🧾</div>'}
+      ${(status==='placeno'||ps==='ship') ? `<button onclick="event.stopPropagation();shareRacunAsImage('${r.id}')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter';">📸 Podeli</button>` : '<div style="font-size:11px;color:#888;">Tapni za detalje 🧾</div>'}
     </div>
     ${(() => {
       // Löschen-Button: nur für bezahlte/gesendete Rechnungen älter als 30 Tage
@@ -5422,7 +5264,7 @@ function kRacunCard(r, showUpload, showArhiva) {
         </div>`;
       }
       return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;text-align:right;">
-        <button onclick="event.stopPropagation();kupacDeleteRacun('${r.id}')" style="background:none;color:#cbd5e1;border:1px solid #e2e8f0;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Outfit';">🗑️ Obriši iz istorije</button>
+        <button onclick="event.stopPropagation();kupacDeleteRacun('${r.id}')" style="background:none;color:#cbd5e1;border:1px solid #e2e8f0;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter';">🗑️ Obriši iz istorije</button>
       </div>`;
     })()}
   </div>`;
@@ -5449,7 +5291,7 @@ function renderKArhiva(racuni) {
 function renderKPoslato(racuni) {
   const el = document.getElementById('k-poslato-list');
   if (!racuni.length) { el.innerHTML = '<div class="section-empty" style="color:#999;">Nema poslatih paketa.</div>'; return; }
-  el.innerHTML = '<div style="background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1A8B8B;">📦 Vaši paketi su na putu! Očekujte isporuku uskoro.</div>'
+  el.innerHTML = '<div style="background:rgba(14,196,172,0.1);border:1px solid rgba(14,196,172,0.3);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1A8B8B;">📦 Vaši paketi su na putu! Očekujte isporuku uskoro.</div>'
     + racuni.map(r => kRacunCard(r, false, true)).join('');
 }
 
@@ -5679,9 +5521,9 @@ function shareRacunAsImage(racunId) {
   const st = r.paketStatus==='ship'?{c:'#10b981',l:'📦 Poslato'}:r.status==='placeno'?{c:'#10b981',l:'✅ Plaćeno'}:r.status==='ceka'?{c:'#d97706',l:'⏳ Čeka'}:{c:'#ef4444',l:'🔴 Novo'};
 
   overlay.innerHTML = `
-    <div id="racun-share-card" style="background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;font-family:'Outfit',sans-serif;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+    <div id="racun-share-card" style="background:white;border-radius:20px;padding:24px;width:100%;max-width:340px;font-family:'Inter',sans-serif;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
       <div style="text-align:center;margin-bottom:16px;">
-        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--txt);">Nova<span style="color:#d97706;">roba</span>shop</div>
+        <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--txt);">Nova<span style="color:#d97706;">roba</span>shop</div>
         <div style="font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Potvrda Narudžbine</div>
       </div>
       <div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:14px;">
@@ -5701,8 +5543,8 @@ function shareRacunAsImage(racunId) {
       ${admin?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px;font-size:11px;color:#94a3b8;text-align:center;">Admin: ${admin.name||''}</div>`:''}
     </div>
     <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:340px;">
-      <button onclick="window._doShareRacun()" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">📤 Podeli</button>
-      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,0.12);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';">✕ Zatvori</button>
+      <button onclick="window._doShareRacun()" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">📤 Podeli</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:rgba(255,255,255,0.12);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter';">✕ Zatvori</button>
     </div>`;
 
   window._doShareRacun = async function() {
@@ -6026,9 +5868,9 @@ function renderKPoruke(poruke) {
       <div style="font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:8px;">${p.tekst}</div>
       ${p.foto ? `<img src="${p.foto}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;display:block;" />` : ''}
       ${!isHaupt ? `<div id="kreply-box-${safeId}" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding-top:10px;" onclick="event.stopPropagation()">
-        <textarea id="kreply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;font-family:'Outfit';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
+        <textarea id="kreply-text-${safeId}" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;font-family:'Inter';outline:none;resize:none;color:var(--txt);box-sizing:border-box;" rows="2" placeholder="Odgovori Adminu..."></textarea>
         ${fotoButtonsHtml('k'+safeId, true)}
-        <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';">📩 Pošalji odgovor</button>
+        <button onclick="kupacReplyToAdmin('${p.od}','${safeId}')" style="width:100%;margin-top:8px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter';">📩 Pošalji odgovor</button>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -6292,11 +6134,11 @@ function renderKNotif(notifs) {
     // Aktions-Button je nach Typ
     let actionBtn = '';
     if (n.tip === 'placeno')
-      actionBtn = `<button onclick="kNavTab('arhiva')" style="margin-top:8px;background:#dcfce7;color:#16a34a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">→ Pogledaj plaćene račune</button>`;
+      actionBtn = `<button onclick="kNavTab('arhiva')" style="margin-top:8px;background:#dcfce7;color:#16a34a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj plaćene račune</button>`;
     else if (n.tip === 'paket_poslat' || n.tip === 'poslato')
-      actionBtn = `<button onclick="kNavTab('poslato')" style="margin-top:8px;background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">→ Pogledaj poslate pakete</button>`;
+      actionBtn = `<button onclick="kNavTab('poslato')" style="margin-top:8px;background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj poslate pakete</button>`;
     else if (n.tip === 'nova_racun')
-      actionBtn = `<button onclick="kNavTab('racuni')" style="margin-top:8px;background:rgba(255,77,109,0.12);color:var(--rose);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit';">→ Pogledaj novi račun</button>`;
+      actionBtn = `<button onclick="kNavTab('racuni')" style="margin-top:8px;background:rgba(240,64,96,0.12);color:var(--rose);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter';">→ Pogledaj novi račun</button>`;
 
     return `<div style="background:${unread?'rgba(79,142,247,0.08)':'rgba(9,12,20,0.8)'};border:1px solid ${unread?'rgba(79,142,247,0.25)':'rgba(255,255,255,0.07)'};border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
       <div style="font-size:24px;flex-shrink:0;">${icon}</div>
