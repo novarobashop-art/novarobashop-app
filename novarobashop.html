@@ -7169,8 +7169,8 @@ async function initPushNotifications() {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
     const { messaging, getToken, db, doc, updateDoc } = window._fb;
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-    if (token && window._currentUser) {
+const swReg = await navigator.serviceWorker.getRegistration('/novarobashop-app/');
+const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });    if (token && window._currentUser) {
       await updateDoc(doc(db, 'users', window._currentUser.uid), { fcmToken: token });
       console.log('FCM token saved ✅');
     }
