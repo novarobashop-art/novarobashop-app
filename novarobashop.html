@@ -1467,7 +1467,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <!-- ═══ KOLONA 3: Narudžbine ═══ -->
         <div style="display:flex;flex-direction:column;overflow:hidden;">
           <div style="padding:10px 14px;font-size:10px;font-weight:800;color:var(--emerald);text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--brd);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-            <span>📋 Narudžbine <span id="ln-count" style="background:rgba(16,185,129,0.2);border-radius:20px;padding:2px 7px;font-size:9px;margin-left:4px;">0</span></span>
+            <span id="ln-col3-lbl">📋 Narudžbine <span id="ln-count" style="background:rgba(16,185,129,0.2);border-radius:20px;padding:2px 7px;font-size:9px;margin-left:4px;">0</span></span>
+            <button id="ln-view-toggle" onclick="toggleLnView()" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:#c4b5fd;border-radius:8px;padding:3px 9px;font-size:9px;font-weight:800;cursor:pointer;font-family:'Nunito';letter-spacing:0.3px;flex-shrink:0;">📦 Po artiklu</button>
           </div>
           <!-- INFO: Računi se šalju automatski kad završiš Live -->
           <div style="padding:8px 10px;background:rgba(245,158,11,0.07);border-bottom:1px solid rgba(245,158,11,0.15);font-size:10px;color:#fcd34d;text-align:center;flex-shrink:0;">
@@ -4940,6 +4941,7 @@ function checkNarudzba(chatItem) {
 }
 
 function renderLnKorpe() {
+  if (typeof _lnViewMode !== 'undefined' && _lnViewMode === 'artikal') { renderLnNachArtikel(); return; }
   const list  = document.getElementById('ln-list');
   const count = document.getElementById('ln-count');
   const entries = Object.values(_lnKorpe);
@@ -5126,6 +5128,152 @@ function lnKolMinus(kupacId, stavkaIdx) {
   }
   renderLnKorpe();
   renderLnArtikli(); // Osvezi dostupno stanje
+}
+
+// ═══════════════════════════════════════════════════
+// 📦 PO ARTIKLU — Pregled ko je što uzeo
+// ═══════════════════════════════════════════════════
+let _lnViewMode = 'kupac'; // 'kupac' | 'artikal'
+let _lnArtikelExpanded = {};
+
+function toggleLnView() {
+  _lnViewMode = (_lnViewMode === 'kupac') ? 'artikal' : 'kupac';
+  const btn = document.getElementById('ln-view-toggle');
+  if (_lnViewMode === 'artikal') {
+    btn.textContent = '👤 Po kupcu';
+    btn.style.background = 'rgba(20,184,166,0.15)';
+    btn.style.borderColor = 'rgba(20,184,166,0.3)';
+    btn.style.color = '#5eead4';
+    renderLnNachArtikel();
+  } else {
+    btn.textContent = '📦 Po artiklu';
+    btn.style.background = 'rgba(139,92,246,0.15)';
+    btn.style.borderColor = 'rgba(139,92,246,0.3)';
+    btn.style.color = '#c4b5fd';
+    renderLnKorpe();
+  }
+}
+
+function toggleArtikelExpand(artKey) {
+  _lnArtikelExpanded[artKey] = !_lnArtikelExpanded[artKey];
+  renderLnNachArtikel();
+}
+
+function renderLnNachArtikel() {
+  if (_lnViewMode !== 'artikal') return;
+  const list  = document.getElementById('ln-list');
+  const count = document.getElementById('ln-count');
+  const entries = Object.values(_lnKorpe);
+  count.textContent = entries.filter(e => !e.racunSent).length;
+
+  if (!entries.length) {
+    if (_lnArtikli.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:#fcd34d;font-size:12px;padding:20px 10px;background:rgba(245,158,11,0.07);border-radius:10px;margin:8px;">⚠️ Dodaj artikal sa cenom i količinom,<br>pa će kupci pisati cenu u chat!</div>';
+    } else {
+      list.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px 10px;">Čekam da kupci pišu cene u chat...<br><span style="font-size:10px;opacity:0.6;">npr. "500" ili "3x500"</span></div>';
+    }
+    return;
+  }
+
+  // Gruppiraj sve stavke po artiklu
+  const artMap = {};
+  entries.forEach(({ kupac, stavke, racunSent }) => {
+    stavke.forEach(s => {
+      const artKey = s.naziv + '||' + s.cena;
+      if (!artMap[artKey]) artMap[artKey] = { naziv: s.naziv, cena: s.cena, ukupnoKolicina: 0, kupci: [] };
+      artMap[artKey].ukupnoKolicina += (s.kolicina || 1);
+      artMap[artKey].kupci.push({ kupac, kolicina: s.kolicina || 1, racunSent });
+    });
+  });
+
+  const artKeys = Object.keys(artMap);
+  if (!artKeys.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px 10px;">Nema narudžbina</div>';
+    return;
+  }
+
+  list.innerHTML = artKeys.map(artKey => {
+    const art = artMap[artKey];
+    const isOpen = !!_lnArtikelExpanded[artKey];
+
+    // Stanje iz _lnArtikli
+    const lnA = _lnArtikli.find(a => a.naziv === art.naziv && a.cena === art.cena);
+    const stanje = lnA ? (lnA.stanje || 1) : null;
+    const dostupno = stanje !== null ? Math.max(0, stanje - art.ukupnoKolicina) : null;
+    const bojaDostupno = dostupno === 0 ? '#fda4af' : (dostupno !== null && dostupno <= 3) ? '#fcd34d' : '#6ee7b7';
+    const stanjeText = stanje !== null
+      ? '<span style="color:' + bojaDostupno + ';font-weight:800;">' + dostupno + ' ostalo</span> / ' + stanje + ' kom'
+      : '';
+
+    const ukupnoRSD = art.cena * art.ukupnoKolicina;
+    // Koliko već ima račun poslat
+    const brSent = art.kupci.filter(x => x.racunSent).length;
+
+    // Lista kupaca (vidljiva samo kad je open)
+    const kupciHtml = art.kupci.map(({ kupac, kolicina, racunSent }) => {
+      const ini = (kupac.tiktokNick || kupac.name || '?').slice(0,2).toUpperCase();
+      const nameColor = racunSent ? '#6ee7b7' : 'white';
+      const statusIcon = racunSent ? '✅' : '⏳';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:rgba(20,184,166,0.15);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">' + ini + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:12px;font-weight:700;color:' + nameColor + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (kupac.tiktokNick || kupac.name || '—') + '</div>'
+          + '<div style="font-size:10px;color:var(--txt3);">@' + (kupac.tiktokIme || '—') + '</div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+          + '<span style="font-size:13px;font-weight:800;color:var(--amber);">' + kolicina + 'x</span>'
+          + '<span style="font-size:11px;color:' + (kolicina * art.cena).toString() + ';">'
+            + '<span style="font-size:10px;color:rgba(255,255,255,0.45);">' + (kolicina * art.cena).toLocaleString() + ' RSD</span>'
+          + '</span>'
+          + '<span style="font-size:12px;" title="' + (racunSent ? 'Račun poslat' : 'Čeka kraj Livea') + '">' + statusIcon + '</span>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    // Boja bordera — rasprodato = crvena, puno narudžbi = amber, normalno = purple
+    const borderCol = dostupno === 0 ? 'rgba(244,63,94,0.35)' : art.ukupnoKolicina > 0 ? 'rgba(139,92,246,0.3)' : 'rgba(255,255,255,0.08)';
+
+    return '<div style="background:rgba(255,255,255,0.03);border:1.5px solid ' + borderCol + ';border-radius:14px;margin-bottom:8px;overflow:hidden;">'
+
+      // ── Header (klikni za expand) ──
+      + '<div onclick="toggleArtikelExpand(' + JSON.stringify(artKey) + ')" style="display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;user-select:none;">'
+
+        // Naziv + stanje info
+        + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:13px;font-weight:800;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + art.naziv + '</div>'
+          + '<div style="font-size:10px;color:var(--txt3);margin-top:2px;">'
+            + art.cena.toLocaleString() + ' RSD/kom'
+            + (stanjeText ? ' · ' + stanjeText : '')
+          + '</div>'
+        + '</div>'
+
+        // Badge: naručeno
+        + '<div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:4px 9px;text-align:center;flex-shrink:0;">'
+          + '<div style="font-size:14px;font-weight:800;color:var(--amber);line-height:1;">' + art.ukupnoKolicina + 'x</div>'
+          + '<div style="font-size:8px;color:rgba(245,158,11,0.6);margin-top:1px;">naručeno</div>'
+        + '</div>'
+
+        // Arrow
+        + '<div style="color:var(--txt3);font-size:11px;flex-shrink:0;transition:transform 0.15s;transform:rotate(' + (isOpen ? '90' : '0') + 'deg);">▶</div>'
+      + '</div>'
+
+      // ── Summary bar (uvek vidljiva) ──
+      + '<div style="padding:5px 13px 6px;background:rgba(0,0,0,0.2);display:flex;justify-content:space-between;align-items:center;">'
+        + '<span style="font-size:10px;color:var(--txt3);">'
+          + art.kupci.length + ' kupac' + (art.kupci.length === 1 ? '' : 'a')
+          + (brSent > 0 ? ' · <span style="color:#6ee7b7;">✅ ' + brSent + ' gotovo</span>' : '')
+          + ' · ' + ukupnoRSD.toLocaleString() + ' RSD'
+        + '</span>'
+        + '<span style="font-size:10px;color:rgba(139,92,246,0.7);font-weight:700;">' + (isOpen ? '▲ zatvori' : '▼ ko je uzeo?') + '</span>'
+      + '</div>'
+
+      // ── Kupci lista (samo kad open) ──
+      + (isOpen
+          ? '<div style="padding:4px 13px 10px;">' + kupciHtml + '</div>'
+          : '')
+
+    + '</div>';
+  }).join('');
 }
 
 function closeKassenbon() {
@@ -7163,8 +7311,9 @@ async function initPushNotifications() {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
     const { messaging, getToken, db, doc, updateDoc } = window._fb;
-const swReg = await navigator.serviceWorker.getRegistration('/novarobashop-app/');
-const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });    if (token && window._currentUser) {
+    const swReg = await navigator.serviceWorker.getRegistration("/novarobashop-app/");
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+    if (token && window._currentUser) {
       await updateDoc(doc(db, 'users', window._currentUser.uid), { fcmToken: token });
       console.log('FCM token saved ✅');
     }
