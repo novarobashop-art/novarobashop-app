@@ -1683,92 +1683,100 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
   <div id="ktab-poslato" style="padding:16px;display:none;">
     <div id="k-poslato-list"></div>
   </div>
-  <!-- ══════════════ PODRŠKA — CHAT UI ══════════════ -->
-  <div id="ktab-podrska" style="display:none;flex-direction:column;height:calc(100dvh - 64px);overflow:hidden;">
+  <!-- ══════════════ PODRŠKA ══════════════ -->
+  <div id="ktab-podrska" style="display:none;flex-direction:column;height:calc(100dvh - 130px);overflow-y:auto;">
 
-    <!-- ── Header: Admin wählen ── -->
-    <div style="padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div style="font-size:15px;font-weight:800;color:var(--txt);">💬 Podrška</div>
-        <div id="k-chat-online-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280;margin-left:auto;"></div>
-        <div id="k-chat-online-lbl" style="font-size:10px;color:var(--txt3);">Izaberite admina</div>
+    <!-- ── 1. PODACI ZA UPLATU — immer sichtbar oben ── -->
+    <div style="margin:14px 16px 0;background:linear-gradient(135deg,rgba(37,99,235,0.12),rgba(14,196,172,0.08));border:1.5px solid rgba(37,99,235,0.25);border-radius:18px;overflow:hidden;">
+      <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleChatBank()">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;background:rgba(37,99,235,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;">🏦</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#93c5fd;">Podaci za uplatu</div>
+            <div style="font-size:10px;color:var(--txt3);" id="k-bank-preview">Tapni da vidiš broj računa</div>
+          </div>
+        </div>
+        <span id="k-chat-bank-arrow" style="font-size:13px;color:#93c5fd;transition:transform 0.2s;">▼</span>
       </div>
+      <div id="k-chat-bank-detail" style="display:none;padding:0 14px 14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Broj računa</div>
+            <div style="font-weight:800;font-size:14px;color:white;word-break:break-all;" id="k-bank-num">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Vlasnik</div>
+            <div style="font-weight:800;font-size:14px;color:white;" id="k-bank-name">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">PostNet broj</div>
+            <div style="font-weight:800;font-size:14px;color:white;" id="k-postnet-num">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">PostNet ime</div>
+            <div style="font-weight:800;font-size:14px;color:white;" id="k-postnet-name">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. ADMIN AUSWAHL (falls nötig) ── -->
+    <div style="margin:10px 16px 0;">
       <select id="k-poruka-admin-sel" onchange="onChatAdminChange(this.value)"
-        style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Nunito';outline:none;color:var(--txt);">
+        style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 14px;font-size:13px;font-family:'Nunito';outline:none;color:var(--txt);">
         <option value="">— Izaberite admina —</option>
       </select>
     </div>
 
-    <!-- ── Bankdaten (einklappbar) ── -->
-    <div id="k-chat-bank-bar" style="display:none;flex-shrink:0;background:rgba(37,99,235,0.08);border-bottom:1px solid rgba(37,99,235,0.18);padding:8px 16px;cursor:pointer;" onclick="toggleChatBank()">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;font-weight:700;color:#93c5fd;">🏦 Podaci za uplatu</span>
-        <span id="k-chat-bank-arrow" style="font-size:11px;color:#93c5fd;">▼</span>
+    <!-- ── 3. CHAT VERLAUF ── -->
+    <div style="margin:10px 16px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#6b7280;" id="k-chat-online-dot"></div>
+        <div style="font-size:13px;font-weight:700;color:var(--txt);">💬 Chat</div>
+        <div style="font-size:11px;color:var(--txt3);" id="k-chat-online-lbl">Izaberite admina</div>
       </div>
-      <div id="k-chat-bank-detail" style="display:none;padding-top:8px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Broj računa</div>
-            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-bank-num">—</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Vlasnik</div>
-            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-bank-name">—</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">PostNet broj</div>
-            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-postnet-num">—</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">PostNet ime</div>
-            <div style="font-weight:700;font-size:13px;color:var(--txt);" id="k-postnet-name">—</div>
-          </div>
+      <!-- Verlauf -->
+      <div id="k-chat-feed" style="min-height:180px;max-height:340px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">💬</div>
+          <div style="font-size:12px;color:var(--txt3);">Izaberite admina da vidite chat</div>
         </div>
       </div>
-    </div>
-
-    <!-- ── Chat Verlauf ── -->
-    <div id="k-chat-feed" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;">
-      <div id="k-chat-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
-        <div style="font-size:40px;margin-bottom:12px;">💬</div>
-        <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px;">Izaberite admina gore</div>
-        <div style="font-size:12px;color:var(--txt3);">Chat istorija će se pojaviti ovde</div>
+      <!-- Foto Vorschau -->
+      <div id="foto-prev-kporuka" style="padding:0 12px 4px;"></div>
+      <!-- ── EINGABE ── -->
+      <div style="border-top:1px solid rgba(255,255,255,0.07);padding:10px 12px;display:flex;gap:8px;align-items:flex-end;">
+        <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+        <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
+        <button onclick="document.getElementById('foto-inp-kporuka').click()"
+          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
+        <button onclick="document.getElementById('foto-cam-kporuka').click()"
+          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
+        <textarea id="k-poruka" rows="1" placeholder="Napiši poruku adminu..."
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"
+          style="flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:18px;padding:9px 14px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);line-height:1.4;max-height:90px;overflow-y:auto;"></textarea>
+        <button onclick="chatSendMsg()"
+          style="background:var(--blue);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">➤</button>
       </div>
     </div>
 
-    <!-- ── Foto Vorschau ── -->
-    <div id="foto-prev-kporuka" style="padding:0 16px 4px;flex-shrink:0;"></div>
-
-    <!-- ── Haupt Warnung (einklappbar) ── -->
-    <div id="k-chat-haupt-bar" style="flex-shrink:0;border-top:1px solid rgba(255,122,48,0.2);padding:0;">
-      <div onclick="toggleHauptBar()" style="display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;background:rgba(255,122,48,0.05);">
-        <span style="font-size:11px;color:var(--orange);font-weight:700;">⚠️ Žalba Hauptu</span>
+    <!-- ── 4. ŽALBA HAUPTU ── -->
+    <div style="margin:10px 16px 14px;background:rgba(255,122,48,0.05);border:1px solid rgba(255,122,48,0.2);border-radius:18px;overflow:hidden;">
+      <div onclick="toggleHauptBar()" style="display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;">
+        <div style="width:28px;height:28px;background:rgba(255,122,48,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚠️</div>
+        <span style="font-size:12px;font-weight:700;color:var(--orange);">Žalba — Kontaktiraj Haupt</span>
         <span id="k-haupt-arrow" style="font-size:10px;color:var(--orange);margin-left:auto;">▶</span>
       </div>
-      <div id="k-haupt-expand" style="display:none;padding:0 16px 10px;background:rgba(255,122,48,0.04);">
-        <div style="font-size:11px;color:#888;margin-bottom:6px;">Koristite samo ako Admin nije rešio problem</div>
+      <div id="k-haupt-expand" style="display:none;padding:0 16px 14px;">
+        <div style="font-size:11px;color:#888;margin-bottom:8px;">Koristite samo ako Admin nije rešio problem</div>
         <div style="display:flex;gap:6px;">
-          <textarea id="k-poruka-haupt" style="flex:1;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:10px;font-size:13px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="2" placeholder="Opišite problem..."></textarea>
-          <button onclick="posaljiPoruku('haupt')" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:20px;cursor:pointer;align-self:flex-end;">➤</button>
+          <textarea id="k-poruka-haupt" style="flex:1;background:rgba(255,122,48,0.06);border:1.5px solid rgba(255,122,48,0.3);border-radius:10px;padding:10px;font-size:13px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);" rows="3" placeholder="Opišite problem..."></textarea>
+          <button onclick="posaljiPoruku('haupt')" style="background:var(--orange);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:18px;cursor:pointer;align-self:flex-end;">➤</button>
         </div>
       </div>
     </div>
 
-    <!-- ── Eingabe ── -->
-    <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.07);padding:10px 12px;background:var(--bg2);display:flex;gap:8px;align-items:flex-end;">
-      <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <button onclick="document.getElementById('foto-inp-kporuka').click()" title="Galerija"
-        style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
-      <button onclick="document.getElementById('foto-cam-kporuka').click()" title="Kamera"
-        style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
-      <textarea id="k-poruka" rows="1" placeholder="Poruka..."
-        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"
-        style="flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:18px;padding:9px 14px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);line-height:1.4;max-height:90px;overflow-y:auto;"></textarea>
-      <button onclick="chatSendMsg()"
-        style="background:var(--blue);border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">➤</button>
-    </div>
   </div>
 
   <!-- Bottom Nav -->
@@ -5753,6 +5761,9 @@ function kNavTab(name) {
   if (name === 'home')     renderKHome();
   if (name === 'faq')      initFaq();
   if (name === 'podrska') {
+    // Scroll to top
+    const tab = document.getElementById('ktab-podrska');
+    if (tab) tab.scrollTop = 0;
     // Sync: wenn globaler Admin gewählt, Chat-Admin übernehmen
     const globalSel = document.getElementById('k-global-admin-sel');
     const chatSel   = document.getElementById('k-poruka-admin-sel');
@@ -6326,6 +6337,14 @@ function onChatAdminChange(adminId) {
     if(el('k-bank-name'))   el('k-bank-name').textContent   = admin.bankName   || '—';
     if(el('k-postnet-num')) el('k-postnet-num').textContent = admin.postnetNum || '—';
     if(el('k-postnet-name'))el('k-postnet-name').textContent= admin.postnetName|| '—';
+    // Preview-Zeile oben befüllen
+    const prev = document.getElementById('k-bank-preview');
+    if (prev) prev.textContent = admin.bankNum ? '🏦 ' + admin.bankNum : 'Tapni da vidiš broj računa';
+    // Bankdaten automatisch ausklappen
+    const det = document.getElementById('k-chat-bank-detail');
+    const arr = document.getElementById('k-chat-bank-arrow');
+    if (det) det.style.display = 'block';
+    if (arr) { arr.textContent = '▲'; arr.style.transform = 'rotate(180deg)'; }
   }
   // Chat neu rendern
   renderChatVerlauf();
@@ -6342,6 +6361,7 @@ function toggleChatBank() {
   const open = det.style.display !== 'none';
   det.style.display = open ? 'none' : 'block';
   if (arr) arr.textContent = open ? '▼' : '▲';
+  if (arr) arr.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 function toggleHauptBar() {
@@ -6381,10 +6401,9 @@ function renderChatVerlauf() {
 
   // Wenn kein Admin gewählt
   if (!_chatAdminId) {
-    feed.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:12px;">💬</div>
-      <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:4px;">Izaberite admina gore</div>
-      <div style="font-size:12px;color:var(--txt3);">Chat istorija će se pojaviti ovde</div>
+    feed.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">💬</div>
+      <div style="font-size:12px;color:var(--txt3);">Izaberite admina da vidite chat</div>
     </div>`;
     return;
   }
@@ -6394,9 +6413,9 @@ function renderChatVerlauf() {
     .sort((a,b) => a._vreme > b._vreme ? 1 : -1);
 
   if (!alle.length) {
-    feed.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
-      <div style="font-size:32px;margin-bottom:10px;">✉️</div>
-      <div style="font-size:13px;color:var(--txt3);">Još nema poruka sa ovim adminom.<br>Pošaljite prvu poruku!</div>
+    feed.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">✉️</div>
+      <div style="font-size:12px;color:var(--txt3);">Još nema poruka.<br>Napišite prvu poruku ispod! 👇</div>
     </div>`;
     return;
   }
