@@ -1213,7 +1213,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <label class="inp-label">Opis</label>
         <input type="text" class="inp-dark" id="racun-opis" placeholder="Naziv paketa..." />
         <label class="inp-label">Foto (opciono)</label>
-        <input type="file" id="racun-foto-input" accept="image/*" capture="environment" style="display:none;" onchange="previewRacunFoto(event)" />
+        <input type="file" id="racun-foto-input" accept="image/*" style="display:none;" onchange="previewRacunFoto(event)" />
         <div id="racun-foto-preview" style="display:none;margin-bottom:8px;">
           <img id="racun-foto-img" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" />
           <button onclick="clearRacunFoto()" style="width:100%;margin-top:6px;background:rgba(230,57,70,0.15);color:#FF6B76;border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕ Ukloni foto</button>
@@ -1552,9 +1552,9 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
           <!-- Eingabe -->
           <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.07);padding:10px 12px;background:rgba(255,255,255,0.02);display:flex;gap:8px;align-items:flex-end;">
             <input type="file" id="foto-inp-areply" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'areply')" />
-            <input type="file" id="foto-cam-areply" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'areply')" />
-            <button onclick="document.getElementById('foto-inp-areply').click()" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
-            <button onclick="document.getElementById('foto-cam-areply').click()" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
+  
+            <button onclick="triggerFoto('areply',false)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🖼️</button>
+            <button onclick="triggerFoto('areply',true)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">📷</button>
             <textarea id="admin-chat-input" rows="1" placeholder="Odgovori..."
               oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"
               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminChatSend();}"
@@ -1776,11 +1776,10 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <textarea id="k-poruka" rows="3" placeholder="Vaša poruka..."
         style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;font-family:'Nunito';outline:none;resize:none;color:var(--txt);box-sizing:border-box;"></textarea>
       <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
       <div style="display:flex;gap:6px;margin-top:8px;">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()"
+        <button type="button" onclick="triggerFoto('kporuka',true)"
           style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()"
+        <button type="button" onclick="triggerFoto('kporuka',false)"
           style="flex:1;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';color:var(--txt2);">🖼️ Galerija</button>
       </div>
       <div id="foto-prev-kporuka"></div>
@@ -6697,6 +6696,20 @@ function msgFotoPreview(inputEl, previewId) {
   reader.readAsDataURL(file);
 }
 
+function triggerFoto(previewId, isCamera) {
+  // Einen einzigen Input nutzen, capture dynamisch setzen/entfernen
+  const inp = document.getElementById('foto-inp-' + previewId)
+           || document.getElementById('foto-cam-' + previewId);
+  if (!inp) return;
+  if (isCamera) {
+    inp.setAttribute('capture', 'environment');
+  } else {
+    inp.removeAttribute('capture');
+  }
+  // Kleiner Delay damit Browser das Attribut übernimmt
+  setTimeout(() => inp.click(), 50);
+}
+
 function clearMsgFoto(previewId) {
   delete _fotoCache[previewId];
   const prev = document.getElementById('foto-prev-' + previewId);
@@ -6710,11 +6723,11 @@ function fotoButtonsHtml(previewId, light) {
   var border = light ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.15)";
   var color = light ? "#555" : "#aaa";
   var btnStyle = "flex:1;background:" + bg + ";border:1.5px solid " + border + ";border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:sans-serif;color:" + color + ";";
+  // Nur 1 Input — capture wird per JS gesetzt/entfernt
   return "<input type=\"file\" id=\"foto-inp-" + previewId + "\" accept=\"image/*\" style=\"display:none;\" onchange=\"msgFotoPreview(this,'" + previewId + "')\" />"
-    + "<input type=\"file\" id=\"foto-cam-" + previewId + "\" accept=\"image/*\" capture=\"environment\" style=\"display:none;\" onchange=\"msgFotoPreview(this,'" + previewId + "')\" />"
     + "<div style=\"display:flex;gap:6px;margin-top:6px;\">"
-    + "<button type=\"button\" onclick=\"document.getElementById('foto-cam-" + previewId + "').click()\" style=\"" + btnStyle + "\">📷 Kamera</button>"
-    + "<button type=\"button\" onclick=\"document.getElementById('foto-inp-" + previewId + "').click()\" style=\"" + btnStyle + "\">🖼️ Galerija</button>"
+    + "<button type=\"button\" onclick=\"triggerFoto('" + previewId + "',true)\" style=\"" + btnStyle + "\">📷 Kamera</button>"
+    + "<button type=\"button\" onclick=\"triggerFoto('" + previewId + "',false)\" style=\"" + btnStyle + "\">🖼️ Galerija</button>"
     + "</div>"
     + "<div id=\"foto-prev-" + previewId + "\"></div>";
 }
