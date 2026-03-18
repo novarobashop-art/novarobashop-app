@@ -1844,46 +1844,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       </div>
     </div>
 
-    <!-- ② PORUKE OD ADMINA -->
-    <div class="pod2-card pod2-inbox">
-      <div class="pod2-header">
-        <div class="pod2-icon">📬</div>
-        <div>
-          <div class="pod2-title">Poruke od Admina</div>
-          <div class="pod2-sub">Primljene poruke</div>
-        </div>
-      </div>
-      <div id="k-admin-poruke-list">
-        <div style="text-align:center;color:rgba(255,255,255,0.4);padding:16px 0;font-size:13px;">Nema poruka od admina.</div>
-      </div>
-    </div>
-
-    <!-- ③ POŠALJI PORUKU -->
-    <div class="pod2-card pod2-send">
-      <div class="pod2-header">
-        <div class="pod2-icon">📩</div>
-        <div>
-          <div class="pod2-title">Pošalji Poruku Adminu</div>
-          <div class="pod2-sub">Direktna komunikacija</div>
-        </div>
-      </div>
-      <label class="pod2-label">Izaberi Admina</label>
-      <select id="k-poruka-admin-sel" class="pod2-inp">
-        <option value="">Izaberite admina...</option>
-      </select>
-      <label class="pod2-label">Poruka</label>
-      <textarea id="k-poruka" class="pod2-inp" rows="3" placeholder="Vaša poruka..." style="resize:none;"></textarea>
-      <input type="file" id="foto-inp-kporuka" accept="image/*" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <input type="file" id="foto-cam-kporuka" accept="image/*" capture="environment" style="display:none;" onchange="msgFotoPreview(this,'kporuka')" />
-      <div class="pod2-media-row">
-        <button type="button" onclick="document.getElementById('foto-cam-kporuka').click()" class="pod2-media-btn">📷 Kamera</button>
-        <button type="button" onclick="document.getElementById('foto-inp-kporuka').click()" class="pod2-media-btn">🖼️ Galerija</button>
-      </div>
-      <div id="foto-prev-kporuka"></div>
-      <button onclick="posaljiPoruku('admin')" class="pod2-btn pod2-btn-green">✉️ Pošalji Adminu</button>
-    </div>
-
-    <!-- ④ ŽALBA HAUPT -->
+    <!-- ② ŽALBA HAUPT -->
     <div class="pod2-card pod2-haupt">
       <div class="pod2-header">
         <div class="pod2-icon">⚠️</div>
