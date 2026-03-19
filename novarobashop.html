@@ -1459,7 +1459,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
                 <div style="font-size:24px;font-weight:700;color:var(--amber);letter-spacing:-1px;line-height:1;" id="auk-top-iznos">—</div>
                 <div style="font-size:14px;font-weight:700;color:white;margin-top:4px;" id="auk-top-kupac">—</div>
                 <div style="font-size:11px;color:var(--txt2);" id="auk-top-tiktok">—</div>
-                <button onclick="zakljuciAukciju()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:10px;padding:9px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';">✅ Zaključi &amp; Pošalji Račun</button>
+                <button id="auk-zakljuci-btn" onclick="zakljuciAukciju()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;padding:10px;color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:Nunito;box-shadow:0 4px 12px rgba(245,158,11,0.35);">🔨 Zaključi Aukciju</button>
+
               </div>
             </div>
 
@@ -4304,11 +4305,11 @@ async function addRacun() {
   await addDoc(collection(db, 'notifikacije'), {
     userId: kupacId,
     tip: 'nova_racun',
-    poruka: 'Imate novu računu u iznosu od ' + iznos.toLocaleString() + ' RSD',
+    poruka: '🧾 Nova računa\n――――――――――――――――\n' + (opis || 'Račun') + '\n――――――――――――――――\nUkupno: ' + iznos.toLocaleString() + ' RSD',
     vreme: new Date().toISOString(),
     procitano: false
   });
-  sendPushToUser(kupacId, '🧾 Nova Računa', 'Imate novu računu u iznosu od ' + iznos.toLocaleString() + ' RSD');
+  sendPushToUser(kupacId, '🧾 Nova Računa', (opis||'Račun') + ' — ' + iznos.toLocaleString() + ' RSD');
 
   document.getElementById('racun-iznos').value = '';
   document.getElementById('racun-opis').value = '';
@@ -4640,6 +4641,7 @@ async function toggleLive() {
 
     // Reset korpe i gesendet — artikli ostaju (admin ih dodaje pre ili tokom livea)
     _lnKorpe = {};
+    _pendingAukcije = [];
     _lnResetGesendet();
     renderLnKorpe();
 
@@ -4704,21 +4706,68 @@ async function toggleLive() {
     } catch(e) {}
 
     // ── AUTOMATSKI POŠALJI SVE RAČUNE kad se Live završi ──
-    const pending = Object.values(_lnKorpe).filter(k => !k.racunSent && k.stavke.length > 0);
-    console.log('Live završen — pending računi:', pending.length, pending.map(k => k.kupac?.name));
-    if (pending.length > 0) {
-      showToast('📤 Šaljem račune za ' + pending.length + ' kupac(a)...', 4000);
-      for (const k of pending) {
-        console.log('Šaljem račun za:', k.kupac?.name, k.kupac?.id);
-        await posaljiLnRacun(k.kupac.id);
+    // Spoji normalne narudžbine + aukcije po kupcu u JEDAN račun
+    const { db, collection, addDoc } = window._fb;
+
+    // Skupi sve stavke po kupacId
+    const svePoKupcu = {}; // { kupacId: { kupac, stavke: [] } }
+
+    // 1. Normalne narudžbine
+    for (const k of Object.values(_lnKorpe)) {
+      if (k.racunSent || !k.stavke.length) continue;
+      const id = k.kupac.id;
+      if (!svePoKupcu[id]) svePoKupcu[id] = { kupac: k.kupac, stavke: [] };
+      svePoKupcu[id].stavke.push(...k.stavke);
+    }
+
+    // 2. Aukcije — dodaj kao stavke istom kupcu (ili novi unos)
+    for (const auk of _pendingAukcije) {
+      const id = auk.kupac.id;
+      if (!svePoKupcu[id]) svePoKupcu[id] = { kupac: auk.kupac, stavke: [] };
+      for (const a of auk.artikli) {
+        svePoKupcu[id].stavke.push({ naziv: a.naziv + ' 🏆', cena: auk.iznos, kolicina: 1 });
       }
-      showToast('✅ Live završen! ' + pending.length + ' račun(a) poslato!', 4000);
+    }
+
+    const svi = Object.values(svePoKupcu);
+    console.log('Live završen — računi za slanje:', svi.length, svi.map(k => k.kupac?.name));
+
+    if (svi.length > 0) {
+      showToast('📤 Šaljem račune za ' + svi.length + ' kupac(a)...', 3000);
+      let sent = 0;
+      for (const { kupac, stavke } of svi) {
+        try {
+          const ukupno = stavke.reduce((s, x) => s + (x.cena * (x.kolicina||1)), 0);
+          const broj = Math.floor(1000 + Math.random()*9000);
+          await addDoc(collection(db,'racuni'), {
+            adminId: window._currentUser.uid,
+            kupacId: kupac.id, kupacName: kupac.name||'',
+            iznos: ukupno, opis: stavke.map(s => s.naziv).join(', '),
+            stavke,
+            status: 'novo', paketStatus: 'prep',
+            datum: new Date().toISOString().slice(0,10),
+            broj, createdAt: new Date().toISOString(), sourceLive: true
+          });
+          const poruka = '🧾 Nova računa sa Livea\n――――――――――――――――\n'
+            + stavke.map(s => { const kol = s.kolicina||1; return s.naziv + '  ' + kol + 'x ' + s.cena.toLocaleString() + ' = ' + (s.cena*kol).toLocaleString() + ' RSD'; }).join('\n')
+            + '\n――――――――――――――――\nUkupno: ' + ukupno.toLocaleString() + ' RSD';
+          await addDoc(collection(db,'notifikacije'), {
+            userId: kupac.id, tip: 'nova_racun', poruka,
+            vreme: new Date().toISOString(), procitano: false
+          });
+          sent++;
+        } catch(e) {
+          console.error('Greška pri slanju računa za', kupac.name, e.message);
+        }
+      }
+      showToast('✅ Live završen! ' + sent + ' račun(a) poslato!', 5000);
     } else {
       showToast('⏹️ Live završen');
     }
 
     // Reset korpe za sledeći live — artikli ostaju za ponovnu upotrebu
     _lnKorpe = {};
+    _pendingAukcije = [];
     _lnResetGesendet();
     renderLnKorpe();
   }
@@ -4809,73 +4858,92 @@ function resetujAukciju() {
   document.getElementById('ln-count').textContent = '0';
 }
 
-async function zakljuciAukciju() {
+// ── Pending aukcije — šalju se na kraju Livea ──
+let _pendingAukcije = []; // [{ kupac, iznos, artikli, gubitnici }]
+
+function zakljuciAukciju() {
   if (!_aukWinner) { showToast('⚠️ Nema ponuda još'); return; }
   const { kupac, iznos } = _aukWinner;
   const opisArtikli = _aukArtikli.map(a => a.naziv).join(', ');
-  if (!confirm('Zaključiti aukciju?\n\nPobednik: ' + (kupac.tiktokNick||kupac.name) + '\nPonuda: ' + iznos.toLocaleString() + ' RSD\nArtikli: ' + opisArtikli)) return;
 
+  // Sačuvaj pobednika za slanje na kraju Livea
+  _pendingAukcije.push({
+    kupac,
+    iznos,
+    artikli: [..._aukArtikli],
+    opis: opisArtikli,
+    gubitnici: Object.values(_aukPonude).filter(p => p.kupac.id !== kupac.id)
+  });
+
+  // Reset stanja za sledeću aukciju
+  _aukAktivna = false;
+  _aukPonude  = {};
+  _aukWinner  = null;
+  _aukArtikli = [];
+
+  // Reset UI — odmah spreman za sledeću aukciju
+  document.getElementById('auk-top-box').style.display = 'none';
+  document.getElementById('auk-btn').style.display = 'block';
+  document.getElementById('auk-btn').disabled = false;
+  document.getElementById('auk-btn').textContent = '🔨 Startuj Aukciju';
+  document.getElementById('auk-btn').onclick = startirajAukciju;
+  document.getElementById('auk-artikli-list').innerHTML = '';
+  document.getElementById('auk-naziv').value = '';
+  document.getElementById('auk-start').value = '';
+  document.getElementById('ln-list').innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:30px 10px;">Čekam ponude...</div>';
+  document.getElementById('ln-count').textContent = '0';
+
+  const total = _pendingAukcije.length;
+  showToast('✅ Aukcija #' + total + ' zaključena! Pobednik: ' + (kupac.tiktokNick||kupac.name) + ' — ' + iznos.toLocaleString() + ' RSD\n📦 Račun se šalje na kraju Livea.', 5000);
+}
+
+async function posaljiSveAukcijeNaKrajuLivea() {
+  if (!_pendingAukcije.length) return 0;
   const { db, collection, addDoc } = window._fb;
-  const btn = document.getElementById('auk-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Šaljem...'; }
-
-  try {
-    const broj = Math.floor(1000 + Math.random()*9000);
-    await addDoc(collection(db,'racuni'), {
-      adminId: window._currentUser.uid,
-      kupacId: kupac.id, kupacName: kupac.name||'',
-      iznos, opis: opisArtikli,
-      stavke: _aukArtikli.map(a => ({ naziv: a.naziv, cena: iznos })),
-      status: 'novo', paketStatus: 'prep',
-      datum: new Date().toISOString().slice(0,10),
-      broj, createdAt: new Date().toISOString(), sourceAukcija: true
-    });
-
-    // Pobednik notifikacija
+  let sent = 0;
+  for (const auk of _pendingAukcije) {
     try {
-      await addDoc(collection(db,'notifikacije'), {
-        userId: kupac.id, tip: 'nova_racun',
-        poruka: '🏆 Pobedili ste aukciju!\n' + opisArtikli + '\nVaša ponuda: ' + iznos.toLocaleString() + ' RSD',
-        vreme: new Date().toISOString(), procitano: false
+      const broj = Math.floor(1000 + Math.random()*9000);
+      await addDoc(collection(db,'racuni'), {
+        adminId: window._currentUser.uid,
+        kupacId: auk.kupac.id, kupacName: auk.kupac.name||'',
+        iznos: auk.iznos, opis: auk.opis,
+        stavke: auk.artikli.map(a => ({ naziv: a.naziv, cena: auk.iznos })),
+        status: 'novo', paketStatus: 'prep',
+        datum: new Date().toISOString().slice(0,10),
+        broj, createdAt: new Date().toISOString(), sourceAukcija: true
       });
-    } catch(e) { console.warn('Pobednik notif error:', e.message); }
-
-    // Gubitnici notifikacije — svaka zasebno, greška ne blokira
-    const gubitnici = Object.values(_aukPonude).filter(p => p.kupac.id !== kupac.id);
-    let notifOk = 0, notifErr = 0;
-    for (const p of gubitnici) {
+      // Pobednik notif
       try {
         await addDoc(collection(db,'notifikacije'), {
-          userId: p.kupac.id, tip: 'info',
-          poruka: '😔 Aukcija završena. Pobedila ponuda: ' + iznos.toLocaleString() + ' RSD za: ' + opisArtikli,
+          userId: auk.kupac.id, tip: 'nova_racun',
+          poruka: '🏆 Pobedili ste aukciju!\n――――――――――――――――\n' + auk.artikli.map(a => a.naziv + '  1x ' + auk.iznos.toLocaleString() + ' = ' + auk.iznos.toLocaleString() + ' RSD').join('\n') + '\n――――――――――――――――\nUkupno: ' + auk.iznos.toLocaleString() + ' RSD',
           vreme: new Date().toISOString(), procitano: false
         });
-        notifOk++;
-      } catch(e) {
-        notifErr++;
-        console.warn('Gubitnik notif error za', p.kupac.id, e.message);
+      } catch(e) { console.warn('Auk pobednik notif error:', e.message); }
+      // Gubitnici notif
+      for (const p of auk.gubitnici) {
+        try {
+          await addDoc(collection(db,'notifikacije'), {
+            userId: p.kupac.id, tip: 'info',
+            poruka: '😔 Aukcija završena. Pobedila ponuda: ' + auk.iznos.toLocaleString() + ' RSD za: ' + auk.opis,
+            vreme: new Date().toISOString(), procitano: false
+          });
+        } catch(e) { console.warn('Auk gubitnik notif error:', e.message); }
       }
+      sent++;
+    } catch(e) {
+      console.error('posaljiSveAukcijeNaKrajuLivea error:', e.message);
     }
-
-    _aukAktivna = false;
-    const iznosEl = document.getElementById('auk-top-iznos');
-    if (iznosEl) iznosEl.style.color = '#6ee7b7';
-    if (btn) btn.style.display = 'none';
-
-    let msg = '✅ Aukcija zaključena! Račun poslat ' + (kupac.tiktokNick||kupac.name) + ' — ' + iznos.toLocaleString() + ' RSD';
-    if (notifErr > 0) msg += ' (' + notifErr + ' notif nije stiglo)';
-    showToast(msg, 5000);
-
-  } catch(e) {
-    console.error('zakljuciAukciju error:', e);
-    showToast('❌ Greška pri zaključivanju: ' + e.message, 6000);
-    if (btn) { btn.disabled = false; btn.textContent = '✅ Zaključi & Pošalji Račun'; }
   }
+  _pendingAukcije = [];
+  return sent;
 }
 
 function renderAukPonude() {
   const list  = document.getElementById('ln-list');
   const count = document.getElementById('ln-count');
+  if (!list || !count) return; // elementi još nisu u DOM-u
   const sve   = Object.values(_aukPonude).sort((a,b) => b.iznos - a.iznos);
   count.textContent = sve.length;
   if (!sve.length) { list.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:20px;">Čekam ponude iz chata...</div>'; return; }
@@ -4883,12 +4951,13 @@ function renderAukPonude() {
     const isWinner = idx === 0;
     const ini = (kupac.tiktokNick||kupac.name||'?').slice(0,2).toUpperCase();
     const mins = Math.floor((new Date()-vreme)/60000);
-    return '<div style="display:flex;align-items:center;gap:8px;padding:9px;background:' + (isWinner?'rgba(245,158,11,0.1)':'rgba(255,255,255,0.03)') + ';border:1.5px solid ' + (isWinner?'rgba(245,158,11,0.4)':'rgba(148,163,184,0.1)') + ';border-radius:12px;margin-bottom:6px;">'
+    const clickHandler = isWinner ? ' onclick="zakljuciAukciju()" title="Klikni da zaključiš aukciju i pošalješ račun"' : '';
+    return '<div' + clickHandler + ' style="display:flex;align-items:center;gap:8px;padding:9px;background:' + (isWinner?'rgba(245,158,11,0.1)':'rgba(255,255,255,0.03)') + ';border:1.5px solid ' + (isWinner?'rgba(245,158,11,0.4)':'rgba(148,163,184,0.1)') + ';border-radius:12px;margin-bottom:6px;' + (isWinner?'cursor:pointer;':'') + '">'
       + '<div style="font-size:14px;font-weight:800;color:' + (isWinner?'var(--amber)':'var(--txt3)') + ';min-width:20px;">' + (isWinner?'🏆':idx+1) + '</div>'
       + '<div style="width:32px;height:32px;border-radius:50%;background:' + (isWinner?'rgba(245,158,11,0.2)':'rgba(148,163,184,0.1)') + ';color:' + (isWinner?'var(--amber)':'var(--txt2)') + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + ini + '</div>'
       + '<div style="flex:1;min-width:0;">'
         + '<div style="font-size:12px;font-weight:800;color:' + (isWinner?'white':'rgba(255,255,255,0.7)') + ';">' + (kupac.tiktokNick||kupac.name||'—') + '</div>'
-        + '<div style="font-size:10px;color:var(--txt3);">@' + (kupac.tiktokIme||'—') + ' · ' + (mins<1?'upravo':mins+'min') + '</div>'
+        + '<div style="font-size:10px;color:var(--txt3);">@' + (kupac.tiktokIme||'—') + ' · ' + (mins<1?'upravo':mins+'min') + (isWinner?' · 👆 klikni za račun':'') + '</div>'
       + '</div>'
       + '<div style="font-size:' + (isWinner?'16':'13') + 'px;font-weight:800;color:' + (isWinner?'var(--amber)':'var(--txt2)') + ';">' + iznos.toLocaleString() + ' RSD</div>'
     + '</div>';
@@ -5023,9 +5092,9 @@ function checkAukcijaPonuda(chatItem) {
   const sve    = Object.values(_aukPonude);
   _aukWinner   = sve.reduce((max, p) => p.iznos > max.iznos ? p : max, sve[0]);
 
-  document.getElementById('auk-top-iznos').textContent  = _aukWinner.iznos.toLocaleString() + ' RSD';
-  document.getElementById('auk-top-kupac').textContent  = _aukWinner.kupac.tiktokNick || _aukWinner.kupac.name || '—';
-  document.getElementById('auk-top-tiktok').textContent = '@' + (_aukWinner.kupac.tiktokIme||'—');
+  const _ei = document.getElementById('auk-top-iznos'); if(_ei) _ei.textContent = _aukWinner.iznos.toLocaleString() + ' RSD';
+  const _ek = document.getElementById('auk-top-kupac'); if(_ek) _ek.textContent = _aukWinner.kupac.tiktokNick || _aukWinner.kupac.name || '—';
+  const _et = document.getElementById('auk-top-tiktok'); if(_et) _et.textContent = '@' + (_aukWinner.kupac.tiktokIme||'—');
 
   renderAukPonude();
   showToast((prev?'📈 ':'🔨 ') + (kupac.tiktokNick||kupac.name) + ': ' + iznos.toLocaleString() + ' RSD', 2500);
@@ -5045,10 +5114,10 @@ function checkNarudzba(chatItem) {
   if (_lnRacunGesendet.has(kupac.id)) return;
   if (_lnKorpe[kupac.id]?.racunSent) return;
 
+  // Akzeptiert NUR reine Zahlen: "100", "200", "3x100" — kein Text erlaubt
   const raw = (chatItem.comment||'').trim();
 
-  // Pokusaj da parsuje format "3x 100" ili "3 x 100" ili "3X100" ili samo "100"
-  // Regex: opcioni (broj + x) + razmak + cena
+  // Format "3x100" ili samo "100"
   const match = raw.replace(/\s/g,'').match(/^(\d+)[xX](\d+)$/);
   let trazenaKolicina = 1;
   let trazenaCena     = 0;
@@ -5237,7 +5306,7 @@ async function posaljiLnRacun(kupacId) {
     await addDoc(collection(db,'notifikacije'), {
       userId:    kupacId,
       tip:       'nova_racun',
-      poruka:    '🧾 Nova računa sa Livea\nUkupno: ' + ukupno.toLocaleString() + ' RSD\n' + stavke.map(s=>'• '+s.naziv+' '+s.cena.toLocaleString()+' RSD').join('\n'),
+      poruka:    '🧾 Nova računa sa Livea\n――――――――――――――――\n' + stavke.map(s => { const kol = s.kolicina||1; return s.naziv + '  ' + kol + 'x ' + s.cena.toLocaleString() + ' = ' + (s.cena*kol).toLocaleString() + ' RSD'; }).join('\n') + '\n――――――――――――――――\nUkupno: ' + ukupno.toLocaleString() + ' RSD',
       vreme:     new Date().toISOString(),
       procitano: false
     });
