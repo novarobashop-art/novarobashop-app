@@ -122,8 +122,8 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
 .cd.kasni{background:var(--orange);box-shadow:0 0 6px var(--orange);}
 .cd.noreg{background:var(--rose);box-shadow:0 0 6px var(--rose);}
 .cd.unk  {background:var(--txt3);}
-.cn{font-size:12px;font-weight:800;}
-.cnick{font-size:10px;color:var(--txt2);margin-left:5px;}
+.cn{font-size:11px;font-weight:400;color:var(--txt2);margin-left:4px;}
+.cnick{font-size:14px;font-weight:800;color:inherit;text-transform:uppercase;letter-spacing:0.3px;}
 .cs-badge{font-size:9px;font-weight:700;padding:1px 7px;border-radius:var(--r-pill);margin-left:5px;}
 .cs-reg  {background:rgba(16,185,129,0.15);color:#6ee7b7;}
 .cs-kasni{background:rgba(249,115,22,0.15);color:#fdba74;}
@@ -489,8 +489,8 @@ function renderChat(){
       <div class="cd ${s}"></div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;">
-          <span class="cn" style="color:${c};">@${d.tiktokId||'?'}</span>
-          ${k?`<span class="cnick">${k.tiktokNick||k.name||''}</span>`:''}
+          ${k?`<span class="cnick" style="color:${c};">${k.tiktokNick||k.name||''}</span>`:''}
+          <span class="cn">@${(d.tiktokId||'?').toLowerCase()}</span>
           <span class="cs-badge cs-${s}">${lb}</span>
           <span class="ct">${ts}</span>
         </div>
