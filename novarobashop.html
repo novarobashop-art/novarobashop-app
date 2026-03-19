@@ -2915,12 +2915,14 @@ function adminRacunCard(r) {
 
 async function deleteRacun(racunId) {
   if (!confirm('Obrisati ovaj račun iz admin prikaza?\n(Kupac zadržava svoju kopiju)')) return;
-  const { db, doc, updateDoc } = window._fb;
-  await updateDoc(doc(db, 'racuni', racunId), {
-    adminDeleted: true,
-    adminDeletedAt: new Date().toISOString()
-  });
-  showToast('🗑️ Račun uklonjen iz tvog prikaza');
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'racuni', racunId), {
+      adminDeleted: true,
+      adminDeletedAt: new Date().toISOString()
+    });
+    showToast('🗑️ Račun uklonjen iz tvog prikaza');
+  } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
 }
 
 function renderARacuni(racuni) {
@@ -3275,10 +3277,12 @@ async function saveProizvod() {
 }
 
 async function deleteProizvod(id) {
+  try {
   if (!confirm('Obrisati ovaj proizvod?')) return;
   const { db, doc, deleteDoc } = window._fb;
   await deleteDoc(doc(db, 'proizvodi', id));
   showToast('🗑️ Proizvod obrisan');
+  } catch(e) { console.error('deleteProizvod:', e); showToast('❌ Greška pri brisanju: ' + (e.message||e), 4000); }
 }
 
 // ════════════════════════════════════════
@@ -3481,6 +3485,7 @@ function selectKupacForAuto(id, name, tiktok) {
 }
 
 async function saveAutoRacun() {
+  try {
   const kupacId = document.getElementById('auto-kupac-id').value;
   const iznos   = parseFloat(document.getElementById('auto-iznos').value);
   const opis    = document.getElementById('auto-opis').value.trim();
@@ -3500,6 +3505,7 @@ async function saveAutoRacun() {
   document.getElementById('auto-kupac-id').value='';
   document.getElementById('auto-kupac-search').value='';
   document.getElementById('auto-kupac-selected').style.display='none';
+  } catch(e) { console.error('saveAutoRacun:', e); showToast('❌ Greška pri čuvanju auto-računa: ' + (e.message||e), 4000); }
 }
 
 async function loadAutoRacuni() {
@@ -3543,6 +3549,7 @@ function renderAutoRacuni(list) {
 }
 
 async function triggerAutoRacun(autoId) {
+  try {
   const { db, collection, addDoc, doc, getDoc, updateDoc } = window._fb;
   const snap = await getDoc(doc(db,'auto_racuni',autoId));
   if (!snap.exists()) return;
@@ -3559,11 +3566,14 @@ async function triggerAutoRacun(autoId) {
   const next = new Date(); next.setDate(next.getDate()+a.interval);
   await updateDoc(doc(db,'auto_racuni',autoId),{nextDate: next.toISOString().slice(0,10)});
   showToast('✅ Račun kreiran!');
+  } catch(e) { console.error('triggerAutoRacun:', e); showToast('❌ Greška pri slanju auto-računa: ' + (e.message||e), 4000); }
 }
 async function toggleAutoRacun(autoId, aktivan) {
+  try {
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db,'auto_racuni',autoId),{aktivan});
   showToast(aktivan?'▶ Auto-račun aktiviran':'⏸ Auto-račun pauziran');
+  } catch(e) { console.error('toggleAutoRacun:', e); showToast('❌ Greška pri promeni statusa: ' + (e.message||e), 4000); }
 }
 
 // ════════════════════════════════════════
@@ -3692,6 +3702,7 @@ function setRating(val) {
 }
 
 async function submitRating() {
+  try {
   if(!_ratingValue){ showToast('⚠️ Izaberi ocenu (1-5)'); return; }
   const komentar = document.getElementById('rating-komentar')?.value.trim()||'';
   const { db, doc, updateDoc, collection, addDoc } = window._fb;
@@ -3704,6 +3715,7 @@ async function submitRating() {
   });
   document.getElementById('rating-modal-overlay')?.remove();
   showToast('⭐ Hvala na oceni!');
+  } catch(e) { console.error('submitRating:', e); showToast('❌ Greška pri slanju ocene: ' + (e.message||e), 4000); }
 }
 
 function getAPStatusStyle(status) {
@@ -3720,11 +3732,13 @@ function getAPStatusLabel(status) {
 }
 
 async function setAdminPorukaStatus(porukaId, status) {
+  try {
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db, 'poruke', porukaId), { status });
   // Status-Button Highlight sofort aktualisieren
   renderAdminStatusBtns();
   showToast(status==='hitno'?'🔴 Hitno!':status==='proverava'?'🟡 Proverava se':'🟢 Rešeno!');
+  } catch(e) { console.error('setAdminPorukaStatus:', e); showToast('❌ Greška pri promeni statusa: ' + (e.message||e), 4000); }
 }
 
 function renderAdminStatusBtns() {
@@ -3746,6 +3760,7 @@ function renderAdminStatusBtns() {
 }
 
 async function deleteAdminPoruka(porukaId, vreme, status, event) {
+  try {
   event.stopPropagation();
   const diffDays = (Date.now() - new Date(vreme||0)) / (1000*60*60*24);
   if (diffDays < 2 && status !== 'reseno') {
@@ -3754,6 +3769,7 @@ async function deleteAdminPoruka(porukaId, vreme, status, event) {
   const { db, doc, deleteDoc } = window._fb;
   await deleteDoc(doc(db, 'poruke', porukaId));
   showToast('🗑️ Poruka obrisana');
+  } catch(e) { console.error('deleteAdminPoruka:', e); showToast('❌ Greška pri brisanju poruke: ' + (e.message||e), 4000); }
 }
 
 function toggleAdminReply(safeId) {
@@ -3846,10 +3862,6 @@ function renderAdminInbox() {
       </div>
     </div>`;
   }).join('');
-}
-
-function filterAdminPoruke(val) {
-  renderAdminInbox();
 }
 
 function openAdminChat(kupacId, kupacName, tiktok, porukaId) {
@@ -4258,6 +4270,7 @@ function clearRacunFoto() {
 }
 
 async function addRacun() {
+  try {
   const kupacId = document.getElementById('racun-kupac-id').value;
   const kupacName = document.getElementById('racun-kupac-name').value;
   const iznos = parseFloat(document.getElementById('racun-iznos').value);
@@ -4310,9 +4323,11 @@ async function addRacun() {
   } else {
     showToast('✅ Račun kreiran i poslat kupcu!');
   }
+  } catch(e) { console.error('addRacun:', e); showToast('❌ Greška pri kreiranju računa: ' + (e.message||e), 4000); }
 }
 
 async function setPaket(racunId, status, btn) {
+  try {
   if (status === 'cancel') {
     const { db, doc, updateDoc } = window._fb;
     await updateDoc(doc(db, 'racuni', racunId), { paketStatus: status, status: 'storno' });
@@ -4352,9 +4367,11 @@ async function setPaket(racunId, status, btn) {
     sendShippingNotification(racunId, r.kupacId, r.kupacName, r.opis, r.iznos);
     showToast('📦 Paket označen kao poslat! Kupac obavešten.');
   }
+  } catch(e) { console.error('setPaket:', e); showToast('❌ Greška pri ažuriranju statusa: ' + (e.message||e), 4000); }
 }
 
 async function confirmPayment(racunId) {
+  try {
   const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
   await updateDoc(doc(db, 'racuni', racunId), { status: 'placeno', placenoAt: new Date().toISOString() });
   const racunSnap = await getDoc(doc(db, 'racuni', racunId));
@@ -4369,12 +4386,15 @@ async function confirmPayment(racunId) {
   });
   sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD — Hvala!`);
   showToast('✅ Plaćanje potvrđeno! Kupac obavešten.');
+  } catch(e) { console.error('confirmPayment:', e); showToast('❌ Greška pri potvrdi plaćanja: ' + (e.message||e), 4000); }
 }
 
 async function rejectPayment(racunId) {
+  try {
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db, 'racuni', racunId), { status: 'novo' });
   showToast('✗ Plaćanje odbijeno');
+  } catch(e) { console.error('rejectPayment:', e); showToast('❌ Greška pri odbijanju plaćanja: ' + (e.message||e), 4000); }
 }
 
 // Warnt alle anderen Admins die diesen Kunden kennen
@@ -4411,6 +4431,7 @@ async function _warnOtherAdminsAboutBlock(kupacId, kupacName, vonAdminId, vonAdm
 }
 
 async function blockKupac(kupacId) {
+  try {
   const { db, doc, updateDoc, collection, addDoc } = window._fb;
   const kupac = (_allKupci||[]).find(k => k.id === kupacId);
   const kupacName = kupac?.name || kupacId;
@@ -4429,6 +4450,7 @@ async function blockKupac(kupacId) {
   await _warnOtherAdminsAboutBlock(kupacId, kupacName, window._currentUser.uid, window._currentUser.name);
   showToast('🔒 Kupac blokiran');
   renderAKupci(_allKupci);
+  } catch(e) { console.error('blockKupac:', e); showToast('❌ Greška pri blokiranju: ' + (e.message||e), 4000); }
 }
 
 function editKupacTiktok(kupacId, tiktokIme, tiktokNick) {
@@ -4443,6 +4465,7 @@ function closeTiktokModal() {
 }
 
 async function saveTiktok() {
+  try {
   const kupacId = document.getElementById('edit-kupac-id').value;
   const tiktokIme = document.getElementById('edit-tiktok-ime').value.trim().replace('@','').toLowerCase();
   const tiktokNick = document.getElementById('edit-tiktok-nick').value.trim();
@@ -4451,12 +4474,15 @@ async function saveTiktok() {
   await updateDoc(doc(db, 'users', kupacId), { tiktokIme, tiktokNick });
   closeTiktokModal();
   showToast('✅ TikTok sačuvan!');
+  } catch(e) { console.error('saveTiktok:', e); showToast('❌ Greška pri čuvanju TikTok podataka: ' + (e.message||e), 4000); }
 }
 
 async function unblockKupac(kupacId) {
+  try {
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db, 'users', kupacId), { blocked: false, blockedAt: null });
   showToast('🔓 Kupac odblokiran');
+  } catch(e) { console.error('unblockKupac:', e); showToast('❌ Greška pri odblokiranju: ' + (e.message||e), 4000); }
 }
 
 function showKupacRacuniFilter(kupacId) {
@@ -5228,10 +5254,12 @@ async function posaljiLnRacun(kupacId) {
 }
 
 async function posaljiSveLnRacune() {
+  try {
   const pending = Object.values(_lnKorpe).filter(k => !k.racunSent && k.stavke.length > 0);
   if (!pending.length) { showToast('ℹ️ Nema novih narudžbina'); return; }
   for (const k of pending) await posaljiLnRacun(k.kupac.id);
   showToast('✅ Svi računi poslati! (' + pending.length + ' kupaca)');
+  } catch(e) { console.error('posaljiSveLnRacune:', e); showToast('❌ Greška pri slanju računa: ' + (e.message||e), 4000); }
 }
 
 function obrisiLnKorpu(kupacId) {
@@ -5585,10 +5613,7 @@ function openKassenbon(racunId) {
 function updateApStatus() {}
 function aktivirajProizvod() {}
 function dodajArtikal() {}
-function startirajAukciju() {}
-function resetujAukciju() {}
 function renderPonude() {}
-function zakljuciAukciju() { showToast('ℹ️ Koristi novi Live Narudžbine sistem'); }
 
 function startLiveChatFeed() {
   const { db, collection, query, where, onSnapshot, limit, orderBy } = window._fb;
@@ -5869,6 +5894,7 @@ function checkFirstLoginSettings() {
 
 // ===== KUPAC DATA =====
 let _currentUplatnicaRacunId = null;
+let _adminList = [];
 let _allKupacRacuni = []; // sve racune ovog kupca
 
 async function loadKupacData() {
@@ -6400,6 +6426,7 @@ function closeQuickRacun() {
   document.getElementById('quick-racun-modal').classList.remove('show');
 }
 async function submitQuickRacun() {
+  try {
   const kupacId = document.getElementById('qr-kupac-id').value;
   const iznos   = parseFloat(document.getElementById('qr-iznos').value);
   const opis    = document.getElementById('qr-opis').value.trim();
@@ -6424,6 +6451,7 @@ async function submitQuickRacun() {
   closeQuickRacun();
   showToast('✅ Račun kreiran za ' + (kupac?.tiktokIme ? '@'+kupac.tiktokIme : kupac?.name||'kupca') + '!');
   btn.disabled = false; btn.textContent = '✓ Kreiraj Račun';
+  } catch(e) { console.error('submitQuickRacun:', e); showToast('❌ Greška pri kreiranju računa: ' + (e.message||e), 4000); }
 }
 
 // ══════════════════════════════════════════
