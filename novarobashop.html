@@ -5764,13 +5764,14 @@ function startLiveChatFeed() {
         const nick = kupac ? (kupac.tiktokNick||'') : (d.tiktokNick||d.kupacName||'');
         const card = document.createElement('div');
         card.style.cssText = `display:flex;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border-left:3px solid ${color};margin-bottom:6px;`;
-        card.innerHTML = `<div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
-            ${nick ? `<span style="font-weight:800;font-size:16px;color:white;white-space:nowrap;">${nick}</span>` : ''}
-            <span style="font-weight:600;font-size:11px;color:${color};white-space:nowrap;opacity:0.8;">@${d.tiktokId||'?'}</span>
-          </div>
-          <div style="font-size:15px;color:rgba(255,255,255,0.9);margin-top:2px;line-height:1.4;">${d.comment||''}</div>
-        </div>`;
+        const nickHtml = nick ? '<span style="font-weight:800;font-size:16px;color:white;white-space:nowrap;">' + nick + '</span>' : '';
+        card.innerHTML = '<div style="flex:1;min-width:0;">'
+          + '<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">'
+          + nickHtml
+          + '<span style="font-weight:600;font-size:11px;color:' + color + ';white-space:nowrap;opacity:0.8;">@' + (d.tiktokId||'?') + '</span>'
+          + '</div>'
+          + '<div style="font-size:15px;color:rgba(255,255,255,0.9);margin-top:2px;line-height:1.4;">' + (d.comment||'') + '</div>'
+          + '</div>';
         feed.appendChild(card);
       });
       // Auto-scroll na vrh (najnoviji gore)
