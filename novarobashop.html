@@ -5018,7 +5018,6 @@ function renderLnArtikli() {
   el.innerHTML = _lnArtikli.map((a, i) => {
     // Koliko je vec rezervisano od svih kupaca
     const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
-      if (k.racunSent) return sum;
       const s = k.stavke.find(x => x.naziv === a.naziv && x.cena === a.cena);
       return sum + (s ? (s.kolicina||1) : 0);
     }, 0);
@@ -5117,9 +5116,12 @@ function checkNarudzba(chatItem) {
   );
   if (!kupac) return;
 
-  // BLOKADA: Ako je kupac vec dobio racun ovog livea — ignorisi sve dalje komentare
-  if (_lnRacunGesendet.has(kupac.id)) return;
-  if (_lnKorpe[kupac.id]?.racunSent) return;
+  // Ako je korpa poslata (racunSent) — resetuj je da kupac može kupiti sledeći artikal
+  if (_lnKorpe[kupac.id]?.racunSent) {
+    delete _lnKorpe[kupac.id];
+    _lnRacunGesendet.delete(kupac.id);
+    try { sessionStorage.setItem('_lnRacunGesendet', JSON.stringify([..._lnRacunGesendet])); } catch(e) {}
+  }
 
   // Akzeptiert NUR reine Zahlen: "100", "200", "3x100" — kein Text erlaubt
   const raw = (chatItem.comment||'').trim();
@@ -5152,9 +5154,8 @@ function checkNarudzba(chatItem) {
   // Ako nema tačnog podudaranja — ignoriši komentar
   if (!matchedArtikal) return;
 
-  // Provjeri koliko je STVARNO ostalo
+  // Provjeri koliko je STVARNO ostalo (ubroji i racunSent — oni su već prodati!)
   const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
-    if (k.racunSent) return sum;
     const s = k.stavke.find(x => x.naziv === matchedArtikal.naziv && x.cena === matchedArtikal.cena);
     return sum + (s ? (s.kolicina||1) : 0);
   }, 0);
@@ -5259,7 +5260,10 @@ function renderLnKorpe() {
 
       // Buttons
       + (racunSent
-          ? '<div style="display:flex;align-items:center;gap:8px;color:#6ee7b7;font-size:13px;font-weight:700;"><span>✅</span> Račun poslat</div>'
+          ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+              + '<div style="display:flex;align-items:center;gap:8px;color:#6ee7b7;font-size:13px;font-weight:700;"><span>✅</span> Račun poslat</div>'
+              + '<button onclick="ukloniPoslatiLn(\'' + kupac.id + '\')" style="background:rgba(148,163,184,0.08);color:rgba(148,163,184,0.5);border:1px solid rgba(148,163,184,0.15);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;" title="Ukloni iz prikaza (račun ostaje kod kupca)">✕ skloni</button>'
+            + '</div>'
           : '<div style="display:flex;gap:6px;">'
               + '<div style="flex:1;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:9px;text-align:center;font-size:11px;color:#fcd34d;font-weight:700;">⏳ Čeka kraj Livea</div>'
               + '<button onclick="obrisiLnKorpu(\'' + kupac.id + '\')" style="background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:11px 14px;font-size:14px;cursor:pointer;" title="Obriši">🗑</button>'
@@ -5333,7 +5337,19 @@ async function posaljiSveLnRacune() {
 
 function obrisiLnKorpu(kupacId) {
   delete _lnKorpe[kupacId];
+  // Ukloni i iz gesendet-a da kupac može ponovo da kupi
+  _lnRacunGesendet.delete(kupacId);
+  try { sessionStorage.setItem('_lnRacunGesendet', JSON.stringify([..._lnRacunGesendet])); } catch(e) {}
   renderLnKorpe();
+}
+
+// Ukloni poslati račun iz admin prikaza — račun OSTAJE kod kupca, samo sklanja iz liste
+function ukloniPoslatiLn(kupacId) {
+  delete _lnKorpe[kupacId];
+  _lnRacunGesendet.delete(kupacId);
+  try { sessionStorage.setItem('_lnRacunGesendet', JSON.stringify([..._lnRacunGesendet])); } catch(e) {}
+  renderLnKorpe();
+  renderLnArtikli();
 }
 
 // Obriši jednu stavku iz korpe kupca
@@ -5356,7 +5372,6 @@ function lnKolPlus(kupacId, stavkaIdx) {
   const artikal = _lnArtikli.find(a => a.naziv === s.naziv && a.cena === s.cena);
   if (artikal) {
     const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
-      if (k.racunSent) return sum;
       const x = k.stavke.find(x => x.naziv === s.naziv && x.cena === s.cena);
       return sum + (x ? (x.kolicina||1) : 0);
     }, 0);
