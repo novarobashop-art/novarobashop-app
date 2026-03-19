@@ -347,20 +347,43 @@ function startMonitor(){
     e=>{ console.error('Racuni listener error:',e.message);_fsErr('Računi: '+e.message); }
   ));
 
-  // Live chat feed
+  // Live chat feed — BEZ orderBy da ne treba composite index u Firestore!
+  // Sortiranje se radi lokalno u renderChat()
   _unsubs.push(snap(
-    q(col(db,'live_chat'),wh('adminId','==',uid),ob('timestamp','desc'),lim(150)),
+    q(col(db,'live_chat'),wh('adminId','==',uid),lim(150)),
     s=>{
       let got=[];
-      s.docChanges().forEach(ch=>{if(ch.type==='added')got.push({id:ch.doc.id,...ch.doc.data()});});
-      if(!got.length)return;
-      got.forEach(item=>{
-        _chat.unshift(item); _chatCnt++;
-        const tid=(item.tiktokId||'').toLowerCase();
-        if(tid&&!_recent.find(x=>x.tiktok.toLowerCase()===tid)){
-          _recent.unshift({tiktok:item.tiktokId,statusColor:item.statusColor||'unknown',time:new Date()});
-          if(_recent.length>30)_recent.pop();
+      s.docChanges().forEach(ch=>{
+        if(ch.type==='added'||ch.type==='modified'){
+          got.push({id:ch.doc.id,...ch.doc.data()});
         }
+      });
+      if(!got.length){
+        // Čak i ako nema novih poruka, status bar ažuriraj
+        _fsOk('live chat aktivan');
+        return;
+      }
+      got.forEach(item=>{
+        // Proveri da li već postoji u _chat (po id-u)
+        const existing=_chat.findIndex(x=>x.id===item.id);
+        if(existing===-1){
+          _chat.unshift(item);
+          _chatCnt++;
+          const tid=(item.tiktokId||'').toLowerCase();
+          if(tid&&!_recent.find(x=>x.tiktok.toLowerCase()===tid)){
+            _recent.unshift({tiktok:item.tiktokId,statusColor:item.statusColor||'unknown',time:new Date()});
+            if(_recent.length>30)_recent.pop();
+          }
+        } else {
+          // Update postojeći
+          _chat[existing]=item;
+        }
+      });
+      // Sortiraj lokalno po timestamp desc
+      _chat.sort((a,b)=>{
+        const ta=a.timestamp?.toDate?a.timestamp.toDate():new Date(a.timestamp||0);
+        const tb=b.timestamp?.toDate?b.timestamp.toDate():new Date(b.timestamp||0);
+        return tb-ta;
       });
       if(_chat.length>200)_chat=_chat.slice(0,200);
       document.getElementById('csdot').style.cssText='width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;margin-left:auto;';
@@ -368,8 +391,19 @@ function startMonitor(){
       document.getElementById('s-c').textContent=_chatCnt;
       _fsOk('live chat aktivan');
       renderChat();renderRecent();
+      // FIX: render() pozovi i ovde da se osveze statistike (Reg/Kasni/NijeReg brojevi)
+      render();
     },
-    e=>{ console.error('Chat feed error:',e.message);_fsErr('Live chat: '+e.message); }
+    e=>{
+      console.error('Chat feed error:',e.message);
+      // Posebna poruka ako je index problem
+      if(e.message&&e.message.includes('index')){
+        _fsErr('Live chat: Nedostaje Firestore index — idi na Firebase Console i kreiraj ga!');
+        _showToast('⚠️ Firestore index nedostaje! Provjeri konzolu.',8000);
+      } else {
+        _fsErr('Live chat: '+e.message);
+      }
+    }
   ));
 }
 

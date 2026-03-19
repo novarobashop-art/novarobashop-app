@@ -5685,23 +5685,25 @@ function dodajArtikal() {}
 function renderPonude() {}
 
 function startLiveChatFeed() {
-  const { db, collection, query, where, onSnapshot, limit, orderBy } = window._fb;
+  const { db, collection, query, where, onSnapshot, limit } = window._fb;
   const feed = document.getElementById('live-chat-feed');
   feed.innerHTML = '<div style="text-align:center;color:var(--txt3);font-size:12px;padding:10px;">⏳ Povezujem se...</div>';
   const adminId = window._currentUser.uid;
 
   console.log('startLiveChatFeed — adminId:', adminId);
 
-  // Najjednostavniji query — samo adminId filter
+  // BEZ orderBy — ne treba composite index u Firestore!
+  // Sortiranje se radi lokalno. orderBy+where zahteva ručno kreiranje indexa u Firebase Console.
   const q = query(
     collection(db, 'live_chat'),
     where('adminId', '==', adminId),
-    orderBy('timestamp', 'desc'),
-    limit(50)
+    limit(100)
   );
 
   // KRITIČNO: Zapamti vreme starta — ignorisi stare poruke za narudzbine
   let _initialLoadDone = false;
+  let _liveChatNewCount = 0; // Broji samo NOVE poruke tokom ovog Live-a
+  let _seenDocIds = new Set(); // Prati već prikazane poruke
 
   _liveChatUnsub = onSnapshot(q, snap => {
     console.log('Chat snapshot — docs:', snap.size, 'changes:', snap.docChanges().length);
@@ -5712,12 +5714,19 @@ function startLiveChatFeed() {
       return;
     }
 
-    // Prikaži sve poruke u feed-u (samo display)
+    // Skupi sve docs, sortiraj lokalno po timestamp desc
+    const allDocs = [];
+    snap.forEach(docSnap => allDocs.push({ id: docSnap.id, ...docSnap.data() }));
+    allDocs.sort((a, b) => {
+      const ta = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp || 0);
+      const tb = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp || 0);
+      return tb - ta; // desc — najnoviji gore
+    });
+
+    // Prikaži sve poruke u feed-u
     feed.innerHTML = '';
-    snap.docs.forEach(docSnap => {
-      const d = docSnap.data();
+    allDocs.forEach(d => {
       const color = d.statusColor === 'green' ? '#00c896' : d.statusColor === 'orange' ? '#FFB800' : '#ff4d4d';
-      // Pronadji kupca da dobijemo nick
       const kupac = (window._allKupciGlobal||[]).find(k => (k.tiktokIme||'').toLowerCase() === (d.tiktokId||'').toLowerCase());
       const nick = kupac ? (kupac.tiktokNick||'') : (d.tiktokNick||d.kupacName||'');
       const card = document.createElement('div');
@@ -5732,24 +5741,35 @@ function startLiveChatFeed() {
       feed.appendChild(card);
     });
 
-    const cntEl = document.getElementById('live-chat-count');
-    if (cntEl) cntEl.textContent = snap.size;
-
-    // Za narudzbine — SAMO posle inicijalnog load-a obradi nove poruke
-    if (_initialLoadDone) {
-      snap.docChanges().forEach(change => {
-        if (change.type === 'added') {
+    // Broji samo NOVE poruke (ne stare iz Firestore)
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added' && !_seenDocIds.has(change.doc.id)) {
+        _seenDocIds.add(change.doc.id);
+        if (_initialLoadDone) {
+          // Nova poruka tokom Live-a — povećaj counter i obradi narudžbinu
+          _liveChatNewCount++;
           checkChatForOrder(change.doc.data());
         }
-      });
-    }
+      }
+    });
 
-    // Prvi snapshot = inicijalni load — sve sto dolazi posle je nova poruka
-    if (!_initialLoadDone) _initialLoadDone = true;
+    // Counter: prikaži ukupan broj NOVIH poruka tokom Live-a (ili svih ako je 0)
+    const cntEl = document.getElementById('live-chat-count');
+    if (cntEl) cntEl.textContent = _liveChatNewCount > 0 ? _liveChatNewCount : snap.size;
+
+    if (!_initialLoadDone) {
+      // Inicijalni load — zapamti sve doc IDs kao "stare"
+      snap.forEach(d => _seenDocIds.add(d.id));
+      _initialLoadDone = true;
+    }
 
   }, err => {
     console.error('Chat feed ERROR:', err.code, err.message);
-    feed.innerHTML = '<div style="color:#fda4af;font-size:12px;padding:10px;">❌ Greška: ' + err.message + '</div>';
+    if (err.message && err.message.includes('index')) {
+      feed.innerHTML = '<div style="color:#fda4af;font-size:12px;padding:10px;">❌ Firestore index nedostaje!<br><span style="font-size:11px;opacity:0.7;">Idi na Firebase Console → Firestore → Indexes i kreiraj ga.</span></div>';
+    } else {
+      feed.innerHTML = '<div style="color:#fda4af;font-size:12px;padding:10px;">❌ Greška: ' + err.message + '</div>';
+    }
   });
 }
 
