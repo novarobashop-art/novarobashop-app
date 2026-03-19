@@ -1226,7 +1226,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="hidden" id="racun-kupac-name" />
         <div id="racun-kupac-selected" style="display:none;background:rgba(0,210,150,0.1);border:1px solid rgba(0,210,150,0.3);border-radius:8px;padding:8px 12px;margin-top:6px;font-size:13px;font-weight:700;color:#00d296;"></div>
         <label class="inp-label">Iznos (RSD)</label>
-        <input type="number" class="inp-dark" id="racun-iznos" placeholder="1500" />
+        <input type="text" inputmode="numeric" class="inp-dark" id="racun-iznos" placeholder="1500" oninput="numOnly(this)" />
         <label class="inp-label">Opis</label>
         <input type="text" class="inp-dark" id="racun-opis" placeholder="Naziv paketa..." />
         <label class="inp-label">Foto (opciono)</label>
@@ -1287,13 +1287,13 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <label class="inp-label">Naziv proizvoda *</label>
         <input type="text" class="inp-dark" id="proizvod-naziv" placeholder="npr. Majica, Haljina..." />
         <label class="inp-label">Cena (RSD) *</label>
-        <input type="number" class="inp-dark" id="proizvod-cena" placeholder="1500" />
+        <input type="text" inputmode="numeric" class="inp-dark" id="proizvod-cena" placeholder="1500" oninput="numOnly(this)" />
         <label class="inp-label">Opis</label>
         <textarea class="inp-dark" id="proizvod-opis" placeholder="Kratak opis..." rows="2" style="resize:none;"></textarea>
         <label class="inp-label">Kategorija</label>
         <input type="text" class="inp-dark" id="proizvod-kategorija" placeholder="npr. Odeća, Obuća..." />
         <label class="inp-label">Količina na stanju</label>
-        <input type="number" class="inp-dark" id="proizvod-kolicina" placeholder="10" />
+        <input type="text" inputmode="numeric" class="inp-dark" id="proizvod-kolicina" placeholder="10" oninput="numOnly(this)" />
         <label class="inp-label">Foto proizvoda</label>
         <input type="file" id="proizvod-foto-inp" accept="image/*" style="display:none;" onchange="previewProizvodFoto(event)" />
         <div id="proizvod-foto-preview" style="display:none;margin-bottom:8px;">
@@ -1375,7 +1375,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <input type="hidden" id="auto-kupac-id" />
         <div id="auto-kupac-selected" style="display:none;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--teal);"></div>
         <label class="inp-label">Iznos (RSD)</label>
-        <input type="number" class="inp-dark" id="auto-iznos" placeholder="1500" />
+        <input type="text" inputmode="numeric" class="inp-dark" id="auto-iznos" placeholder="1500" oninput="numOnly(this)" />
         <label class="inp-label">Opis</label>
         <input type="text" class="inp-dark" id="auto-opis" placeholder="Mesečna pretplata..." />
         <label class="inp-label">Ponavljanje</label>
@@ -1434,8 +1434,8 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
             <div id="panel-narudzba">
               <input type="text" id="ln-naziv" class="inp-dark" placeholder="naziv artikla..." style="margin-bottom:6px;font-size:13px;" />
               <div style="display:flex;gap:6px;">
-                <input type="number" id="ln-cena" class="inp-dark" placeholder="cena RSD" style="flex:1;margin-bottom:0;font-size:15px;font-weight:800;" />
-                <input type="number" id="ln-kolicina" class="inp-dark" value="1" min="1" max="99" style="width:54px;margin-bottom:0;font-size:15px;font-weight:800;text-align:center;" title="Količina" />
+                <input type="text" inputmode="numeric" id="ln-cena" class="inp-dark" placeholder="cena RSD" style="flex:1;margin-bottom:0;font-size:15px;font-weight:800;" oninput="numOnly(this)" />
+                <input type="text" inputmode="numeric" id="ln-kolicina" class="inp-dark" value="1" style="width:54px;margin-bottom:0;font-size:15px;font-weight:800;text-align:center;" title="Količina" oninput="numOnly(this)" />
                 <button onclick="dodajLnArtikal()" style="background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:10px;padding:0 16px;color:#160900;font-size:20px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
               </div>
               <div style="font-size:10px;color:var(--txt3);margin-top:5px;">👆 Dodaj artikal → kupci pišu cenu ili "3x500" u TikTok chat</div>
@@ -1446,7 +1446,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
               <!-- Artikli za aukciju -->
               <input type="text" id="auk-naziv" class="inp-dark" placeholder="naziv artikla..." style="margin-bottom:6px;font-size:13px;" />
               <div style="display:flex;gap:6px;margin-bottom:8px;">
-                <input type="number" id="auk-start" class="inp-dark" placeholder="startna cena RSD" style="flex:1;margin-bottom:0;font-size:14px;font-weight:800;" />
+                <input type="text" inputmode="numeric" id="auk-start" class="inp-dark" placeholder="startna cena RSD" style="flex:1;margin-bottom:0;font-size:14px;font-weight:800;" oninput="numOnly(this)" />
                 <button onclick="dodajAukArtikal()" style="background:rgba(244,63,94,0.15);color:#fda4af;border:1px solid rgba(244,63,94,0.3);border-radius:10px;padding:0 14px;font-size:18px;font-weight:800;cursor:pointer;">+</button>
               </div>
               <div id="auk-artikli-list" style="margin-bottom:8px;"></div>
@@ -2289,7 +2289,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
     <input type="hidden" id="qr-kupac-id" />
     <label class="inp-label">Iznos (RSD)</label>
-    <input type="number" class="inp-dark" id="qr-iznos" placeholder="1500" style="font-size:20px;font-weight:800;" />
+    <input type="text" inputmode="numeric" class="inp-dark" id="qr-iznos" placeholder="1500" style="font-size:20px;font-weight:800;" oninput="numOnly(this)" />
     <label class="inp-label">Opis paketa</label>
     <input type="text" class="inp-dark" id="qr-opis" placeholder="Naziv paketa..." />
     <button onclick="submitQuickRacun()" id="qr-btn" style="width:100%;background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:14px;padding:14px;color:#160900;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(245,158,11,0.3);transition:all 0.2s;">
@@ -2557,6 +2557,11 @@ async function completeRegistration() {
 }
 
 // ===== LOGIN =====
+// Dozvoli samo cifre u input polju
+function numOnly(el) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+}
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
@@ -5120,7 +5125,102 @@ function checkNarudzba(chatItem) {
   const raw = (chatItem.comment||'').trim();
 
   // Format "3x100" ili samo "100"
-  const match = raw.replace(/\s/g,'').match(/^(\d+)[xX](\d+)$/);
+  const match = raw.replace(/\s/g,'').match(/^(\d+)[xX*](\d+)$/);
+  let trazenaKolicina = 1;
+  let trazenaCena     = 0;
+
+  if (match) {
+    // Format "3x100" ili "3*100"
+    trazenaKolicina = parseInt(match[1]);
+    trazenaCena     = parseInt(match[2]);
+  } else {
+    // Format samo "100" — uzima 1 komad
+    const nums = raw.replace(/\./g,'').replace(/,/g,'').match(/^\d+$/);
+    if (!nums) return;
+    trazenaCena = parseInt(nums[0]);
+    trazenaKolicina = 1;
+  }
+
+  if (!trazenaCena || trazenaCena < 1 || trazenaKolicina < 1) return;
+
+  // Ako nema aktivnih artikala — upozori admina
+  if (_lnArtikli.length === 0) {
+    showToast('⚠️ Nema aktivnih artikala! Dodaj artikal prvo.', 4000);
+    return;
+  }
+
+  // Pronadji artikal sa tom cenom — TAČNO ili NAJBLIŽE
+  let matchedArtikal = _lnArtikli.find(a => Math.round(a.cena) === trazenaCena);
+
+  // Ako nema tačnog podudaranja — uzmi artikal sa najbližom cenom (tolerancija ±30%)
+  if (!matchedArtikal && _lnArtikli.length > 0) {
+    const sorted = [..._lnArtikli].sort((a, b) =>
+      Math.abs(a.cena - trazenaCena) - Math.abs(b.cena - trazenaCena)
+    );
+    const closest = sorted[0];
+    const diff = Math.abs(closest.cena - trazenaCena) / closest.cena;
+    if (diff <= 0.30) {
+      // Unutar 30% — uzmi najbliži artikal ali sa cenom koju je kupac napisao
+      matchedArtikal = { ...closest, cena: trazenaCena };
+    } else {
+      // Previše daleko — napravi slobodan artikal sa cenom kupca
+      matchedArtikal = {
+        naziv: 'Artikal ' + trazenaCena.toLocaleString() + ' RSD',
+        cena: trazenaCena,
+        stanje: 9999, // neograničena količina za slobodne artiklе
+        _free: true
+      };
+    }
+  }
+
+  if (!matchedArtikal) return;
+
+  // Provjeri koliko je STVARNO ostalo (preskoči za slobodne artikle)
+  let dostupno = matchedArtikal.stanje || 9999;
+  if (!matchedArtikal._free) {
+    const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
+      if (k.racunSent) return sum;
+      const s = k.stavke.find(x => x.naziv === matchedArtikal.naziv && x.cena === matchedArtikal.cena);
+      return sum + (s ? (s.kolicina||1) : 0);
+    }, 0);
+    dostupno = (matchedArtikal.stanje || 1) - rezervisano;
+
+    if (dostupno <= 0) {
+      showToast('❌ ' + matchedArtikal.naziv + ' — rasprodato!', 3000);
+      return;
+    }
+  }
+
+  const finalKolicina = matchedArtikal._free ? trazenaKolicina : Math.min(trazenaKolicina, dostupno);
+
+  // Dodaj u korpu
+  if (!_lnKorpe[kupac.id]) _lnKorpe[kupac.id] = { kupac, stavke: [], racunSent: false };
+
+  // Ako vec postoji ovaj artikal — samo azuriraj kolicinu
+  const existing = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
+  if (existing) {
+    if (!matchedArtikal._free) {
+      const njegovaRez = existing.kolicina || 1;
+      const ukupnoSme = njegovaRez + dostupno;
+      const novaKol = Math.min(existing.kolicina + finalKolicina, ukupnoSme);
+      if (novaKol === existing.kolicina) {
+        showToast('⚠️ ' + (kupac.tiktokNick||kupac.name) + ' — nema više na stanju!', 3000);
+        return;
+      }
+      existing.kolicina = novaKol;
+    } else {
+      existing.kolicina = (existing.kolicina || 1) + finalKolicina;
+    }
+  } else {
+    _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena, kolicina: finalKolicina });
+  }
+
+  renderLnKorpe();
+  renderLnArtikli();
+  const ukupno = finalKolicina * matchedArtikal.cena;
+  const upozorenje = (!matchedArtikal._free && finalKolicina < trazenaKolicina) ? ' (samo ' + finalKolicina + ' ostalo!)' : '';
+  showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + finalKolicina + 'x ' + matchedArtikal.naziv + ' — ' + ukupno.toLocaleString() + ' RSD' + upozorenje, 3000);
+}
   let trazenaKolicina = 1;
   let trazenaCena     = 0;
 
