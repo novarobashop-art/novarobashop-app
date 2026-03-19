@@ -5143,55 +5143,29 @@ function checkNarudzba(chatItem) {
 
   if (!trazenaCena || trazenaCena < 1 || trazenaKolicina < 1) return;
 
-  // Ako nema aktivnih artikala — upozori admina
-  if (_lnArtikli.length === 0) {
-    showToast('⚠️ Nema aktivnih artikala! Dodaj artikal prvo.', 4000);
+  // Ako nema aktivnih artikala — ignoriši (bez toast-a, ništa ne radi)
+  if (_lnArtikli.length === 0) return;
+
+  // Pronadji artikal sa TAČNO tom cenom — bez tolerancije, bez slobodnih artikala
+  const matchedArtikal = _lnArtikli.find(a => Math.round(a.cena) === trazenaCena);
+
+  // Ako nema tačnog podudaranja — ignoriši komentar
+  if (!matchedArtikal) return;
+
+  // Provjeri koliko je STVARNO ostalo
+  const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
+    if (k.racunSent) return sum;
+    const s = k.stavke.find(x => x.naziv === matchedArtikal.naziv && x.cena === matchedArtikal.cena);
+    return sum + (s ? (s.kolicina||1) : 0);
+  }, 0);
+  const dostupno = (matchedArtikal.stanje || 1) - rezervisano;
+
+  if (dostupno <= 0) {
+    showToast('❌ ' + matchedArtikal.naziv + ' — rasprodato!', 3000);
     return;
   }
 
-  // Pronadji artikal sa tom cenom — TAČNO ili NAJBLIŽE
-  let matchedArtikal = _lnArtikli.find(a => Math.round(a.cena) === trazenaCena);
-
-  // Ako nema tačnog podudaranja — uzmi artikal sa najbližom cenom (tolerancija ±30%)
-  if (!matchedArtikal && _lnArtikli.length > 0) {
-    const sorted = [..._lnArtikli].sort((a, b) =>
-      Math.abs(a.cena - trazenaCena) - Math.abs(b.cena - trazenaCena)
-    );
-    const closest = sorted[0];
-    const diff = Math.abs(closest.cena - trazenaCena) / closest.cena;
-    if (diff <= 0.30) {
-      // Unutar 30% — uzmi najbliži artikal ali sa cenom koju je kupac napisao
-      matchedArtikal = { ...closest, cena: trazenaCena };
-    } else {
-      // Previše daleko — napravi slobodan artikal sa cenom kupca
-      matchedArtikal = {
-        naziv: 'Artikal ' + trazenaCena.toLocaleString() + ' RSD',
-        cena: trazenaCena,
-        stanje: 9999, // neograničena količina za slobodne artiklе
-        _free: true
-      };
-    }
-  }
-
-  if (!matchedArtikal) return;
-
-  // Provjeri koliko je STVARNO ostalo (preskoči za slobodne artikle)
-  let dostupno = matchedArtikal.stanje || 9999;
-  if (!matchedArtikal._free) {
-    const rezervisano = Object.values(_lnKorpe).reduce((sum, k) => {
-      if (k.racunSent) return sum;
-      const s = k.stavke.find(x => x.naziv === matchedArtikal.naziv && x.cena === matchedArtikal.cena);
-      return sum + (s ? (s.kolicina||1) : 0);
-    }, 0);
-    dostupno = (matchedArtikal.stanje || 1) - rezervisano;
-
-    if (dostupno <= 0) {
-      showToast('❌ ' + matchedArtikal.naziv + ' — rasprodato!', 3000);
-      return;
-    }
-  }
-
-  const finalKolicina = matchedArtikal._free ? trazenaKolicina : Math.min(trazenaKolicina, dostupno);
+  const finalKolicina = Math.min(trazenaKolicina, dostupno);
 
   // Dodaj u korpu
   if (!_lnKorpe[kupac.id]) _lnKorpe[kupac.id] = { kupac, stavke: [], racunSent: false };
@@ -5199,18 +5173,14 @@ function checkNarudzba(chatItem) {
   // Ako vec postoji ovaj artikal — samo azuriraj kolicinu
   const existing = _lnKorpe[kupac.id].stavke.find(s => s.naziv === matchedArtikal.naziv && s.cena === matchedArtikal.cena);
   if (existing) {
-    if (!matchedArtikal._free) {
-      const njegovaRez = existing.kolicina || 1;
-      const ukupnoSme = njegovaRez + dostupno;
-      const novaKol = Math.min(existing.kolicina + finalKolicina, ukupnoSme);
-      if (novaKol === existing.kolicina) {
-        showToast('⚠️ ' + (kupac.tiktokNick||kupac.name) + ' — nema više na stanju!', 3000);
-        return;
-      }
-      existing.kolicina = novaKol;
-    } else {
-      existing.kolicina = (existing.kolicina || 1) + finalKolicina;
+    const njegovaRez = existing.kolicina || 1;
+    const ukupnoSme = njegovaRez + dostupno;
+    const novaKol = Math.min(existing.kolicina + finalKolicina, ukupnoSme);
+    if (novaKol === existing.kolicina) {
+      showToast('⚠️ ' + (kupac.tiktokNick||kupac.name) + ' — nema više na stanju!', 3000);
+      return;
     }
+    existing.kolicina = novaKol;
   } else {
     _lnKorpe[kupac.id].stavke.push({ naziv: matchedArtikal.naziv, cena: matchedArtikal.cena, kolicina: finalKolicina });
   }
@@ -5218,7 +5188,7 @@ function checkNarudzba(chatItem) {
   renderLnKorpe();
   renderLnArtikli();
   const ukupno = finalKolicina * matchedArtikal.cena;
-  const upozorenje = (!matchedArtikal._free && finalKolicina < trazenaKolicina) ? ' (samo ' + finalKolicina + ' ostalo!)' : '';
+  const upozorenje = finalKolicina < trazenaKolicina ? ' (samo ' + finalKolicina + ' ostalo!)' : '';
   showToast('🛒 ' + (kupac.tiktokNick||kupac.name) + ' → ' + finalKolicina + 'x ' + matchedArtikal.naziv + ' — ' + ukupno.toLocaleString() + ' RSD' + upozorenje, 3000);
 }
 
