@@ -2741,6 +2741,7 @@ function adminRacunCard(r) {
         <button class="paket-btn ${r.paketStatus==='prep'?'sel-prep':''}" onclick="setPaket('${r.id}','prep',this)">📦 Priprema</button>
         <button class="paket-btn ${r.paketStatus==='ship'?'sel-ship':''}" onclick="setPaket('${r.id}','ship',this)">🚚 Poslato</button>
         <button class="paket-btn ${r.paketStatus==='cancel'?'sel-cancel':''}" onclick="setPaket('${r.id}','cancel',this)">❌ Storno</button>
+        ${r.status==='storno' ? `<button class="paket-btn" style="color:#22c55e;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);" onclick="reverseStorno('${r.id}')">↩️ Povrati</button>` : ''}
         <button class="paket-btn" style="color:#ff4d4d;" onclick="deleteRacun('${r.id}')">🗑️ Obriši</button>
       </div>
       ${r.adminFotoUrl ? `<div style="margin-top:10px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" /></div>` : ''}
@@ -2764,6 +2765,19 @@ async function deleteRacun(racunId) {
   } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
 }
 
+async function reverseStorno(racunId) {
+  if (!confirm('Poništiti storno? Račun će ponovo biti aktivan (NOVO) i kupac će ga videti.')) return;
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'racuni', racunId), {
+      paketStatus: 'prep',
+      status: 'novo',
+      stornoVreme: null
+    });
+    showToast('↩️ Storno poništen – račun je ponovo aktivan');
+  } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
+}
+
 function renderARacuni(racuni) {
   const el = document.getElementById('a-racuni-list');
   // Samo novo i ceka u Računi tabu
@@ -2783,11 +2797,19 @@ function renderAPlaceno(racuni) {
 
 function renderAArhiva(racuni) {
   const el = document.getElementById('a-arhiva-list');
-  // Poslato ili storno
-  const arhiva = racuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno');
-  if (!arhiva.length) { el.innerHTML = '<div class="section-empty">Nema poslanih paketa.</div>'; return; }
-  el.innerHTML = `<div style="font-size:12px;color:var(--txt3);font-weight:700;margin-bottom:10px;">📦 Poslato / Arhiva (${arhiva.length})</div>`
-    + arhiva.map(r => adminRacunCard(r)).join('');
+  const poslato = racuni.filter(r => r.paketStatus === 'ship');
+  const storni  = racuni.filter(r => r.status === 'storno' && r.paketStatus !== 'ship');
+  if (!poslato.length && !storni.length) { el.innerHTML = '<div class="section-empty">Nema poslanih paketa.</div>'; return; }
+  let html = '';
+  if (poslato.length) {
+    html += `<div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px;">📦 Poslato (${poslato.length})</div>`;
+    html += poslato.map(r => adminRacunCard(r)).join('');
+  }
+  if (storni.length) {
+    html += `<div style="font-size:12px;color:#94a3b8;font-weight:700;margin:14px 0 10px;">❌ Stornirani (${storni.length})</div>`;
+    html += storni.map(r => adminRacunCard(r)).join('');
+  }
+  el.innerHTML = html;
 }
 
 function renderAPlacanja(racuni) {
@@ -2903,21 +2925,33 @@ function filterArhiva(val) {
   const filtered = s ? arhiva.filter(r => _matchRacun(r, s)) : arhiva;
   const el = document.getElementById('a-arhiva-list');
   if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
-  el.innerHTML = `<div style="font-size:12px;color:var(--txt3);font-weight:700;margin-bottom:10px;">📦 Poslato / Arhiva (${filtered.length})</div>`
-    + filtered.map(r => adminRacunCard(r)).join('');
+  const poslato = filtered.filter(r => r.paketStatus === 'ship');
+  const storni  = filtered.filter(r => r.status === 'storno' && r.paketStatus !== 'ship');
+  let html = '';
+  if (poslato.length) {
+    html += `<div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px;">📦 Poslato (${poslato.length})</div>`;
+    html += poslato.map(r => adminRacunCard(r)).join('');
+  }
+  if (storni.length) {
+    html += `<div style="font-size:12px;color:#94a3b8;font-weight:700;margin:14px 0 10px;">❌ Stornirani (${storni.length})</div>`;
+    html += storni.map(r => adminRacunCard(r)).join('');
+  }
+  el.innerHTML = html;
 }
 
 // ===== DASHBOARD =====
 function renderDashboard() {
   const racuni = _allRacuni || [];
   const kupci = _allKupci || [];
-  const ukupnoRsd = racuni.reduce((s,r) => s + (r.iznos||0), 0);
+  const aktivni  = racuni.filter(r => r.status !== 'storno');
+  const ukupnoRsd = aktivni.reduce((s,r) => s + (r.iznos||0), 0);
   const placenoRsd = racuni.filter(r => r.status==='placeno' || r.paketStatus==='ship').reduce((s,r) => s + (r.iznos||0), 0);
+  const stornoCount = racuni.filter(r => r.status==='storno').length;
   const blokirani = kupci.filter(k => k.blocked).length;
   const ceka = racuni.filter(r => r.status==='ceka').length;
 
   document.getElementById('dash-kupci').textContent = kupci.length;
-  document.getElementById('dash-racuni').textContent = racuni.length;
+  document.getElementById('dash-racuni').textContent = aktivni.length + (stornoCount > 0 ? ` (-${stornoCount} storno)` : '');
   document.getElementById('dash-ukupno-rsd').textContent = ukupnoRsd.toLocaleString();
   document.getElementById('dash-placeno-rsd').textContent = placenoRsd.toLocaleString();
   document.getElementById('dash-blokirani').textContent = blokirani;
@@ -2925,7 +2959,7 @@ function renderDashboard() {
 
   // Top kupci
   const kupacTotals = {};
-  racuni.forEach(r => {
+  racuni.filter(r => r.status !== 'storno').forEach(r => {
     if (!kupacTotals[r.kupacId]) kupacTotals[r.kupacId] = 0;
     kupacTotals[r.kupacId] += (r.iznos||0);
   });
@@ -3422,12 +3456,13 @@ function renderKIstorija(racuni) {
   // Called from loadKupacData after racuni load
   const poslato  = racuni.filter(r=>r.paketStatus==='ship');
   const placeno  = racuni.filter(r=>r.status==='placeno'||r.status==='storno'||r.paketStatus==='ship');
-  const ukupnRsd = racuni.reduce((s,r)=>s+(r.iznos||0),0);
+  const ukupnRsd = racuni.filter(r=>r.status!=='storno').reduce((s,r)=>s+(r.iznos||0),0);
+  const stornoN  = racuni.filter(r=>r.status==='storno').length;
   const el = document.getElementById('k-istorija-list');
   const kisUk = document.getElementById('kis-ukupno');
   const kisPos = document.getElementById('kis-poslato');
   const kisRsd = document.getElementById('kis-rsd');
-  if(kisUk) kisUk.textContent = racuni.length;
+  if(kisUk) kisUk.textContent = racuni.filter(r=>r.status!=='storno').length + (stornoN>0?` (-${stornoN} storno)`:'');
   if(kisPos) kisPos.textContent = poslato.length;
   if(kisRsd) kisRsd.textContent = ukupnRsd.toLocaleString();
   if(!el) return;
@@ -4161,7 +4196,11 @@ async function setPaket(racunId, status, btn) {
   try {
   if (status === 'cancel') {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db, 'racuni', racunId), { paketStatus: status, status: 'storno' });
+    await updateDoc(doc(db, 'racuni', racunId), { paketStatus: 'cancel', status: 'storno' });
+    // Button-Visuals aktualisieren
+    const btns = btn.parentElement.querySelectorAll('.paket-btn');
+    btns.forEach(b => b.className = 'paket-btn');
+    btn.classList.add('sel-cancel');
     showToast('❌ Račun storniran');
     return;
   }
@@ -4735,12 +4774,15 @@ function renderKAllRacuni(racuni) {
   console.log('renderKAllRacuni - sve racune:', racuni.map(r => ({id:r.id.slice(-4), status:r.status, paketStatus:r.paketStatus})));
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship' && r.status !== 'storno'));
+  renderKArhiva(racuni.filter(r => (r.status === 'placeno' || r.status === 'storno') && r.paketStatus !== 'ship'));
   renderKPoslato(racuni.filter(r => r.paketStatus === 'ship'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
   const p = racuni.filter(r => r.paketStatus === 'ship').length;
   document.getElementById('knav-lbl-poslato').textContent = 'Poslato' + (p > 0 ? ' (' + p + ')' : '');
+  const stornoCount = racuni.filter(r => r.status === 'storno').length;
+  const arhivaLbl = document.getElementById('knav-lbl-arhiva');
+  if (arhivaLbl) arhivaLbl.textContent = 'Arhiva' + (stornoCount > 0 ? ' (' + stornoCount + ')' : '');
 }
 
 function kRacunCard(r, showUpload, showArhiva) {
@@ -4940,7 +4982,19 @@ function renderKArhiva(racuni) {
     (r.datum||'').includes(q)
   ) : racuni;
   if (!list.length) { el.innerHTML = `<div class="section-empty">${q ? '🔍 Nema rezultata za "'+q+'"' : 'Nema plaćenih računa'}</div>`; return; }
-  el.innerHTML = list.map(r => kRacunCard(r, false, true)).join('');
+  const placeni = list.filter(r => r.status === 'placeno');
+  const storni  = list.filter(r => r.status === 'storno');
+  let html = '';
+  if (storni.length) {
+    html += `<div style="background:rgba(148,163,184,0.06);border:1.5px solid rgba(148,163,184,0.18);border-radius:16px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">❌ Stornirani računi (${storni.length})</div>`;
+    html += storni.map(r => kRacunCard(r, false, true)).join('');
+    html += '</div>';
+  }
+  if (placeni.length) {
+    html += placeni.map(r => kRacunCard(r, false, true)).join('');
+  }
+  el.innerHTML = html;
 }
 function filterKArhiva(val) {
   renderKArhiva(window._kArhivaRacuni || []);
@@ -5384,6 +5438,127 @@ async function _doSendUplatnica(contextId) {
     else if (err.message && err.message.includes('network')) msg = '❌ Nema interneta. Poveži se i pokušaj ponovo.';
     showToast(msg + ' Pokušaj ponovo.', 6000);
   }
+}
+
+function closeKassenbon() {
+  const modal = document.getElementById('kassenbon-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function openKassenbon(racunId) {
+  const r = (window._kAllRacuni||[]).find(x => x.id === racunId);
+  if (!r) { showToast('❌ Račun nije pronađen'); return; }
+  const u   = window._currentUser;
+  const ps  = r.paketStatus || 'prep';
+  const st  = ps==='ship'
+    ? { c:'#2563eb', bg:'#dbeafe', l:'📦 POSLATO' }
+    : r.status==='placeno'
+      ? { c:'#16a34a', bg:'#dcfce7', l:'✅ PLAĆENO' }
+      : r.status==='ceka'
+        ? { c:'#d97706', bg:'#fef3c7', l:'⏳ ČEKA' }
+        : r.status==='storno'
+          ? { c:'#6b7280', bg:'#f1f5f9', l:'❌ STORNO' }
+          : { c:'#dc2626', bg:'#fef2f2', l:'🔴 NOVO' };
+
+  const adminId = document.getElementById('k-global-admin-sel')?.value;
+  const admin   = _adminList.find(a => a.id === (r.adminId || adminId));
+  const broj    = r.broj || r.id.slice(-4);
+
+  // Stavke ili opis
+  let stavkeHtml = '';
+  if (r.stavke && r.stavke.length) {
+    stavkeHtml = r.stavke.map(s => {
+      const kol = s.kolicina || 1;
+      const sub = (s.cena||0) * kol;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dotted #e5e7eb;font-size:13px;">
+        <span style="flex:1;font-weight:600;color:#111;">${s.naziv}</span>
+        <span style="color:#888;margin:0 8px;">${kol}×${(s.cena||0).toLocaleString()}</span>
+        <span style="font-weight:800;color:#111;">${sub.toLocaleString()} RSD</span>
+      </div>`;
+    }).join('');
+    stavkeHtml += `<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-size:15px;font-weight:800;color:#111;">
+      <span>Ukupno</span><span>${(r.iznos||0).toLocaleString()} RSD</span>
+    </div>`;
+  } else {
+    stavkeHtml = `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:15px;font-weight:800;color:#111;">
+      <span>${r.opis||'—'}</span><span>${(r.iznos||0).toLocaleString()} RSD</span>
+    </div>`;
+  }
+
+  // Bankdaten — nur für offene Rechnungen
+  let bankHtml = '';
+  if ((r.status==='novo') && admin && (admin.bankNum || admin.postnetNum)) {
+    bankHtml = `<div style="background:#f1f5ff;border-radius:12px;padding:12px 14px;margin:12px 0;border:1px solid #c7d7ff;">
+      <div style="font-size:10px;font-weight:700;color:#4b6cb7;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🏦 Podaci za uplatu</div>
+      ${admin.bankNum ? `<div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:4px;">🏦 ${admin.bankNum}${admin.bankName ? ' <span style="font-weight:400;font-size:12px;color:#64748b;">'+admin.bankName+'</span>' : ''}</div>` : ''}
+      ${admin.postnetNum ? `<div style="font-size:14px;font-weight:800;color:#1e3a8a;">📮 ${admin.postnetNum}${admin.postnetName ? ' <span style="font-weight:400;font-size:12px;color:#64748b;">'+admin.postnetName+'</span>' : ''}</div>` : ''}
+    </div>`;
+  }
+
+  // Uplatnica slika ako postoji
+  const uplatnicaHtml = r.uplatnicaUrl
+    ? `<div style="margin:10px 0;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📎 Uplatnica</div>
+       <img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:100px;max-width:100%;object-fit:contain;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;display:block;" /></div>`
+    : '';
+
+  // Admin foto ako postoji
+  const adminFotoHtml = r.adminFotoUrl
+    ? `<div style="margin:10px 0;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🖼️ Foto artikla</div>
+       <img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:120px;max-width:100%;object-fit:contain;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;display:block;" /></div>`
+    : '';
+
+  // Upload button — samo za novo
+  let uploadHtml = '';
+  if (r.status === 'novo' && ps !== 'ship') {
+    uploadHtml = `<div style="margin-top:14px;border-top:1px dashed #fecaca;padding-top:12px;">
+      <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:8px;text-align:center;">📸 Pošalji sliku potvrde o uplati</div>
+      <div id="upl-preview-kb-${r.id}" style="display:none;margin-bottom:10px;text-align:center;">
+        <img id="upl-img-kb-${r.id}" style="max-height:160px;width:100%;object-fit:contain;border-radius:10px;border:2px solid #3b82f6;margin-bottom:8px;" />
+        <div style="display:flex;gap:8px;">
+          <button onclick="confirmUplatnica('${r.id}','kb-${r.id}')" style="flex:1;background:#16a34a;color:white;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';">✅ Pošalji!</button>
+          <button onclick="cancelUplatnicaPreview('kb-${r.id}')" style="background:rgba(244,63,94,0.1);color:#e11d48;border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">✕</button>
+        </div>
+      </div>
+      <div id="upl-btns-kb-${r.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button onclick="openUplatnicaWithPreview('${r.id}','camera','kb-${r.id}')" style="background:#1d4ed8;color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';">📷 Kamera</button>
+        <button onclick="openUplatnicaWithPreview('${r.id}','gallery','kb-${r.id}')" style="background:#374151;color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito';">🖼️ Galerija</button>
+      </div>
+      <button onclick="stornoRacun('${r.id}')" style="width:100%;margin-top:8px;background:none;color:#94a3b8;border:1px solid #e2e8f0;border-radius:8px;padding:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">Storno zahtev</button>
+    </div>`;
+  }
+
+  // Storno info
+  const stornoHtml = r.status === 'storno'
+    ? `<div style="background:#f1f5f9;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:#6b7280;">❌ Račun je storniran${r.stornoVreme ? ' · '+new Date(r.stornoVreme).toLocaleDateString('sr-Latn') : ''}. Nema dugovanja.</div>`
+    : '';
+
+  const content = `
+    <div style="text-align:center;padding:12px 0 8px;">
+      <div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#111;">Nova<span style="color:#d97706;">roba</span>shop</div>
+      <div style="font-size:10px;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Račun · ${r.datum||''}</div>
+    </div>
+    <div style="border-top:1px dashed #e5e7eb;border-bottom:1px dashed #e5e7eb;padding:10px 0;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#111;">Račun #${broj}</div>
+          ${u ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${u.name||''}${u.tiktokIme?' · @'+u.tiktokIme:''}</div>` : ''}
+        </div>
+        <span style="background:${st.bg};color:${st.c};border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;">${st.l}</span>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">${stavkeHtml}</div>
+    ${bankHtml}
+    ${adminFotoHtml}
+    ${uplatnicaHtml}
+    ${uploadHtml}
+    ${stornoHtml}
+    ${(r.status==='placeno'||ps==='ship') ? `<button onclick="shareRacunAsImage('${r.id}')" style="width:100%;margin-top:12px;background:#3b82f6;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">📸 Podeli Račun</button>` : ''}
+    ${(ps==='ship' && !r.ocena) ? `<button onclick="openRatingModal('${r.id}');closeKassenbon()" style="width:100%;margin-top:8px;background:#fef3c7;color:#d97706;border:1.5px solid #fde68a;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">⭐ Ostavi Ocenu</button>` : ''}
+  `;
+
+  document.getElementById('kassenbon-content').innerHTML = content;
+  const modal = document.getElementById('kassenbon-modal');
+  modal.style.display = 'flex';
 }
 
 async function stornoRacun(racunId) {
