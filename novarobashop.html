@@ -152,7 +152,28 @@
   // Foreground push notifications
   onMessage(messaging, payload => {
     const { title, body } = payload.notification || {};
+    const data = payload.data || {};
+    // Toast in der App
     showToast(`🔔 ${title}: ${body}`, 5000);
+    // Auch Browser-Notification wenn App im Vordergrund
+    if (Notification.permission === 'granted') {
+      const n = new Notification(title || 'Novarobashop', {
+        body: body || '',
+        icon: '/novarobashop-app/icon-192.png',
+        badge: '/novarobashop-app/icon-192.png',
+        tag: data.tag || 'novarobashop',
+        renotify: true,
+        vibrate: [200, 100, 200],
+        silent: false
+      });
+      // Klick öffnet richtigen Tab
+      n.onclick = () => {
+        window.focus();
+        if (data.tab) kNavTab(data.tab);
+        n.close();
+      };
+      setTimeout(() => n.close(), 8000);
+    }
   });
 
   onAuthStateChanged(auth, async (user) => {
@@ -2631,10 +2652,7 @@ async function checkOverdueRacuni(racuni) {
         });
 
         // 3. Push an Kunden
-        await sendPushToUser(r.kupacId,
-          '🔒 Nalog blokiran',
-          `Račun #${r.broj} nije plaćen na vreme. Nalog je blokiran.`
-        );
+        await sendPushToUser(r.kupacId, '🔒 Nalog blokiran', `Račun #${r.broj} nije plaćen na vreme. Nalog je blokiran.`, {tag:'blokiran',tab:'dugovi'});
 
         // 4. Haupt benachrichtigen
         await addDoc(collection(db, 'haupt_notifikacije'), {
@@ -2848,7 +2866,7 @@ async function stornoToPlaceno(racunId) {
       vreme: new Date().toISOString(),
       procitano: false
     });
-    sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD`);
+    sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD`, {tag:'placanje',tab:'arhiva'});
     showToast('✅ Račun označen kao plaćen, kupac obavešten');
   } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
 }
@@ -4053,7 +4071,7 @@ async function adminChatSend() {
     status: ''
   });
   // Push
-  try { sendPushToUser(kid, '📩 Poruka od Admina', (tekst||'📷').slice(0,60)); } catch(e){}
+  try { sendPushToUser(kid, '📩 Poruka od Admina', (tekst||'📷').slice(0,60), {tag:'chat',tab:'chat'}); } catch(e){}
   // Notif
   try {
     const { addDoc: ad, collection: col, serverTimestamp: st } = window._fb;
@@ -4269,7 +4287,7 @@ async function replyToKupac(kupacId, kupacName, safeId, realPorukaId) {
     // 3. Mark original message as reseno
     try { await updateDoc(doc(db, 'poruke', realPorukaId), { status: 'reseno' }); } catch(e) {}
     
-    sendPushToUser(kupacId, '📩 Poruka od Admina', tekst.slice(0,60));
+    sendPushToUser(kupacId, '📩 Poruka od Admina', tekst.slice(0,60), {tag:'chat',tab:'chat'});
     if (ta) ta.value = '';
     const box = document.getElementById('areply-box-' + safeId);
     if (box) box.style.display = 'none';
@@ -4343,7 +4361,7 @@ async function addRacun() {
     vreme: new Date().toISOString(),
     procitano: false
   });
-  sendPushToUser(kupacId, '🧾 Nova Računa', (opis||'Račun') + ' — ' + iznos.toLocaleString() + ' RSD');
+  sendPushToUser(kupacId, '🧾 Nova Računa', (opis||'Račun') + ' — ' + iznos.toLocaleString() + ' RSD', {tag:'racun', tab:'racuni'});
 
   document.getElementById('racun-iznos').value = '';
   document.getElementById('racun-opis').value = '';
@@ -4401,7 +4419,7 @@ async function setPaket(racunId, status, btn) {
       vreme: new Date().toISOString(),
       procitano: false
     });
-    sendPushToUser(r.kupacId, '📦 Paket Poslat!', `Račun #${r.broj} — očekivana isporuka: ${dateStr}`);
+    sendPushToUser(r.kupacId, '📦 Paket Poslat!', `Račun #${r.broj} — očekivana isporuka: ${dateStr}`, {tag:'poslato',tab:'poslato'});
     // Also call sendShippingNotification helper
     sendShippingNotification(racunId, r.kupacId, r.kupacName, r.opis, r.iznos);
     showToast('📦 Paket označen kao poslat! Kupac obavešten.');
@@ -4423,7 +4441,7 @@ async function confirmPayment(racunId) {
     vreme: new Date().toISOString(),
     procitano: false
   });
-  sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD — Hvala!`);
+  sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD — Hvala!`, {tag:'placanje',tab:'arhiva'});
   showToast('✅ Plaćanje potvrđeno! Kupac obavešten.');
   } catch(e) { console.error('confirmPayment:', e); showToast('❌ Greška pri potvrdi plaćanja: ' + (e.message||e), 4000); }
 }
@@ -5619,7 +5637,7 @@ async function _doSendUplatnica(contextId) {
       vreme: new Date().toISOString(),
       procitano: false
     });
-    sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`);
+    sendPushToUser(r.adminId, '💰 Nova Uplatnica!', `${window._currentUser.name} - Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD)`, {tag:'uplatnica',tab:'placanja'});
 
     delete _uplatnicaPreviewCache[contextId];
     showToast('✅ Uplatnica poslata! Admin proverava. Hvala!', 4000);
@@ -6600,26 +6618,66 @@ async function sendMahnungen(racuni) {
 }
 
 // ===== PUSH NOTIFICATIONS =====
+
+// Service Worker → App: Tab öffnen wenn auf Notification geklickt
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'OPEN_TAB' && event.data.tab) {
+      window.focus();
+      if (typeof kNavTab === 'function') kNavTab(event.data.tab);
+    }
+  });
+}
+
+// URL-Parameter: ?tab=racuni beim Öffnen nach Notification-Klick
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const tabParam = params.get('tab');
+  if (tabParam) {
+    window.addEventListener('load', () => {
+      setTimeout(() => { if (typeof kNavTab === 'function') kNavTab(tabParam); }, 1500);
+    });
+  }
+})();
+
 const VAPID_KEY = 'BHyKcuHzDE813s9vLJyPJvJQS6k7XZ_ckFpbDo7x1O15QMJPO357AyDDzgNrgPomkeSsnf1aEjifX0UI5YDdGvE';
 const PUSH_WORKER_URL = 'https://novarobashop-push.novarobashop.workers.dev';
 
 async function initPushNotifications() {
   try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      // Zeige freundliche Erklärung bevor Browser-Dialog erscheint
+      permission = await Notification.requestPermission();
+    }
+    if (permission !== 'granted') {
+      console.log('Push: permission denied');
+      return;
+    }
     const { messaging, getToken, db, doc, updateDoc } = window._fb;
-    const swReg = await navigator.serviceWorker.getRegistration("/novarobashop-app/");
+    // Warte auf SW-Registrierung
+    let swReg = await navigator.serviceWorker.getRegistration('/novarobashop-app/');
+    if (!swReg) swReg = await navigator.serviceWorker.ready;
+    if (!swReg) return;
     const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
     if (token && window._currentUser) {
-      await updateDoc(doc(db, 'users', window._currentUser.uid), { fcmToken: token });
+      await updateDoc(doc(db, 'users', window._currentUser.uid), {
+        fcmToken: token,
+        fcmUpdatedAt: new Date().toISOString()
+      });
       console.log('FCM token saved ✅');
     }
   } catch(err) {
-    console.log('Push init error:', err);
+    console.log('Push init error:', err.message || err);
+    // Retry nach 10s bei Token-Fehlern
+    if (err.code === 'messaging/token-subscribe-failed' || err.message?.includes('token')) {
+      setTimeout(initPushNotifications, 10000);
+    }
   }
 }
 
-async function sendPushToUser(userId, title, body) {
+async function sendPushToUser(userId, title, body, options = {}) {
   try {
     const { db, doc, getDoc } = window._fb;
     const userDoc = await getDoc(doc(db, 'users', userId));
@@ -6629,10 +6687,47 @@ async function sendPushToUser(userId, title, body) {
     await fetch(PUSH_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: fcmToken, title, body })
+      body: JSON.stringify({
+        token: fcmToken,
+        title,
+        body,
+        icon: '/novarobashop-app/icon-192.png',
+        badge: '/novarobashop-app/icon-192.png',
+        tag: options.tag || 'novarobashop',
+        data: { tab: options.tab || 'home', url: 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html' }
+      })
     });
   } catch(err) {
     console.log('Push send error:', err);
+  }
+}
+
+// Pošalji push svim kupcima jednog admina (za Live obaveštenja)
+async function sendPushToAllKupci(adminId, title, body, tag = 'live') {
+  try {
+    const { db, collection, query, where, getDocs, doc, getDoc } = window._fb;
+    const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'kupac')));
+    const tokens = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+    });
+    if (!tokens.length) return;
+    await fetch(PUSH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokens,   // Worker muss multicast unterstützen
+        title,
+        body,
+        icon: '/novarobashop-app/icon-192.png',
+        badge: '/novarobashop-app/icon-192.png',
+        tag,
+        data: { tab: 'notif', url: 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html' }
+      })
+    });
+  } catch(err) {
+    console.log('Push multicast error:', err);
   }
 }
 
