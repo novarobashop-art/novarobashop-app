@@ -1088,6 +1088,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <button class="a-tab" onclick="aTab('placanja',this)">💰 Plaćanja</button>
     <button class="a-tab" onclick="aTab('placeno',this)">✅ Plaćeno</button>
     <button class="a-tab" onclick="aTab('arhiva',this)">📦 Arhiva</button>
+    <button class="a-tab" onclick="aTab('storno-admin',this)" id="a-tab-storno-btn">❌ Storno</button>
     <button class="a-tab" onclick="aTab('kalender',this)">📅 Kalender</button>
     <button class="a-tab" onclick="aTab('chart',this)">📈 Grafik</button>
     <button class="a-tab" onclick="aTab('autoracun',this)">🔁 Auto-Račun</button>
@@ -1231,6 +1232,31 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <button onclick="document.getElementById('arhiva-search').value='';filterArhiva('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
       </div>
       <div id="a-arhiva-list"></div>
+    </div>
+
+    <!-- STORNO ADMIN TAB -->
+    <div id="atab-storno-admin" style="display:none;">
+      <div style="background:rgba(148,163,184,0.07);border:1.5px solid rgba(148,163,184,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:800;color:#94a3b8;margin-bottom:4px;">❌ Stornirani računi</div>
+        <div style="font-size:12px;color:var(--txt2);">Ovde možeš videti sve stornirane račune i po potrebi ih povratiti na aktivno.</div>
+      </div>
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+        <div style="flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;">
+          <span style="font-size:16px;margin-right:8px;">🔍</span>
+          <input type="text" id="storno-admin-search" placeholder="Pretraži po imenu, @tiktok, broju..." oninput="filterAStorno(this.value)"
+            style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
+          <button onclick="document.getElementById('storno-admin-search').value='';filterAStorno('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+        </div>
+        <select id="storno-admin-sort" onchange="filterAStorno(document.getElementById('storno-admin-search').value)"
+          style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;">
+          <option value="date-desc">📅 Najnoviji</option>
+          <option value="date-asc">📅 Najstariji</option>
+          <option value="iznos-desc">💰 Iznos ↓</option>
+          <option value="tiktok-az">@TikTok A–Z</option>
+        </select>
+      </div>
+      <div id="a-storno-summary" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+      <div id="a-storno-list"></div>
     </div>
 
     <!-- PROIZVODI TAB -->
@@ -1540,6 +1566,15 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       <button onclick="document.getElementById('k-arhiva-search').value='';filterKArhiva('')" style="background:none;border:none;color:var(--txt3);font-size:14px;cursor:pointer;padding:4px;">✕</button>
     </div>
     <div id="k-arhiva-list"></div>
+  </div>
+
+  <!-- ══ STORNO TAB ══ -->
+  <div id="ktab-storno" style="padding:16px;display:none;">
+    <div style="background:rgba(148,163,184,0.08);border:1.5px solid rgba(148,163,184,0.2);border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:800;color:#94a3b8;">❌ Stornirani računi</div>
+      <div style="font-size:12px;color:var(--txt2);margin-top:3px;">Ovi računi su otkazani. Nema dugovanja.</div>
+    </div>
+    <div id="k-storno-list"></div>
   </div>
   <div id="ktab-poslato" style="padding:16px;display:none;">
     <div id="k-poslato-list"></div>
@@ -1881,6 +1916,11 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <div class="k-nav-item" id="knav-arhiva" onclick="kNavTab('arhiva')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">🟢</div>
       <div class="k-nav-lbl" id="knav-lbl-arhiva" style="color:var(--txt3);">Plaćeno</div>
+    </div>
+    <div class="k-nav-item" id="knav-storno" onclick="kNavTab('storno')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;">
+      <div class="k-nav-icon">❌</div>
+      <div id="k-storno-badge" style="display:none;position:absolute;top:6px;right:6px;background:#94a3b8;color:white;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;align-items:center;justify-content:center;"></div>
+      <div class="k-nav-lbl" id="knav-lbl-storno" style="color:var(--txt3);">Storno</div>
     </div>
     <div class="k-nav-item" id="knav-poslato" onclick="kNavTab('poslato')" style="flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
       <div class="k-nav-icon">📦</div>
@@ -2463,7 +2503,12 @@ async function loadAdminData() {
     renderAPlaceno(_allRacuni);
     renderAArhiva(_allRacuni);
     checkOverdueRacuni(_allRacuni);
-    // refresh open tabs
+    // Storno badge auf Tab-Button
+    const stornoN = _allRacuni.filter(r => r.status === 'storno').length;
+    const stornoBtn = document.getElementById('a-tab-storno-btn');
+    if (stornoBtn) stornoBtn.textContent = stornoN > 0 ? `❌ Storno (${stornoN})` : '❌ Storno';
+    // Refresh open tabs
+    if(document.getElementById('atab-storno-admin')?.style.display==='block') renderAStorno(_allRacuni);
     if(document.getElementById('atab-kalender')?.style.display==='block') renderKalender(_kalFilter||'all');
     if(document.getElementById('atab-chart')?.style.display==='block') renderChart();
   });
@@ -2778,6 +2823,31 @@ async function reverseStorno(racunId) {
   } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
 }
 
+async function stornoToPlaceno(racunId) {
+  if (!confirm('Označiti ovaj stornirani račun kao PLAĆEN?\n(Kupac će dobiti potvrdu plaćanja)')) return;
+  try {
+    const { db, doc, updateDoc, collection, addDoc, getDoc } = window._fb;
+    await updateDoc(doc(db, 'racuni', racunId), {
+      status: 'placeno',
+      paketStatus: 'prep',
+      placenoAt: new Date().toISOString(),
+      stornoVreme: null
+    });
+    const snap = await getDoc(doc(db, 'racuni', racunId));
+    const r = snap.data();
+    await addDoc(collection(db,'notifikacije'), {
+      userId: r.kupacId,
+      tip: 'placeno',
+      racunId,
+      poruka: `✅ Tvoja uplata je potvrđena!\n\nRačun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD\n${r.opis?'📦 '+r.opis:''}\n\nHvala na kupovini! 🎉`,
+      vreme: new Date().toISOString(),
+      procitano: false
+    });
+    sendPushToUser(r.kupacId, '✅ Uplata potvrđena!', `Račun #${r.broj} · ${(r.iznos||0).toLocaleString()} RSD`);
+    showToast('✅ Račun označen kao plaćen, kupac obavešten');
+  } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
+}
+
 function renderARacuni(racuni) {
   const el = document.getElementById('a-racuni-list');
   // Samo novo i ceka u Računi tabu
@@ -2798,18 +2868,111 @@ function renderAPlaceno(racuni) {
 function renderAArhiva(racuni) {
   const el = document.getElementById('a-arhiva-list');
   const poslato = racuni.filter(r => r.paketStatus === 'ship');
-  const storni  = racuni.filter(r => r.status === 'storno' && r.paketStatus !== 'ship');
-  if (!poslato.length && !storni.length) { el.innerHTML = '<div class="section-empty">Nema poslanih paketa.</div>'; return; }
-  let html = '';
-  if (poslato.length) {
-    html += `<div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px;">📦 Poslato (${poslato.length})</div>`;
-    html += poslato.map(r => adminRacunCard(r)).join('');
+  if (!poslato.length) { el.innerHTML = '<div class="section-empty">Nema poslanih paketa.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px;">📦 Poslato (${poslato.length})</div>`
+    + poslato.map(r => adminRacunCard(r)).join('');
+}
+
+function renderAStorno(racuni) {
+  const storni = racuni.filter(r => r.status === 'storno');
+  const el     = document.getElementById('a-storno-list');
+  const sumEl  = document.getElementById('a-storno-summary');
+  if (!el) return;
+
+  // Summary stats
+  if (sumEl) {
+    const ukupnoIznos = storni.reduce((s,r)=>s+(r.iznos||0),0);
+    const ovajMesec   = storni.filter(r=>{
+      const d = new Date(r.stornoVreme||r.datum||0);
+      const n = new Date();
+      return d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear();
+    }).length;
+    sumEl.innerHTML = `
+      <div style="background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2);border-radius:12px;padding:12px 14px;flex:1;min-width:120px;">
+        <div style="font-size:22px;font-weight:800;color:#94a3b8;">${storni.length}</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Ukupno storno</div>
+      </div>
+      <div style="background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2);border-radius:12px;padding:12px 14px;flex:1;min-width:120px;">
+        <div style="font-size:22px;font-weight:800;color:#94a3b8;">${ukupnoIznos.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">RSD otkazano</div>
+      </div>
+      <div style="background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2);border-radius:12px;padding:12px 14px;flex:1;min-width:120px;">
+        <div style="font-size:22px;font-weight:800;color:#94a3b8;">${ovajMesec}</div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Ovaj mesec</div>
+      </div>`;
   }
-  if (storni.length) {
-    html += `<div style="font-size:12px;color:#94a3b8;font-weight:700;margin:14px 0 10px;">❌ Stornirani (${storni.length})</div>`;
-    html += storni.map(r => adminRacunCard(r)).join('');
+
+  if (!storni.length) {
+    el.innerHTML = '<div class="section-empty">Nema storniranih računa. ✅</div>';
+    return;
   }
-  el.innerHTML = html;
+  el.innerHTML = storni
+    .sort((a,b)=>(b.stornoVreme||b.datum||'')>(a.stornoVreme||a.datum||'')?1:-1)
+    .map(r => adminStornoCard(r)).join('');
+}
+
+function filterAStorno(val) {
+  const s    = (val||'').replace('@','').toLowerCase();
+  const sort = document.getElementById('storno-admin-sort')?.value || 'date-desc';
+  let lista  = (_allRacuni||[]).filter(r => r.status === 'storno');
+  if (s) lista = lista.filter(r => _matchRacun(r, s));
+  lista.sort((a,b) => {
+    if (sort==='date-desc') return (b.stornoVreme||b.datum||'')>(a.stornoVreme||a.datum||'')?1:-1;
+    if (sort==='date-asc')  return (a.stornoVreme||a.datum||'')>(b.stornoVreme||b.datum||'')?1:-1;
+    if (sort==='iznos-desc') return (b.iznos||0)-(a.iznos||0);
+    if (sort==='tiktok-az') {
+      const ka=(_allKupci||[]).find(k=>k.id===a.kupacId), kb=(_allKupci||[]).find(k=>k.id===b.kupacId);
+      return (ka?.tiktokIme||'').localeCompare(kb?.tiktokIme||'');
+    }
+    return 0;
+  });
+  const el = document.getElementById('a-storno-list');
+  if (!lista.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = lista.map(r => adminStornoCard(r)).join('');
+}
+
+function adminStornoCard(r) {
+  const kupac     = (_allKupci||[]).find(k => k.id === r.kupacId);
+  const tiktok    = kupac ? '@'+(kupac.tiktokIme||'—') : (r.kupacName||'Kupac');
+  const tiktokNick= kupac ? (kupac.tiktokNick||'') : '';
+  const ime       = kupac ? (kupac.name||'') : '';
+  const stornoDat = r.stornoVreme ? new Date(r.stornoVreme).toLocaleDateString('sr-Latn') : (r.datum||'');
+  const broj      = r.broj || r.id.slice(-4);
+
+  let stavkeHtml = '';
+  if (r.stavke && r.stavke.length) {
+    stavkeHtml = r.stavke.map(s=>{
+      const kol=s.kolicina||1;
+      return `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);padding:2px 0;">
+        <span>${s.naziv}</span><span>${kol>1?kol+'× ':''}<b>${(s.cena*kol).toLocaleString()} RSD</b></span>
+      </div>`;
+    }).join('');
+  } else if (r.opis) {
+    stavkeHtml = `<div style="font-size:12px;color:var(--txt2);margin-top:4px;">${r.opis}</div>`;
+  }
+
+  return `<div style="background:rgba(148,163,184,0.06);border:1.5px solid rgba(148,163,184,0.2);border-radius:16px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#94a3b8;">Račun #${broj}</div>
+        <div style="font-size:13px;color:var(--teal);font-weight:800;">${tiktok}</div>
+        ${tiktokNick ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);">${tiktokNick}</div>` : ''}
+        ${ime ? `<div style="font-size:11px;color:var(--txt3);">${ime}</div>` : ''}
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:18px;font-weight:800;color:#94a3b8;text-decoration:line-through;">${(r.iznos||0).toLocaleString()} RSD</div>
+        <span style="background:rgba(148,163,184,0.12);color:#94a3b8;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:800;">❌ STORNO</span>
+      </div>
+    </div>
+    ${stavkeHtml}
+    <div style="font-size:11px;color:var(--txt3);margin-top:6px;">🗓️ Storniran: ${stornoDat} · Kreiran: ${r.datum||'—'}</div>
+    <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;">
+      <button onclick="reverseStorno('${r.id}')" style="flex:1;min-width:120px;background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">↩️ Povrati na Novo</button>
+      <button onclick="stornoToPlaceno('${r.id}')" style="flex:1;min-width:120px;background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">✅ Označi Plaćenim</button>
+      <button onclick="deleteRacun('${r.id}')" style="background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">🗑️</button>
+    </div>
+    ${r.uplatnicaUrl ? `<div style="margin-top:10px;"><div style="font-size:10px;color:var(--txt3);margin-bottom:4px;">📎 Uplatnica kupca:</div><img src="${r.uplatnicaUrl}" onclick="openImgViewer(this.src)" style="max-height:80px;max-width:130px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" /></div>` : ''}
+  </div>`;
 }
 
 function renderAPlacanja(racuni) {
@@ -3966,7 +4129,7 @@ function toggleAPoruka(safeId) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','dashboard','racuni','placanja','placeno','arhiva','kalender','chart','autoracun','proizvodi','live','podrska-admin'].forEach(n => {
+  ['kupci','dashboard','racuni','placanja','placeno','arhiva','storno-admin','kalender','chart','autoracun','proizvodi','live','podrska-admin'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
@@ -3976,6 +4139,7 @@ function aTab(name, el) {
   if (name === 'kalender') renderKalender('all');
   if (name === 'chart') renderChart();
   if (name === 'autoracun') loadAutoRacuni();
+  if (name === 'storno-admin') renderAStorno(_allRacuni||[]);
 }
 
 function populateKupacSelect(kupci) {
@@ -4655,6 +4819,12 @@ async function loadKupacData() {
     const otvoreni = _allKupacRacuni.filter(r=>r.status==='novo'||r.status==='ceka');
     const badgeEl = document.getElementById('k-dugovi-badge');
     if(badgeEl){ if(otvoreni.length>0){badgeEl.style.display='flex';badgeEl.textContent=otvoreni.length;}else badgeEl.style.display='none'; }
+    // Update storno badge silently
+    const stornoN = _allKupacRacuni.filter(r=>r.status==='storno').length;
+    const stornoBadgeEl = document.getElementById('k-storno-badge');
+    const stornoLblEl   = document.getElementById('knav-lbl-storno');
+    if(stornoBadgeEl){ if(stornoN>0){stornoBadgeEl.style.display='flex';stornoBadgeEl.textContent=stornoN;}else stornoBadgeEl.style.display='none'; }
+    if(stornoLblEl) stornoLblEl.textContent = stornoN > 0 ? `Storno (${stornoN})` : 'Storno';
     // Update racuni badge
     const noviBadge = document.getElementById('k-racuni-badge');
     const noviCount = _allKupacRacuni.filter(r=>r.status==='novo').length;
@@ -4774,15 +4944,20 @@ function renderKAllRacuni(racuni) {
   console.log('renderKAllRacuni - sve racune:', racuni.map(r => ({id:r.id.slice(-4), status:r.status, paketStatus:r.paketStatus})));
   renderKNove(racuni.filter(r => r.status === 'novo'));
   renderKCeka(racuni.filter(r => r.status === 'ceka'));
-  renderKArhiva(racuni.filter(r => (r.status === 'placeno' || r.status === 'storno') && r.paketStatus !== 'ship'));
+  renderKArhiva(racuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship'));
   renderKPoslato(racuni.filter(r => r.paketStatus === 'ship'));
   const n = racuni.filter(r => r.status === 'ceka').length;
   document.getElementById('knav-lbl-ceka').textContent = 'Čeka' + (n > 0 ? ' (' + n + ')' : '');
   const p = racuni.filter(r => r.paketStatus === 'ship').length;
   document.getElementById('knav-lbl-poslato').textContent = 'Poslato' + (p > 0 ? ' (' + p + ')' : '');
   const stornoCount = racuni.filter(r => r.status === 'storno').length;
+  const stornoBadge = document.getElementById('k-storno-badge');
+  const stornoLbl   = document.getElementById('knav-lbl-storno');
+  if (stornoBadge) { if (stornoCount > 0) { stornoBadge.style.display='flex'; stornoBadge.textContent=stornoCount; } else stornoBadge.style.display='none'; }
+  if (stornoLbl)   stornoLbl.textContent = stornoCount > 0 ? `Storno (${stornoCount})` : 'Storno';
+  // Arhiva label reset
   const arhivaLbl = document.getElementById('knav-lbl-arhiva');
-  if (arhivaLbl) arhivaLbl.textContent = 'Arhiva' + (stornoCount > 0 ? ' (' + stornoCount + ')' : '');
+  if (arhivaLbl) arhivaLbl.textContent = 'Plaćeno';
 }
 
 function kRacunCard(r, showUpload, showArhiva) {
@@ -4982,22 +5157,42 @@ function renderKArhiva(racuni) {
     (r.datum||'').includes(q)
   ) : racuni;
   if (!list.length) { el.innerHTML = `<div class="section-empty">${q ? '🔍 Nema rezultata za "'+q+'"' : 'Nema plaćenih računa'}</div>`; return; }
-  const placeni = list.filter(r => r.status === 'placeno');
-  const storni  = list.filter(r => r.status === 'storno');
-  let html = '';
-  if (storni.length) {
-    html += `<div style="background:rgba(148,163,184,0.06);border:1.5px solid rgba(148,163,184,0.18);border-radius:16px;padding:14px;margin-bottom:16px;">
-      <div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">❌ Stornirani računi (${storni.length})</div>`;
-    html += storni.map(r => kRacunCard(r, false, true)).join('');
-    html += '</div>';
-  }
-  if (placeni.length) {
-    html += placeni.map(r => kRacunCard(r, false, true)).join('');
-  }
-  el.innerHTML = html;
+  el.innerHTML = list.map(r => kRacunCard(r, false, true)).join('');
 }
 function filterKArhiva(val) {
   renderKArhiva(window._kArhivaRacuni || []);
+}
+
+function renderKStorno(racuni) {
+  const el = document.getElementById('k-storno-list');
+  if (!el) return;
+  const lista = racuni.filter(r => r.status === 'storno');
+  if (!lista.length) {
+    el.innerHTML = '<div style="text-align:center;padding:48px 16px;"><div style="font-size:32px;margin-bottom:10px;">✅</div><div style="font-size:14px;color:var(--txt3);">Nema storniranih računa</div></div>';
+    return;
+  }
+  el.innerHTML = lista
+    .sort((a,b) => (b.stornoVreme||b.datum||'') > (a.stornoVreme||a.datum||'') ? 1 : -1)
+    .map(r => {
+      const broj  = r.broj || r.id.slice(-4);
+      const iznos = (r.iznos||0).toLocaleString();
+      const datum = r.stornoVreme ? new Date(r.stornoVreme).toLocaleDateString('sr-Latn') : (r.datum||'');
+      const artPreview = r.stavke && r.stavke.length
+        ? r.stavke.map(s=>(s.kolicina&&s.kolicina>1?s.kolicina+'× ':'')+s.naziv).join(' · ')
+        : (r.opis||'');
+      return `<div style="background:rgba(148,163,184,0.06);border:1.5px solid rgba(148,163,184,0.18);border-radius:16px;padding:14px 16px;margin-bottom:10px;opacity:0.85;" onclick="openKassenbon('${r.id}')" style="cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div style="font-size:14px;font-weight:800;color:var(--txt);">Račun #${broj}</div>
+          <span style="background:rgba(148,163,184,0.12);color:#94a3b8;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">❌ STORNO</span>
+        </div>
+        ${artPreview ? `<div style="font-size:12px;color:var(--txt3);margin-bottom:6px;">${artPreview}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed rgba(148,163,184,0.2);padding-top:8px;margin-top:4px;">
+          <div style="font-size:11px;color:#94a3b8;">🗓️ ${datum}</div>
+          <div style="font-size:16px;font-weight:800;color:#94a3b8;text-decoration:line-through;">${iznos} RSD</div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px;">Tapni za detalje 🧾</div>
+      </div>`;
+    }).join('');
 }
 
 function renderKCeka(racuni) {
@@ -5014,7 +5209,7 @@ function renderKPoslato(racuni) {
 }
 
 function kNavTab(name) {
-  ['home','racuni','ceka','arhiva','poslato','notif','podrska','chat','istorija','dugovi','faq'].forEach(n => {
+  ['home','racuni','ceka','arhiva','storno','poslato','notif','podrska','chat','istorija','dugovi','faq'].forEach(n => {
     const tab = document.getElementById('ktab-' + n);
     if(tab) tab.style.display = 'none';
     const lbl = document.getElementById('knav-lbl-' + n);
@@ -5022,12 +5217,13 @@ function kNavTab(name) {
   });
   const tab = document.getElementById('ktab-' + name);
   if(tab) tab.style.display = 'block';
-  const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', chat:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
+  const colors = { home:'#3b82f6', racuni:'var(--rose)', ceka:'#d97706', arhiva:'#16a34a', storno:'#94a3b8', poslato:'#14b8a6', notif:'var(--blue)', podrska:'var(--blue)', chat:'var(--blue)', istorija:'#6366f1', dugovi:'#dc2626', faq:'#8b5cf6' };
   const lbl = document.getElementById('knav-lbl-' + name);
   if (lbl) lbl.style.color = colors[name]||'var(--blue)';
   if (name === 'notif') markAllNotifRead();
   if (name === 'istorija') { const r=window._kAllRacuni||[]; renderKIstorija(r); }
   if (name === 'dugovi')   { const r=window._kAllRacuni||[]; renderKDugovi(r); }
+  if (name === 'storno')   { const r=window._kAllRacuni||[]; renderKStorno(r); }
   if (name === 'home')     renderKHome();
   if (name === 'faq')      initFaq();
   if (name === 'chat') {
