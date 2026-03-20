@@ -2799,14 +2799,19 @@ function adminRacunCard(r) {
 }
 
 async function deleteRacun(racunId) {
-  if (!confirm('Obrisati ovaj račun iz admin prikaza?\n(Kupac zadržava svoju kopiju)')) return;
+  if (!confirm('Obrisati ovaj račun iz admin prikaza?\n(Ako je aktivan, kupac će ga videti kao STORNO)')) return;
   try {
-    const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db, 'racuni', racunId), {
-      adminDeleted: true,
-      adminDeletedAt: new Date().toISOString()
-    });
-    showToast('🗑️ Račun uklonjen iz tvog prikaza');
+    const { db, doc, updateDoc, getDoc } = window._fb;
+    const snap = await getDoc(doc(db, 'racuni', racunId));
+    const r = snap.exists() ? snap.data() : {};
+    const updateData = { adminDeleted: true, adminDeletedAt: new Date().toISOString() };
+    // Ako je još aktivan (novo/ceka), storniraj ga da kupac vidi u Storno tabu
+    if (r.status === 'novo' || r.status === 'ceka') {
+      updateData.status = 'storno';
+      updateData.stornoVreme = new Date().toISOString();
+    }
+    await updateDoc(doc(db, 'racuni', racunId), updateData);
+    showToast('🗑️ Račun obrisan' + (updateData.status === 'storno' ? ' i storniran kod kupca' : ''));
   } catch(e) { showToast('❌ Greška: ' + e.message, 4000); }
 }
 
@@ -4806,7 +4811,7 @@ async function loadKupacData() {
     _allKupacRacuni = [];
     snap.forEach(d => {
       const data = d.data();
-      if (!data.kupacDeleted) _allKupacRacuni.push({id:d.id,...data});
+      if (!data.kupacDeleted && !data.adminDeleted) _allKupacRacuni.push({id:d.id,...data});
     });
     window._kAllRacuni = _allKupacRacuni;
     // filtriraj po izabranom adminu
@@ -5764,17 +5769,20 @@ async function stornoRacun(racunId) {
 }
 
 async function kupacDeleteRacun(racunId) {
-  if (!confirm('Obrisati ovaj račun iz tvoje istorije?\n(Samo tvoja kopija se briše)')) return;
-  // Provjera: samo ako je stariji od 30 dana
   const r = (window._kAllRacuni||[]).find(x => x.id === racunId);
-  if (r) {
-    const datum = new Date(r.createdAt || r.datum || 0);
-    const diffTage = Math.floor((Date.now() - datum) / (1000*60*60*24));
-    if (diffTage < 30) {
-      showToast('⚠️ Možeš obrisati tek nakon 30 dana.', 4000);
-      return;
-    }
+  // Samo plaćene ili poslate račune može kupac brisati
+  if (!r || (r.status !== 'placeno' && r.paketStatus !== 'ship')) {
+    showToast('⚠️ Možeš brisati samo plaćene ili poslate račune.', 4000);
+    return;
   }
+  // Samo starije od 30 dana
+  const datum  = new Date(r.createdAt || r.datum || 0);
+  const diffTage = Math.floor((Date.now() - datum) / (1000*60*60*24));
+  if (diffTage < 30) {
+    showToast(`⚠️ Možeš obrisati tek za ${30 - diffTage} dana.`, 4000);
+    return;
+  }
+  if (!confirm('Obrisati ovaj račun iz tvoje istorije?\n(Samo tvoja kopija se briše)')) return;
   const { db, doc, updateDoc } = window._fb;
   await updateDoc(doc(db, 'racuni', racunId), {
     kupacDeleted: true,
