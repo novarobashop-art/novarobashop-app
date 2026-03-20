@@ -157,6 +157,15 @@ function buildConnection(adminId, tiktokUsername) {
           statusColor,
           timestamp,
         });
+
+        // Engagement: komentar = 2 boda
+        await db.collection('live_engagement').add({
+          adminId,
+          tiktokId: tiktokId.toLowerCase(),
+          type: 'comment',
+          points: 2,
+          timestamp,
+        });
       }
 
       if (connections[adminId]) connections[adminId].msgCount++;
@@ -167,8 +176,58 @@ function buildConnection(adminId, tiktokUsername) {
   });
 
   // ── Gift ──
-  connection.on('gift', (data) => {
-    console.log(`🎁 Gift von @${data.uniqueId}: ${data.giftName}`);
+  connection.on('gift', async (data) => {
+    const tiktokId = data.uniqueId || 'unknown';
+    const giftName = data.giftName || 'Gift';
+    const giftId   = data.giftId || 0;
+    const repeat   = data.repeatCount || 1;
+    console.log(`🎁 Gift von @${tiktokId}: ${giftName} x${repeat}`);
+    if (!db) return;
+    try {
+      await db.collection('live_engagement').add({
+        adminId,
+        tiktokId: tiktokId.toLowerCase(),
+        type: 'gift',
+        giftName,
+        giftId,
+        repeat,
+        points: repeat * 10, // 1 gift = 10 bodova
+        timestamp: new Date(),
+      });
+    } catch(e) { console.error('Gift save error:', e.message); }
+  });
+
+  // ── Like ──
+  connection.on('like', async (data) => {
+    const tiktokId = data.uniqueId || 'unknown';
+    const count    = data.likeCount || 1;
+    if (!db) return;
+    try {
+      await db.collection('live_engagement').add({
+        adminId,
+        tiktokId: tiktokId.toLowerCase(),
+        type: 'like',
+        count,
+        points: Math.ceil(count * 0.1), // 10 lajkova = 1 bod
+        timestamp: new Date(),
+      });
+    } catch(e) { console.error('Like save error:', e.message); }
+  });
+
+  // ── Member Join ──
+  connection.on('member', async (data) => {
+    const tiktokId = data.uniqueId || 'unknown';
+    console.log(`👀 @${tiktokId} ušao na live`);
+    if (!db) return;
+    try {
+      await db.collection('live_engagement').add({
+        adminId,
+        tiktokId: tiktokId.toLowerCase(),
+        type: 'join',
+        points: 1, // gledanje = 1 bod
+        timestamp: new Date(),
+      });
+    } catch(e) { console.error('Member save error:', e.message); }
   });
 
   // ── Error ──
