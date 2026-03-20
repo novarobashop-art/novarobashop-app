@@ -88,7 +88,7 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
 .fb-noreg{background:rgba(216,64,96,0.12)!important;color:#ff9aad!important;border-color:rgba(216,64,96,0.25)!important;}
 .sdd{margin-left:auto;background:rgba(255,255,255,0.05);border:1px solid var(--brd);border-radius:var(--r-xs);padding:4px 10px;color:var(--txt);font-size:11px;font-family:'Nunito';outline:none;cursor:pointer;}
 
-.main{flex:1;display:grid;grid-template-columns:1fr 1fr 300px;overflow:hidden;min-height:0;}
+.main{flex:1;display:grid;grid-template-columns:1fr 320px;overflow:hidden;min-height:0;}
 .col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--brd);}
 .col:last-child{border-right:none;}
 .col-h{padding:9px 14px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;border-bottom:1px solid var(--brd);flex-shrink:0;display:flex;align-items:center;gap:8px;}
@@ -156,8 +156,11 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
 .fs-bar.err  .fsdot{background:#f43f5e;}
 .fs-bar.warn .fsdot{background:#f97316;}
 /* ── Toast Fehler ── */
-.m-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.3);color:#fda4af;border-radius:var(--r-sm);padding:10px 18px;font-size:12px;font-weight:600;z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:nowrap;}
+.m-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.3);color:#fda4af;border-radius:var(--r-md);padding:13px 22px;font-size:14px;font-weight:700;z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
 .m-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.m-toast.green{background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.35);color:#4ade80;}
+.m-toast.purple{background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.35);color:#c084fc;}
+.m-toast.gold{background:rgba(250,204,21,0.15);border-color:rgba(250,204,21,0.4);color:#fbbf24;}
 </style>
 </head>
 <body>
@@ -165,8 +168,8 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
 <!-- LOGIN -->
 <div id="ls">
   <div class="lbox">
-    <div class="llogo">Nova<span>roba</span>shop</div>
-    <div class="lsub">🔴 Live Monitor — Drugi Monitor</div>
+    <div class="llogo">Nova<span style="color:var(--amber);">roba</span>shop</div>
+    <div class="lsub">🔴 Live Monitor</div>
     <input type="email"    class="linp" id="le" placeholder="Email adresa..." />
     <input type="password" class="linp" id="lp" placeholder="Lozinka..." />
     <button class="lbtn" onclick="doLogin()">🖥️ Otvori Live Monitor</button>
@@ -176,39 +179,31 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
 
 <!-- MONITOR -->
 <div id="ms">
-  <!-- TOPBAR -->
+
+  <!-- TOP BAR -->
   <div class="tb">
-    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <div class="tb-logo">Nova<span style="color:var(--amber);">roba</span>shop</div>
-    </div>
+    <div class="tb-logo">Nova<span style="color:var(--amber);">roba</span>shop</div>
 
-    <!-- LIVE START/STOP BUTTON -->
-    <div style="flex-shrink:0;">
-      <button id="live-start-btn" onclick="toggleLiveMonitor()"
-        style="display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#dc2626,#991b1b);color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';letter-spacing:0.5px;box-shadow:0 2px 12px rgba(220,38,38,0.35);">
-        <span style="width:8px;height:8px;border-radius:50%;background:white;display:inline-block;"></span>
-        POKRENI LIVE
-      </button>
-      <button id="live-stop-btn" onclick="toggleLiveMonitor()"
-        style="display:none;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--r-pill);border:none;background:rgba(220,38,38,0.15);border:1.5px solid rgba(220,38,38,0.4);color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';letter-spacing:0.5px;animation:glow 2s infinite;">
-        <span style="width:8px;height:8px;border-radius:50%;background:#f87171;display:inline-block;animation:blink 1.1s infinite;"></span>
-        LIVE AKTIVAN — Završi
-      </button>
-    </div>
+    <!-- START / STOP LIVE -->
+    <button id="live-start-btn" onclick="toggleLiveMonitor()"
+      style="display:flex;align-items:center;gap:8px;padding:8px 20px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#dc2626,#991b1b);color:white;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';letter-spacing:0.5px;box-shadow:0 2px 12px rgba(220,38,38,0.35);">
+      <span style="width:8px;height:8px;border-radius:50%;background:white;display:inline-block;"></span>
+      POKRENI LIVE
+    </button>
+    <button id="live-stop-btn" onclick="toggleLiveMonitor()"
+      style="display:none;align-items:center;gap:8px;padding:8px 20px;border-radius:var(--r-pill);border:1.5px solid rgba(220,38,38,0.5);background:rgba(220,38,38,0.12);color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito';letter-spacing:0.5px;animation:glow 2s infinite;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#f87171;display:inline-block;animation:blink 1.1s infinite;"></span>
+      LIVE AKTIVAN — Završi
+    </button>
 
+    <!-- STATS -->
     <div class="stats">
-      <div class="sp"><div><div class="sp-n" style="color:#4ade80;" id="s-r">0</div><div class="sp-l">Reg.</div></div></div>
-      <div class="sp"><div><div class="sp-n" style="color:#fb923c;" id="s-k">0</div><div class="sp-l">Kasni</div></div></div>
-      <div class="sp"><div><div class="sp-n" style="color:#f87171;" id="s-n">0</div><div class="sp-l">Nije reg.</div></div></div>
       <div class="sp"><div><div class="sp-n" style="color:#a78bfa;" id="s-c">0</div><div class="sp-l">Chat</div></div></div>
       <div class="sp"><div><div class="sp-n" style="color:var(--amber);" id="s-nar">0</div><div class="sp-l">Narudžb.</div></div></div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;">
-      <div class="tb-search">
-        <span style="color:var(--gray2);">🔍</span>
-        <input id="srch" type="text" placeholder="@tiktok ili nickname... (Ctrl+F)" oninput="onSearch(this.value)" />
-      </div>
-      <div id="live-chat-status" style="font-size:10px;color:var(--txt3);white-space:nowrap;flex-shrink:0;">⚫ Nije pov.</div>
+
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+      <div id="live-chat-status" style="font-size:10px;color:var(--txt3);white-space:nowrap;">⚫ Nije pov.</div>
       <button class="tb-logout" onclick="doLogout()">Odjavi</button>
     </div>
   </div>
@@ -220,114 +215,63 @@ body{font-family:'Nunito',sans-serif;background:var(--ink);color:var(--txt);-web
     <span style="margin-left:auto;font-size:9px;opacity:.6;" id="fs-last"></span>
   </div>
 
-  <!-- FILTERBAR -->
-  <div class="fb-bar">
-    <button class="fb fb-all"   onclick="setF('all',this)"   id="f-all">⬜ Svi</button>
-    <button class="fb"          onclick="setF('reg',this)"   id="f-reg">🟢 Registrovani</button>
-    <button class="fb"          onclick="setF('kasni',this)" id="f-kasni">🟠 Kasni</button>
-    <button class="fb"          onclick="setF('noreg',this)" id="f-noreg">🔴 Nije reg.</button>
-    <div style="width:1px;height:18px;background:var(--brd);margin:0 4px;"></div>
-    <span style="font-size:10px;color:var(--gray2);white-space:nowrap;">Chat:</span>
-    <button class="fb fb-all" onclick="setCF('all',this)"   id="cf-all"  style="font-size:10px;padding:3px 9px;">Svi</button>
-    <button class="fb"        onclick="setCF('reg',this)"   id="cf-reg"  style="font-size:10px;padding:3px 9px;">🟢</button>
-    <button class="fb"        onclick="setCF('kasni',this)" id="cf-k"    style="font-size:10px;padding:3px 9px;">🟠</button>
-    <button class="fb"        onclick="setCF('noreg',this)" id="cf-n"    style="font-size:10px;padding:3px 9px;">🔴</button>
-    <select class="sdd" onchange="onSort(this.value)">
-      <option value="tiktok">@TikTok A–Z</option>
-      <option value="nick">Nickname A–Z</option>
-      <option value="status">Po statusu</option>
-      <option value="iznos">Iznos ↓</option>
-    </select>
-  </div>
-
-  <!-- 3 COLS -->
-  <div class="main">
-    <!-- COL1: Kupaci -->
-    <div class="col">
-      <div class="col-h" style="color:var(--teal);">
-        <span>👥</span><span id="gtit">Kupci — učitavanje...</span>
-      </div>
-      <div class="col-b">
-        <div class="kg" id="kg"><div class="empty">⏳ Učitavanje...</div></div>
-      </div>
+  <!-- SAMO CHAT — full width -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;">
+    <div class="col-h" style="color:#a78bfa;">
+      <span>💬</span>
+      <span>TikTok Live Chat</span>
+      <div id="csdot" style="width:7px;height:7px;border-radius:50%;background:#64748b;margin-left:auto;"></div>
+      <span id="cstxt" style="font-size:9px;color:var(--gray2);">Nije aktivan</span>
     </div>
-
-    <!-- COL2: TikTok Live Chat -->
-    <div class="col">
-      <div class="col-h" style="color:#a78bfa;">
-        <span>💬</span><span>TikTok Live Chat</span>
-        <div id="csdot" style="width:7px;height:7px;border-radius:50%;background:#64748b;margin-left:auto;"></div>
-        <span id="cstxt" style="font-size:9px;color:var(--gray2);">Nije aktivan</span>
-      </div>
-      <div class="col-b" id="chat-col">
-        <div class="notice">
-          <div class="notice-icon">🎬</div>
-          <div class="notice-t">Live nije pokrenut</div>
-          <div class="notice-s">Klikni <b style="color:#f87171;">POKRENI LIVE</b> gore<br>da se povežeš sa TikTok chatom.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- COL3: Artikli + Narudžbine -->
-    <div class="col" style="grid-template-rows:auto 1fr;display:flex;flex-direction:column;">
-      <!-- Artikli Input -->
-      <div style="flex-shrink:0;border-bottom:1px solid var(--brd);">
-        <div class="col-h" style="color:var(--amber);">
-          <span>🛍️</span>
-          <span>Artikli</span>
-          <span id="art-lbl" style="font-size:9px;color:var(--txt3);margin-left:auto;">dodaj artikal →</span>
-        </div>
-        <div style="padding:8px 10px;">
-          <input type="text" id="ln-naziv" placeholder="naziv artikla..."
-            style="width:100%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.08);border-radius:var(--r-sm);padding:8px 10px;color:var(--txt);font-size:13px;font-family:'Nunito';outline:none;margin-bottom:6px;transition:border-color .2s;"
-            onfocus="this.style.borderColor='rgba(212,146,42,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'" />
-          <div style="display:flex;gap:5px;">
-            <input type="text" inputmode="numeric" id="ln-cena" placeholder="cena RSD"
-              style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.08);border-radius:var(--r-sm);padding:8px 10px;color:var(--txt);font-size:14px;font-weight:800;font-family:'Nunito';outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='rgba(212,146,42,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"
-              oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
-            <input type="text" inputmode="numeric" id="ln-kolicina" value="1"
-              style="width:46px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.08);border-radius:var(--r-sm);padding:8px 6px;color:var(--txt);font-size:14px;font-weight:800;font-family:'Nunito';outline:none;text-align:center;transition:border-color .2s;"
-              onfocus="this.style.borderColor='rgba(212,146,42,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"
-              oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="Količina" />
-            <button onclick="dodajLnArtikal()"
-              style="background:linear-gradient(135deg,var(--amber),var(--amber2));border:none;border-radius:var(--r-sm);padding:0 14px;color:#160900;font-size:20px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
-          </div>
-          <div id="ln-artikli-list" style="margin-top:8px;"></div>
-        </div>
-      </div>
-
-      <!-- Narudžbine -->
-      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-        <div class="col-h" style="color:var(--emerald);">
-          <span>📋</span>
-          <span>Narudžbine</span>
-          <span id="nar-count" style="background:rgba(16,185,129,0.2);border-radius:20px;padding:2px 7px;font-size:9px;margin-left:6px;">0</span>
-          <span style="font-size:9px;color:rgba(245,158,11,0.8);margin-left:auto;background:rgba(245,158,11,0.08);border-radius:6px;padding:2px 7px;">⚡ šalju se automatski</span>
-        </div>
-        <div style="flex:1;overflow-y:auto;padding:8px;" id="ln-box">
-          <div id="ln-list">
-            <div style="text-align:center;color:var(--gray2);font-size:12px;padding:30px 10px;">
-              Pokreni Live i dodaj artikle<br>da vidiš narudžbine...
-            </div>
-          </div>
-        </div>
+    <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:7px;" id="chat-col">
+      <div class="notice">
+        <div class="notice-icon">🎬</div>
+        <div class="notice-t">Live nije pokrenut</div>
+        <div class="notice-s">Klikni <b style="color:#f87171;">POKRENI LIVE</b> gore<br>da se povežeš sa TikTok chatom.</div>
       </div>
     </div>
   </div>
+
 </div>
 
-<!-- ERROR TOAST -->
+<!-- TOAST -->
 <div class="m-toast" id="m-toast"></div>
-
-<!-- TOOLTIP -->
 <div class="tip" id="tip"></div>
 
 <script>
 const RAILWAY = 'https://novarobashop-server-production.up.railway.app';
-let _kupci=[], _racuni=[], _filter='all', _cfilt='all', _sort='tiktok', _srch='', _chat=[], _chatCnt=0, _unsubs=[];
+const PUSH_WORKER_URL_LM = 'https://novarobashop-push.novarobashop.workers.dev';
+
+// Push an alle Kunden senden (für Live-Benachrichtigungen)
+async function _sendLivePushToAll(title, body) {
+  try {
+    const {collection:col, getDocs, query, where} = window._fb;
+    const db = window._db;
+    const snap = await getDocs(query(col(db,'users'), where('role','==','kupac')));
+    const tokens = [];
+    snap.forEach(d => { const t = d.data().fcmToken; if(t) tokens.push(t); });
+    if (!tokens.length) return;
+    await fetch(PUSH_WORKER_URL_LM, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        tokens,
+        title,
+        body,
+        icon: '/novarobashop-app/icon-192.png',
+        badge: '/novarobashop-app/icon-192.png',
+        tag: 'live',
+        data: { tab: 'notif', url: 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html' }
+      })
+    });
+  } catch(e) { console.log('Live push error:', e.message); }
+}
+let _kupci=[], _racuni=[], _chat=[], _chatCnt=0, _unsubs=[];
+let _seenNoreg=new Set(); // tiktokIds die als rot gesehen wurden
 let _isLive=false, _liveStartedAt=null, _liveChatUnsub=null, _liveKupciUnsub=null;
-let _lnArtikli=[], _lnKorpe={}, _lnGesendet=new Set();
+let _msgCount={};    // { tiktokId: count } — poruke po korisniku u ovom liveu
+let _vipNotified=new Set(); // tiktokIds kojima je već odsviran VIP ton
+const VIP_THRESHOLD=5;  // koliko poruka = VIP
 let _currentUser=null;
 
 // ── AUTH ──
@@ -340,78 +284,112 @@ async function doLogin(){
 async function doLogout(){ await window._signOut(window._auth); }
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('ls').style.display!=='none') doLogin();
-  if((e.key==='f'||e.key==='F')&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); document.getElementById('srch').focus(); }
-  if(e.key==='Escape'){ document.getElementById('srch').value=''; onSearch(''); }
-  if(e.key==='Enter'&&document.activeElement?.id==='ln-naziv') document.getElementById('ln-cena')?.focus();
-  if(e.key==='Enter'&&document.activeElement?.id==='ln-cena')  dodajLnArtikal();
-  if(e.key==='Enter'&&document.activeElement?.id==='ln-kolicina') dodajLnArtikal();
 });
 
 // ── FIRESTORE STATUS ──
 function _fsOk(msg){
-  const bar=document.getElementById('fs-bar'), last=document.getElementById('fs-last');
-  if(bar){ bar.className='fs-bar ok'; document.getElementById('fs-txt').textContent='Firestore: '+(msg||'povezan'); }
-  if(last){ const d=new Date(); last.textContent='Zadnji: '+d.toLocaleTimeString('sr-Latn',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+  const bar=document.getElementById('fs-bar'),last=document.getElementById('fs-last');
+  if(bar){bar.className='fs-bar ok';document.getElementById('fs-txt').textContent='Firestore: '+(msg||'povezan');}
+  if(last){last.textContent='Zadnji: '+new Date().toLocaleTimeString('sr-Latn',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 }
 function _fsErr(msg){
   const bar=document.getElementById('fs-bar');
-  if(bar){ bar.className='fs-bar err'; document.getElementById('fs-txt').textContent='Firestore: '+(msg||'greška'); }
+  if(bar){bar.className='fs-bar err';document.getElementById('fs-txt').textContent='Firestore: '+(msg||'greška');}
 }
-function _showToast(msg,dur=4000){
+function _showToast(msg,dur=4000,color=''){
   const t=document.getElementById('m-toast');
-  if(!t) return;
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), dur);
+  if(!t)return;
+  t.textContent=msg;
+  t.className='m-toast'+(color?' '+color:'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
 
 // ── START MONITOR ──
 function startMonitor(){
-  const {collection:col,query:q,where:wh,onSnapshot:snap,limit:lim}=window._fb;
+  const {collection:col,query:q,where:wh,onSnapshot:snap}=window._fb;
   const db=window._db, uid=window._uid;
 
-  // Učitaj podatke o ulogovanom adminu
-  window._fb.onSnapshot(window._fb.query(window._fb.collection(db,'users'),window._fb.where('__name__','==',uid)), s=>{
-    s.forEach(d=>{ _currentUser={uid,id:uid,...d.data()}; });
+  // Admin user data
+  snap(q(col(db,'users'),wh('__name__','==',uid)),s=>{
+    s.forEach(d=>{_currentUser={uid,id:uid,...d.data()};});
   });
 
-  // Kupci
+  // Kupci (needed for chat name lookup)
   _unsubs.push(snap(
     q(col(db,'users'),wh('role','==','kupac')),
-    s=>{ _kupci=[]; s.forEach(d=>_kupci.push({id:d.id,...d.data()})); _fsOk(); render(); },
+    s=>{ _kupci=[]; s.forEach(d=>_kupci.push({id:d.id,...d.data()})); _fsOk(); },
     e=>{ _fsErr('Kupci: '+e.message); }
   ));
 
-  // Racuni
+  // Racuni (needed for auto invoice send)
   _unsubs.push(snap(
     q(col(db,'racuni'),wh('adminId','==',uid)),
-    s=>{ _racuni=[]; s.forEach(d=>_racuni.push({id:d.id,...d.data()})); _fsOk(); render(); renderLnKorpe(); },
+    s=>{ _racuni=[]; s.forEach(d=>_racuni.push({id:d.id,...d.data()})); _fsOk(); },
     e=>{ _fsErr('Računi: '+e.message); }
   ));
 }
 
+// VIP Score računanje iz live_engagement
+let _vipScores={};   // { tiktokId: totalPoints }
+let _vipBadges=new Set(); // tiktokIds koji su dostigli VIP
+let _engUnsub=null;
+
+function startEngagementListener(){
+  const {collection:col,query:q,where:wh,onSnapshot:snap}=window._fb;
+  const db=window._db, uid=window._uid;
+  _vipScores={};
+  _vipBadges=new Set();
+  if(_engUnsub){_engUnsub();_engUnsub=null;}
+  const liveStart=_liveStartedAt||new Date();
+  const filterFrom=new Date(liveStart.getTime()-3000);
+  _engUnsub=snap(
+    q(col(db,'live_engagement'),wh('adminId','==',uid),wh('timestamp','>=',filterFrom)),
+    s=>{
+      s.docChanges().forEach(ch=>{
+        if(ch.type==='added'){
+          const d=ch.doc.data();
+          const tid=(d.tiktokId||'').toLowerCase();
+          if(!tid) return;
+          _vipScores[tid]=(_vipScores[tid]||0)+(d.points||0);
+          // Novi VIP dostignut?
+          if(_vipScores[tid]>=VIP_THRESHOLD && !_vipBadges.has(tid)){
+            _vipBadges.add(tid);
+            if(!_vipNotified.has(tid)){
+              _vipNotified.add(tid);
+              playVIP();
+              const k=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tid);
+              const ime=k?(k.tiktokNick||k.name||'@'+tid):'@'+tid;
+              _showToast('⭐ VIP: '+ime+' ('+Math.round(_vipScores[tid])+' bodova)!', 5000, 'gold');
+            }
+          }
+        }
+      });
+    },
+    e=>{ console.warn('Engagement listener error:', e.message); }
+  );
+}
+
 // ══════════════════════════════════════════
-// 🔴 LIVE START / STOP
+// 🔴  LIVE START / STOP
 // ══════════════════════════════════════════
 async function toggleLiveMonitor(){
   if(!_isLive){
-    // ── POKRENI LIVE ──
     _isLive=true;
     _liveStartedAt=new Date();
-    _lnKorpe={};
-    _lnGesendet=new Set();
-    renderLnKorpe();
+    _chat=[];
+    _chatCnt=0;
 
     document.getElementById('live-start-btn').style.display='none';
     document.getElementById('live-stop-btn').style.display='flex';
     document.getElementById('live-chat-status').innerHTML='🟡 Povezujem...';
 
-    // Slušaj nove kupce
     startLiveKupciListener();
-    // Slušaj chat
     startLiveChatFeed();
+    startEngagementListener();
 
-    // Poveži Railway server
-    const tiktok = (_currentUser||{}).tiktokAdmin || '';
+    // Povezi Railway TikTok server
+    const tiktok=(_currentUser||{}).tiktokAdmin||'';
     if(tiktok){
       try{
         const ctrl=new AbortController();
@@ -419,7 +397,7 @@ async function toggleLiveMonitor(){
         await fetch(`${RAILWAY}/start-live`,{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer novarobashop2026'},
-          body:JSON.stringify({adminId:window._uid, tiktokUsername:tiktok}),
+          body:JSON.stringify({adminId:window._uid,tiktokUsername:tiktok}),
           signal:ctrl.signal
         });
         clearTimeout(to);
@@ -429,20 +407,23 @@ async function toggleLiveMonitor(){
       }
     }
 
-    // Obavesti kupce
+    // Obavesti kupce — Firestore + Push
     const {collection:col,addDoc}=window._fb;
     const db=window._db;
     const adminName=(_currentUser||{}).name||'Admin';
+    const liveMsg = `🔴 ${adminName} je upravo počeo LIVE${tiktok?' @'+tiktok:''}! Pridruži se!`;
     for(const k of _kupci){
       try{
         await addDoc(col(db,'notifikacije'),{
           userId:k.id, tip:'live',
-          poruka:`🔴 ${adminName} je upravo počeo LIVE${tiktok?' @'+tiktok:''}! Pridruži se!`,
+          poruka: liveMsg,
           vreme:new Date().toISOString(), procitano:false
         });
       } catch(e){}
     }
-    _showToast(`🔴 LIVE pokrenut! ${_kupci.length} kupaca obavešteno!`, 4000);
+    // Push-Benachrichtigung an alle Kunden (wie WhatsApp)
+    _sendLivePushToAll('🔴 LIVE je počeo!', liveMsg);
+    _showToast(`🔴 LIVE pokrenut! ${_kupci.length} kupaca obavešteno!`);
 
   } else {
     // ── ZAVRŠI LIVE ──
@@ -451,8 +432,10 @@ async function toggleLiveMonitor(){
     document.getElementById('live-stop-btn').style.display='none';
     document.getElementById('live-chat-status').innerHTML='⚫ Nije pov.';
 
-    if(_liveChatUnsub){ _liveChatUnsub(); _liveChatUnsub=null; }
-    if(_liveKupciUnsub){ _liveKupciUnsub(); _liveKupciUnsub=null; }
+    if(_liveChatUnsub){_liveChatUnsub();_liveChatUnsub=null;}
+    if(_liveKupciUnsub){_liveKupciUnsub();_liveKupciUnsub=null;}
+    if(_engUnsub){_engUnsub();_engUnsub=null;}
+    _vipScores={}; _vipBadges=new Set(); _vipNotified=new Set();
 
     try{
       await fetch(`${RAILWAY}/stop-live`,{
@@ -462,69 +445,139 @@ async function toggleLiveMonitor(){
       });
     } catch(e){}
 
-    // ── AUTOMATSKI POŠALJI SVE RAČUNE ──
-    const {collection:col,addDoc}=window._fb;
-    const db=window._db;
-    const svi=Object.values(_lnKorpe).filter(k=>!k.racunSent && k.stavke.length>0);
-    if(svi.length>0){
-      _showToast('📤 Šaljem račune za '+svi.length+' kupac(a)...', 3000);
-      let sent=0;
-      for(const {kupac,stavke} of svi){
-        try{
-          const ukupno=stavke.reduce((s,x)=>s+(x.cena*(x.kolicina||1)),0);
-          const broj=Math.floor(1000+Math.random()*9000);
-          await addDoc(col(db,'racuni'),{
-            adminId:window._uid,
-            kupacId:kupac.id, kupacName:kupac.name||'',
-            iznos:ukupno, opis:stavke.map(s=>s.naziv).join(', '),
-            stavke, status:'novo', paketStatus:'prep',
-            datum:new Date().toISOString().slice(0,10),
-            broj, createdAt:new Date().toISOString(), sourceLive:true
-          });
-          const poruka='🧾 Nova računa sa Livea\n――――――――――――――――\n'
-            +stavke.map(s=>{const kol=s.kolicina||1; return s.naziv+'  '+kol+'x '+s.cena.toLocaleString()+' = '+(s.cena*kol).toLocaleString()+' RSD';}).join('\n')
-            +'\n――――――――――――――――\nUkupno: '+ukupno.toLocaleString()+' RSD';
-          await addDoc(col(db,'notifikacije'),{
-            userId:kupac.id, tip:'nova_racun', poruka,
-            vreme:new Date().toISOString(), procitano:false
-          });
-          sent++;
-        } catch(e){ console.error('Greška slanja računa:', e.message); }
-      }
-      _showToast('✅ Live završen! '+sent+' račun(a) poslato!', 5000);
-    } else {
-      _showToast('⏹️ Live završen');
-    }
-
-    // Reset
-    _lnKorpe={};
-    _lnGesendet=new Set();
     _chat=[];
     _chatCnt=0;
+    _seenNoreg=new Set();
+    _msgCount={};
+    _vipNotified=new Set();
     document.getElementById('s-c').textContent='0';
-    document.getElementById('chat-col').innerHTML='<div class="notice"><div class="notice-icon">🎬</div><div class="notice-t">Live nije pokrenut</div><div class="notice-s">Klikni <b style="color:#f87171;">POKRENI LIVE</b> gore<br>da se povežeš sa TikTok chatom.</div></div>';
-    renderLnKorpe();
-    renderLnArtikli();
+    document.getElementById('chat-col').innerHTML=`
+      <div class="notice">
+        <div class="notice-icon">🎬</div>
+        <div class="notice-t">Live završen</div>
+        <div class="notice-s">Klikni <b style="color:#f87171;">POKRENI LIVE</b> ponovo<br>za sledeći live.</div>
+      </div>`;
+    _showToast('⏹️ Live završen');
   }
 }
 
-// ── LIVE KUPCI LISTENER (nova registracija → zvono) ──
+// ── NOVI KUPAC → ZVONO ──
+// ── TÖNE ──
+
+// 🔔 Neuer Kunde registriert — freudiger Aufwärts-Akkord
+// ⭐ VIP — warmer goldener Fanfare-Ton
+function playVIP(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Royaler Fanfare: kurze Einleitung + langer strahlender Akkord
+    [[330,0,'sine',0.2],[440,0.1,'sine',0.25],[550,0.2,'sine',0.3],[660,0.3,'triangle',0.4],[880,0.45,'triangle',0.45],[660,0.45,'sine',0.3],[550,0.45,'sine',0.2]].forEach(([freq,t,type,vol])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq;o.type=type;
+      g.gain.setValueAtTime(0,ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(vol,ctx.currentTime+t+0.06);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+t+(freq===880||freq===660&&t>0.4?0.6:0.2));
+      o.start(ctx.currentTime+t);
+      o.stop(ctx.currentTime+t+0.7);
+    });
+  } catch(e){}
+}
+
+function playNeuerKupac(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Aufwärts-Arpeggio: C5 → E5 → G5 → C6 → kurzer Abschluss-Akkord
+    [[523,0,'triangle',0.35],[659,0.15,'triangle',0.35],[784,0.30,'triangle',0.35],[1047,0.45,'triangle',0.4],[1047,0.70,'sine',0.25],[784,0.70,'sine',0.25]].forEach(([freq,t,type,vol])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq; o.type=type;
+      g.gain.setValueAtTime(0,ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(vol,ctx.currentTime+t+0.04);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+t+0.22);
+      o.start(ctx.currentTime+t);
+      o.stop(ctx.currentTime+t+0.25);
+    });
+  } catch(e){}
+}
+
+// 🚫 Blokiran Kunde im Chat — bedrohlicher Abstieg + Buzzer
+function playBlokiran(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Absteigende Töne: G4 → E4 → C4 → tief
+    [[392,0,'sawtooth',0.3],[330,0.18,'sawtooth',0.3],[262,0.36,'sawtooth',0.3],[196,0.55,'square',0.45]].forEach(([freq,t,type,vol])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq; o.type=type;
+      g.gain.setValueAtTime(0,ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(vol,ctx.currentTime+t+0.05);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+t+0.28);
+      o.start(ctx.currentTime+t);
+      o.stop(ctx.currentTime+t+0.32);
+    });
+    // Kurzer Alarm-Buzz am Ende
+    setTimeout(()=>{
+      try{
+        const ctx2=new(window.AudioContext||window.webkitAudioContext)();
+        [0,0.12,0.24].forEach(t=>{
+          const o=ctx2.createOscillator(),g=ctx2.createGain();
+          o.connect(g);g.connect(ctx2.destination);
+          o.frequency.value=180; o.type='square';
+          g.gain.setValueAtTime(0,ctx2.currentTime+t);
+          g.gain.linearRampToValueAtTime(0.5,ctx2.currentTime+t+0.02);
+          g.gain.linearRampToValueAtTime(0,ctx2.currentTime+t+0.10);
+          o.start(ctx2.currentTime+t);
+          o.stop(ctx2.currentTime+t+0.12);
+        });
+      } catch(e){}
+    },650);
+  } catch(e){}
+}
+
+// 🎉 Nicht-registrierter Kunde hat sich gerade registriert!
+function playRegistrovao(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Fanfare: schnelle Aufwärts-Triole + langer hoher Ton
+    [[392,0,'sine',0.3],[523,0.12,'sine',0.35],[659,0.24,'sine',0.35],[784,0.36,'sine',0.4],[1047,0.5,'triangle',0.45]].forEach(([freq,t,type,vol])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq; o.type=type;
+      g.gain.setValueAtTime(0,ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(vol,ctx.currentTime+t+0.04);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+t+(freq===1047?0.5:0.18));
+      o.start(ctx.currentTime+t);
+      o.stop(ctx.currentTime+t+(freq===1047?0.55:0.22));
+    });
+  } catch(e){}
+}
+
 function startLiveKupciListener(){
   const {collection:col,query:q,where:wh,onSnapshot:snap}=window._fb;
   const db=window._db;
   const poznatiBefore=new Set(_kupci.map(k=>k.id));
   if(_liveKupciUnsub) _liveKupciUnsub();
-  _liveKupciUnsub=snap(q(col(db,'users'),wh('role','==','kupac')), s=>{
-    const novi=[];
+  _liveKupciUnsub=snap(q(col(db,'users'),wh('role','==','kupac')),s=>{
     s.forEach(d=>{
+      const data=d.data();
       if(!poznatiBefore.has(d.id)){
-        novi.push({id:d.id,...d.data()});
         poznatiBefore.add(d.id);
+        if(data.blocked){
+          playBlokiran();
+          _showToast('🚫 BLOKIRAN se pojavio: '+(data.name||data.tiktokIme||'?'), 6000, 'purple');
+        } else {
+          const tiktokIme=(data.tiktokIme||'').toLowerCase();
+          if(tiktokIme && _seenNoreg.has(tiktokIme)){
+            // Bio je crven u chatu — upravo se registrovao!
+            playRegistrovao();
+            _showToast('🎉 @'+tiktokIme+' se upravo registrovao!', 5000, 'green');
+            _seenNoreg.delete(tiktokIme);
+          } else {
+            playNeuerKupac();
+            _showToast('🔔 NOVI KUPAC: '+(data.tiktokNick||data.name||data.tiktokIme||'?')+' se registrovao!', 5000, 'green');
+          }
+        }
       }
-    });
-    novi.forEach(k=>{
-      playKlingel();
-      _showToast('🔔 Novi kupac: '+(k.name||k.tiktokIme||'Nepoznat')+' se upravo registrovao!');
     });
   });
 }
@@ -533,9 +586,9 @@ function playKlingel(){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     [523,659,784].forEach((freq,i)=>{
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=freq; o.type='sine';
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq;o.type='sine';
       g.gain.setValueAtTime(0,ctx.currentTime+i*0.18);
       g.gain.linearRampToValueAtTime(0.4,ctx.currentTime+i*0.18+0.05);
       g.gain.linearRampToValueAtTime(0,ctx.currentTime+i*0.18+0.25);
@@ -550,19 +603,29 @@ function startLiveChatFeed(){
   const {collection:col,query:q,where:wh,onSnapshot:snap,limit:lim}=window._fb;
   const db=window._db, uid=window._uid;
   const feed=document.getElementById('chat-col');
-  feed.innerHTML='<div style="text-align:center;color:var(--gray2);font-size:12px;padding:20px;">⏳ Povezujem se...</div>';
-  const liveStart=_liveStartedAt||new Date();
-  const filterFrom=new Date(liveStart.getTime()-5000);
+  feed.innerHTML='<div style="text-align:center;color:var(--txt3);font-size:13px;padding:40px;">⏳ Povezujem se...</div>';
+  const filterFrom=new Date((_liveStartedAt||new Date()).getTime()-5000);
   let _init=false, _seen=new Set(), _localDocs=[], _newCnt=0;
 
-  const chatQ=q(col(db,'live_chat'),wh('adminId','==',uid),wh('timestamp','>=',filterFrom),lim(200));
+  const chatQ=q(col(db,'live_chat'),wh('adminId','==',uid),wh('timestamp','>=',filterFrom),lim(300));
   _liveChatUnsub=snap(chatQ, snap=>{
     snap.docChanges().forEach(ch=>{
       if(ch.type==='added'&&!_seen.has(ch.doc.id)){
         _seen.add(ch.doc.id);
         const d={id:ch.doc.id,...ch.doc.data()};
         _localDocs.unshift(d);
-        if(_init){ _newCnt++; checkNarudzba(d); }
+        if(_init){
+          _newCnt++;
+          const tId=(d.tiktokId||'').toLowerCase();
+          const kCheck=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tId);
+          if(kCheck?.blocked){
+            playBlokiran();
+            _showToast('🚫 BLOKIRAN piše u chatu: @'+tId, 6000, 'purple');
+          } else if(!kCheck){
+            // Nije registrovan — zapamti ga
+            if(tId) _seenNoreg.add(tId);
+          }
+        }
       } else if(ch.type==='modified'){
         const idx=_localDocs.findIndex(x=>x.id===ch.doc.id);
         if(idx!==-1) _localDocs[idx]={id:ch.doc.id,...ch.doc.data()};
@@ -574,285 +637,80 @@ function startLiveChatFeed(){
     document.getElementById('csdot').style.cssText='width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;margin-left:auto;';
     document.getElementById('cstxt').textContent='Aktivan';
     renderChatFeed(_localDocs);
+    _fsOk('live chat aktivan');
   }, err=>{
-    console.error('Chat feed error:',err.message);
-    feed.innerHTML='<div style="color:#fda4af;font-size:12px;padding:12px;">❌ Greška: '+err.message+'</div>';
+    console.error('Chat error:',err.message);
+    feed.innerHTML='<div style="color:#fda4af;font-size:12px;padding:16px;">❌ Greška: '+err.message+'</div>';
   });
 }
 
 function renderChatFeed(docs){
   const feed=document.getElementById('chat-col');
-  if(!docs.length){ feed.innerHTML='<div style="text-align:center;color:var(--gray2);font-size:12px;padding:20px;">Čekam komentare...</div>'; return; }
-  let items=[...docs];
-  if(_cfilt!=='all') items=items.filter(d=>{
-    const s=d.statusColor;
-    if(_cfilt==='reg')   return s==='green';
-    if(_cfilt==='kasni') return s==='orange';
-    if(_cfilt==='noreg') return s==='red'||!s||s==='unknown';
-    return true;
-  });
-  feed.innerHTML=items.map(d=>{
-    const s=cs(d.statusColor);
-    const c=s==='reg'?'#4ade80':s==='kasni'?'#fb923c':s==='noreg'?'#f87171':'#94a3b8';
-    const lb=s==='reg'?'✅ Reg':s==='kasni'?'⚠️ Kasni':s==='noreg'?'❌ Nije reg':'❓ ?';
-    const t=d.timestamp?.toDate?d.timestamp.toDate():new Date(d.timestamp||Date.now());
-    const ts=t.toLocaleTimeString('sr-Latn',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const k=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===(d.tiktokId||'').toLowerCase());
-    return `<div class="ci ${s}">
-      <div class="cd ${s}"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;">
-          ${k?`<span class="cnick" style="color:${c};">${k.tiktokNick||k.name||''}</span>`:''}
-          <span class="cn">@${(d.tiktokId||'?').toLowerCase()}</span>
-          <span class="cs-badge cs-${s}">${lb}</span>
-          <span class="ct">${ts}</span>
-        </div>
-        <div class="cc">${d.comment||''}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════
-// 🛍️ ARTIKLI — Admin dodaje
-// ══════════════════════════════════════════
-function dodajLnArtikal(){
-  const naziv=document.getElementById('ln-naziv').value.trim();
-  const cena=parseFloat(document.getElementById('ln-cena').value)||0;
-  const kolicina=parseInt(document.getElementById('ln-kolicina').value)||1;
-  if(!naziv){ _showToast('⚠️ Unesite naziv'); return; }
-  if(!cena){  _showToast('⚠️ Unesite cenu');  return; }
-  _lnArtikli.push({naziv, cena, stanje:kolicina});
-  document.getElementById('ln-naziv').value='';
-  document.getElementById('ln-cena').value='';
-  document.getElementById('ln-kolicina').value='1';
-  document.getElementById('ln-naziv').focus();
-  renderLnArtikli();
-  const lbl=document.getElementById('art-lbl');
-  lbl.textContent=_lnArtikli.length+' artikl'+(_lnArtikli.length===1?'':'a')+' aktivno';
-  lbl.style.color='#6ee7b7';
-  _showToast('✅ '+naziv+' — '+cena.toLocaleString()+' RSD × '+kolicina+' kom');
-}
-
-function renderLnArtikli(){
-  const el=document.getElementById('ln-artikli-list');
-  if(!_lnArtikli.length){ el.innerHTML=''; return; }
-  el.innerHTML=_lnArtikli.map((a,i)=>{
-    const rezervisano=Object.values(_lnKorpe).reduce((sum,k)=>{
-      const s=k.stavke.find(x=>x.naziv===a.naziv&&x.cena===a.cena);
-      return sum+(s?(s.kolicina||1):0);
-    },0);
-    const dostupno=(a.stanje||1)-rezervisano;
-    const boja=dostupno<=0?'#fda4af':dostupno<=3?'#fcd34d':'#6ee7b7';
-    return `<div style="display:flex;align-items:center;gap:6px;background:rgba(20,184,166,0.06);border:1px solid rgba(20,184,166,0.15);border-radius:8px;padding:5px 8px;margin-bottom:4px;">
-      <span style="font-size:11px;color:var(--teal);">📌</span>
-      <span style="font-size:12px;font-weight:700;color:white;flex:1;">${a.naziv}</span>
-      <span style="font-size:10px;font-weight:800;color:${boja};background:rgba(255,255,255,0.06);border-radius:5px;padding:1px 6px;">${dostupno}/${a.stanje||1}</span>
-      <span style="font-size:11px;font-weight:800;color:var(--amber);">${a.cena.toLocaleString()} RSD</span>
-      <button onclick="_lnArtikli.splice(${i},1);renderLnArtikli();" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:13px;padding:0 2px;">✕</button>
-    </div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════
-// 📋 NARUDŽBINE — Iz chat-a automatski
-// ══════════════════════════════════════════
-function checkNarudzba(chatItem){
-  if(!_isLive||!_lnArtikli.length) return;
-  const comment=(chatItem.comment||'').toLowerCase().trim();
-  const tiktokId=(chatItem.tiktokId||'').toLowerCase();
-  if(!tiktokId) return;
-  const kupac=_kupci.find(k=>(k.tiktokIme||'').toLowerCase()===tiktokId);
-  if(!kupac) return;
-
-  // Parsiranje: "3x500" ili "2x 750" ili samo "500" ili "2 x 500"
-  let matchedArtikal=null, kolicina=1;
-  const qtyPriceRx=/^(\d+)\s*[xX×]\s*(\d+)$/;
-  const priceOnlyRx=/^(\d{2,6})$/;
-  const mQP=comment.replace(/\s/g,'').match(qtyPriceRx);
-  if(mQP){ kolicina=parseInt(mQP[1]); const cena=parseFloat(mQP[2]); matchedArtikal=_lnArtikli.find(a=>a.cena===cena); }
-  else{ const mP=comment.replace(/\s/g,'').match(priceOnlyRx); if(mP){ const cena=parseFloat(mP[1]); matchedArtikal=_lnArtikli.find(a=>a.cena===cena); } }
-  if(!matchedArtikal) return;
-
-  // Provjeri dostupnost
-  const rezervisano=Object.values(_lnKorpe).reduce((sum,k)=>{
-    if(k.kupac.id===kupac.id) return sum;
-    const s=k.stavke.find(x=>x.naziv===matchedArtikal.naziv&&x.cena===matchedArtikal.cena);
-    return sum+(s?(s.kolicina||1):0);
-  },0);
-  const dostupno=(matchedArtikal.stanje||1)-rezervisano;
-  const finalKol=Math.min(kolicina,dostupno);
-  if(finalKol<=0) return;
-
-  if(_lnKorpe[kupac.id]?.racunSent) return;
-  if(!_lnKorpe[kupac.id]) _lnKorpe[kupac.id]={kupac, stavke:[], racunSent:false};
-  const ex=_lnKorpe[kupac.id].stavke.find(s=>s.naziv===matchedArtikal.naziv&&s.cena===matchedArtikal.cena);
-  if(ex) ex.kolicina=(ex.kolicina||1)+finalKol;
-  else _lnKorpe[kupac.id].stavke.push({naziv:matchedArtikal.naziv, cena:matchedArtikal.cena, kolicina:finalKol});
-
-  renderLnKorpe();
-  renderLnArtikli();
-}
-
-function renderLnKorpe(){
-  const list=document.getElementById('ln-list');
-  const entries=Object.values(_lnKorpe).filter(k=>k.stavke.length>0);
-  const cnt=document.getElementById('nar-count');
-  const stat=document.getElementById('s-nar');
-  if(cnt) cnt.textContent=entries.length;
-  if(stat) stat.textContent=entries.length;
-  if(!entries.length){
-    list.innerHTML='<div style="text-align:center;color:var(--gray2);font-size:12px;padding:20px 10px;">'+(_isLive?'Čekam da kupci pišu cene u chat...':'Pokreni Live da vidiš narudžbine...')+'</div>';
+  if(!docs.length){
+    feed.innerHTML='<div style="text-align:center;color:var(--txt3);font-size:13px;padding:40px;">Čekam komentare...</div>';
     return;
   }
-  list.innerHTML=entries.map(({kupac,stavke,racunSent})=>{
-    const ukupno=stavke.reduce((s,x)=>s+(x.cena*(x.kolicina||1)),0);
-    const ini=(kupac.name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    const statusStyle=racunSent
-      ?'background:rgba(16,185,129,0.08);border:1.5px solid rgba(16,185,129,0.25);opacity:0.6;'
-      :'background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.08);';
-    return `<div style="${statusStyle}border-radius:var(--r-sm);padding:10px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div style="width:30px;height:30px;border-radius:50%;background:rgba(20,184,166,0.15);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${ini}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${kupac.tiktokNick||kupac.name||'—'}</div>
-          <div style="font-size:10px;color:var(--teal);">@${kupac.tiktokIme||'—'}</div>
-        </div>
-        <div style="font-size:13px;font-weight:800;color:var(--amber);">${ukupno.toLocaleString()} RSD</div>
-        ${!racunSent?`<button onclick="obrisiNarudzbu('${kupac.id}')" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:0 2px;" title="Obriši">✕</button>`:''}
-      </div>
-      ${stavke.map(s=>`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);padding:2px 0;border-top:1px solid var(--brd2);">
-        <span>${s.naziv}${s.kolicina>1?' ×'+s.kolicina:''}</span>
-        <span style="color:var(--amber);font-weight:700;">${(s.cena*(s.kolicina||1)).toLocaleString()} RSD</span>
-      </div>`).join('')}
-      ${racunSent
-        ?'<div style="text-align:center;font-size:10px;color:#6ee7b7;margin-top:5px;">✅ Račun poslat</div>'
-        :`<div style="display:flex;gap:5px;margin-top:6px;">
-          <button onclick="posaljiRacunRano('${kupac.id}')" style="flex:1;background:rgba(212,146,42,0.12);color:#fcd34d;border:1px solid rgba(212,146,42,0.3);border-radius:8px;padding:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:'Nunito';">⚡ Pošalji odmah</button>
-        </div>`
-      }
-    </div>`;
-  }).join('');
-}
 
-function obrisiNarudzbu(kupacId){
-  delete _lnKorpe[kupacId];
-  renderLnKorpe();
-  renderLnArtikli();
-}
-
-async function posaljiRacunRano(kupacId){
-  const korpa=_lnKorpe[kupacId];
-  if(!korpa||korpa.racunSent) return;
-  const {collection:col,addDoc}=window._fb;
-  const db=window._db;
-  try{
-    const {kupac,stavke}=korpa;
-    const ukupno=stavke.reduce((s,x)=>s+(x.cena*(x.kolicina||1)),0);
-    const broj=Math.floor(1000+Math.random()*9000);
-    await addDoc(col(db,'racuni'),{
-      adminId:window._uid, kupacId:kupac.id, kupacName:kupac.name||'',
-      iznos:ukupno, opis:stavke.map(s=>s.naziv).join(', '),
-      stavke, status:'novo', paketStatus:'prep',
-      datum:new Date().toISOString().slice(0,10),
-      broj, createdAt:new Date().toISOString(), sourceLive:true
+  // Lokalna detekcija statusa po tiktokIme
+  function getLocalStatus(tiktokId){
+    if(!tiktokId) return 'noreg';
+    const k=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tiktokId.toLowerCase());
+    if(!k) return 'noreg';
+    if(k.blocked) return 'blocked';
+    const r=_racuni.filter(x=>x.kupacId===k.id&&!x.adminDeleted);
+    if(!r.length) return 'noreg';
+    const today=new Date(); today.setHours(0,0,0,0);
+    const kasni=r.some(x=>{
+      if(x.status!=='novo'||!x.datum) return false;
+      const d=new Date(x.datum); d.setHours(0,0,0,0);
+      return Math.round((today-d)/(1000*60*60*24))>=3;
     });
-    const poruka='🧾 Nova računa sa Livea\n――――――――――――――――\n'
-      +stavke.map(s=>{const kol=s.kolicina||1; return s.naziv+'  '+kol+'x '+s.cena.toLocaleString()+' = '+(s.cena*kol).toLocaleString()+' RSD';}).join('\n')
-      +'\n――――――――――――――――\nUkupno: '+ukupno.toLocaleString()+' RSD';
-    await addDoc(col(db,'notifikacije'),{userId:kupac.id, tip:'nova_racun', poruka, vreme:new Date().toISOString(), procitano:false});
-    _lnKorpe[kupacId].racunSent=true;
-    renderLnKorpe();
-    _showToast('✅ Račun poslat za '+kupac.name);
-  } catch(e){ _showToast('❌ Greška: '+e.message); }
-}
+    if(kasni) return 'kasni';
+    return 'reg';
+  }
 
-// ── HELPERS ──
-function getStatus(k){
-  const r=_racuni.filter(x=>x.kupacId===k.id&&!x.adminDeleted);
-  if(!r.length) return 'noreg';
-  const today=new Date(); today.setHours(0,0,0,0);
-  const kasni=r.some(x=>{ if(x.status!=='novo'||!x.datum) return false; const d=new Date(x.datum); d.setHours(0,0,0,0); return Math.round((today-d)/(1000*60*60*24))>=3; });
-  if(kasni) return 'kasni';
-  if(r.some(x=>x.status==='placeno'||x.status==='ceka'||x.status==='novo')) return 'reg';
-  return 'noreg';
-}
-function getIznos(k){ return _racuni.filter(r=>r.kupacId===k.id).reduce((s,r)=>s+(r.iznos||0),0); }
-function ini(n){ return(n||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2); }
-function sc(s){ return s==='reg'?'#4ade80':s==='kasni'?'#fb923c':'#f87171'; }
-function sl(s){ return s==='reg'?'✅ Plaćeno':s==='kasni'?'⚠️ Kasni':'❌ Nije reg.'; }
-function cs(s){ return s==='green'?'reg':s==='orange'?'kasni':s==='red'?'noreg':'unk'; }
+  feed.innerHTML=docs.map(d=>{
+    const tiktokId=(d.tiktokId||'').toLowerCase();
+    let s;
+    if(d.statusColor==='green')       s='reg';
+    else if(d.statusColor==='orange') s='kasni';
+    else if(d.statusColor==='red')    s='noreg';
+    else s=getLocalStatus(tiktokId);
 
-// ── RENDER KUPACI ──
-function render(){
-  let list=[..._kupci];
-  if(_filter!=='all') list=list.filter(k=>getStatus(k)===_filter);
-  if(_srch){ const s=_srch.replace('@','').toLowerCase(); list=list.filter(k=>(k.tiktokIme||'').toLowerCase().includes(s)||(k.tiktokNick||'').toLowerCase().includes(s)||(k.name||'').toLowerCase().includes(s)); }
-  if(_sort==='tiktok') list.sort((a,b)=>(a.tiktokIme||'').localeCompare(b.tiktokIme||''));
-  if(_sort==='nick')   list.sort((a,b)=>(a.tiktokNick||'').localeCompare(b.tiktokNick||''));
-  if(_sort==='status') list.sort((a,b)=>({reg:0,kasni:1,noreg:2}[getStatus(a)]||3)-({reg:0,kasni:1,noreg:2}[getStatus(b)]||3));
-  if(_sort==='iznos')  list.sort((a,b)=>getIznos(b)-getIznos(a));
-  document.getElementById('s-r').textContent=_kupci.filter(k=>getStatus(k)==='reg').length;
-  document.getElementById('s-k').textContent=_kupci.filter(k=>getStatus(k)==='kasni').length;
-  document.getElementById('s-n').textContent=_kupci.filter(k=>getStatus(k)==='noreg').length;
-  const labels={all:'Svi kupci',reg:'✅ Registrovani',kasni:'⚠️ Kasni',noreg:'🔴 Nisu registrovani'};
-  document.getElementById('gtit').textContent=`${labels[_filter]} — ${list.length}`;
-  const g=document.getElementById('kg');
-  if(!list.length){ g.innerHTML=`<div class="empty">Nema kupaca.</div>`; return; }
-  g.innerHTML=list.map(k=>{
-    const st=getStatus(k),iz=getIznos(k),c=sc(st);
-    const narBadge=_lnKorpe[k.id]&&_lnKorpe[k.id].stavke.length?'<div style="position:absolute;top:4px;right:4px;background:var(--amber);color:#160900;border-radius:99px;padding:1px 5px;font-size:7px;font-weight:800;">NAR</div>':'';
-    return `<div class="kc ${st}" style="position:relative;" onmouseenter="showTip(event,'${k.id}')" onmouseleave="hideTip()">
-      ${narBadge}
-      ${st==='kasni'?`<div class="kc-badge">KASNI</div>`:''}
-      <div class="kc-av ${st}">${ini(k.tiktokNick||k.name)}</div>
-      <div class="kc-t" style="color:${c};">@${k.tiktokIme||'—'}</div>
-      <div class="kc-n">${k.tiktokNick||k.name||'—'}</div>
-      ${iz>0?`<div class="kc-i">${iz.toLocaleString()} RSD`:''}
-      <div class="kc-s" style="color:${c};">${sl(st)}</div>
+    // Blocked uvek override — lokalna provjera
+    const kLocal=_kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tiktokId);
+    if(kLocal?.blocked) s='blocked';
+
+    const c  = s==='reg'?'#4ade80':s==='kasni'?'#fb923c':s==='noreg'?'#f87171':s==='blocked'?'#c084fc':'#94a3b8';
+    const bg = s==='reg'?'rgba(74,222,128,0.07)':s==='kasni'?'rgba(251,146,60,0.07)':s==='noreg'?'rgba(248,113,113,0.06)':s==='blocked'?'rgba(192,132,252,0.08)':'rgba(148,163,184,0.04)';
+    const t   = d.timestamp?.toDate?d.timestamp.toDate():new Date(d.timestamp||Date.now());
+    const ts  = t.toLocaleTimeString('sr-Latn',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const k   = _kupci.find(x=>(x.tiktokIme||'').toLowerCase()===tiktokId);
+    const nick= k?(k.tiktokNick||k.name||''):tiktokId;
+    const isVip = _vipBadges.has(tiktokId);
+    const blockedBadge = s==='blocked'
+      ? '<span style="font-size:11px;background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid rgba(192,132,252,0.3);border-radius:99px;padding:1px 8px;font-weight:700;margin-left:4px;">🚫 Blokiran</span>'
+      : '';
+    const vipBadge = isVip
+      ? '<span style="font-size:11px;background:rgba(250,204,21,0.18);color:#fbbf24;border:1px solid rgba(250,204,21,0.4);border-radius:99px;padding:1px 8px;font-weight:800;margin-left:4px;">⭐ VIP</span>'
+      : '';
+    const cardBorder = isVip ? '4px solid rgba(250,204,21,0.55)' : `4px solid ${c}`;
+    const cardBg     = isVip ? `linear-gradient(135deg,${bg},rgba(250,204,21,0.05))` : bg;
+    const nameColor  = isVip ? '#fbbf24' : c;
+
+    return `<div style="padding:12px 16px;border-radius:12px;background:${cardBg};border-left:${cardBorder};animation:sli 0.3s ease;margin-bottom:2px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;flex-wrap:wrap;">
+          <span style="font-size:22px;font-weight:900;color:${nameColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.3px;">${isVip?'⭐ ':''} ${nick}</span>
+          <span style="font-size:12px;color:rgba(255,255,255,0.3);white-space:nowrap;">@${tiktokId}</span>
+          ${blockedBadge}${vipBadge}
+        </div>
+        <span style="font-size:10px;color:var(--txt3);white-space:nowrap;margin-left:10px;flex-shrink:0;">${ts}</span>
+      </div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.85);line-height:1.45;">${d.comment||''}</div>
     </div>`;
   }).join('');
 }
-
-// ── FILTER/SORT ──
-function setF(f,btn){ _filter=f; document.querySelectorAll('.fb[id^="f-"]').forEach(b=>b.className='fb'); btn.className=`fb fb-${f}`; render(); }
-function setCF(f,btn){ _cfilt=f; document.querySelectorAll('.fb[id^="cf-"]').forEach(b=>b.className='fb'); btn.className=`fb fb-${f}`; if(_liveChatUnsub) renderChatFeed([]); }
-function onSort(v){ _sort=v; render(); }
-function onSearch(v){ _srch=v; render(); }
-
-// ── TOOLTIP ──
-function showTip(e,id){
-  const k=_kupci.find(x=>x.id===id); if(!k) return;
-  const st=getStatus(k),c=sc(st),r=_racuni.filter(x=>x.kupacId===id);
-  const pl=r.filter(x=>x.status==='placeno'||x.paketStatus==='ship').reduce((s,x)=>s+(x.iznos||0),0);
-  const ce=r.filter(x=>x.status==='ceka').length, nv=r.filter(x=>x.status==='novo').length;
-  const korpa=_lnKorpe[id];
-  const tip=document.getElementById('tip');
-  tip.innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-      <div style="width:36px;height:36px;border-radius:50%;background:rgba(20,184,166,0.15);color:#5eead4;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;">${ini(k.tiktokNick||k.name)}</div>
-      <div><div style="font-size:14px;font-weight:800;color:#5eead4;">@${k.tiktokIme||'—'}</div><div style="font-size:11px;color:#94a3b8;">${k.tiktokNick||k.name||'—'}</div></div>
-    </div>
-    <div style="font-size:11px;font-weight:800;color:${c};margin-bottom:8px;">${sl(st)}</div>
-    <div style="font-size:11px;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;margin-bottom:8px;">
-      ${k.name   ?`<span style="color:#64748b;">Ime:</span><span style="font-weight:700;">${k.name}</span>`:''}
-      ${k.ulica  ?`<span style="color:#64748b;">Ulica:</span><span style="font-weight:700;">${k.ulica}</span>`:''}
-      ${k.grad   ?`<span style="color:#64748b;">Grad:</span><span style="font-weight:700;">${k.ptt||''} ${k.grad}</span>`:''}
-      ${k.telefon?`<span style="color:#64748b;">Tel:</span><span style="font-weight:700;">${k.telefon}</span>`:''}
-    </div>
-    ${korpa&&korpa.stavke.length?`<div style="background:rgba(212,146,42,0.1);border-radius:8px;padding:8px;margin-bottom:6px;"><div style="font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🛒 U narudžbini</div>${korpa.stavke.map(s=>`<div style="font-size:11px;color:white;">${s.naziv}${s.kolicina>1?' ×'+s.kolicina:''} — ${(s.cena*(s.kolicina||1)).toLocaleString()} RSD</div>`).join('')}</div>`:''}
-    ${r.length?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;text-align:center;">
-      <div style="background:rgba(34,197,94,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#4ade80;">${pl.toLocaleString()}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Plaćeno</div></div>
-      <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#fcd34d;">${ce}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Čeka</div></div>
-      <div style="background:rgba(239,68,68,0.1);border-radius:8px;padding:5px;"><div style="font-size:13px;font-weight:800;color:#f87171;">${nv}</div><div style="font-size:8px;color:#64748b;text-transform:uppercase;">Novo</div></div>
-    </div>`:'<div style="font-size:11px;color:#64748b;">Nema računa</div>'}`;
-  const rect=e.currentTarget.getBoundingClientRect();
-  let L=rect.right+10, T=rect.top;
-  if(L+260>window.innerWidth) L=rect.left-265;
-  if(T+260>window.innerHeight) T=window.innerHeight-270;
-  tip.style.left=L+'px'; tip.style.top=Math.max(8,T)+'px'; tip.style.opacity='1';
-}
-function hideTip(){ document.getElementById('tip').style.opacity='0'; }
 </script>
 </body>
 </html>
