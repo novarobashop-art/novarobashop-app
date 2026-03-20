@@ -68,8 +68,10 @@ export default {
         vibrate:  tag === 'chat'     ? [100, 50, 100, 50, 100]
                 : tag === 'live'     ? [300, 100, 300]
                 : tag === 'racun'    ? [200, 100, 200]
+                : tag === 'mahnung'  ? [200, 100, 200, 100, 200]
+                : tag === 'blokiran' ? [500, 200, 500, 200, 500]
                 :                     [200, 100, 200],
-        requireInteraction: tag === 'racun' || tag === 'live',
+        requireInteraction: tag === 'racun' || tag === 'live' || tag === 'blokiran',
       },
       fcm_options: {
         link: (data && data.url) || 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html',

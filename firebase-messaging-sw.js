@@ -25,6 +25,8 @@ function getNotifOptions(title, body, data = {}) {
                 : tag === 'live'     ? [300, 100, 300]
                 : tag === 'racun'    ? [200, 100, 200]
                 : tag === 'placanje' ? [100, 50, 300]
+                : tag === 'mahnung'  ? [200, 100, 200, 100, 200]
+                : tag === 'blokiran' ? [500, 200, 500, 200, 500]
                 :                     [200, 100, 200];
 
   return {
@@ -35,7 +37,7 @@ function getNotifOptions(title, body, data = {}) {
     renotify: true,
     vibrate,
     silent: false,
-    requireInteraction: tag === 'racun' || tag === 'live', // bleibt bis Klick bei wichtigen
+    requireInteraction: tag === 'racun' || tag === 'live' || tag === 'blokiran',
     data: { url: data.url || APP_URL, tab: data.tab || 'home' }
   };
 }

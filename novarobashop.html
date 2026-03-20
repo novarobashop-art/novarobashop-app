@@ -6588,31 +6588,70 @@ function toggleAdminNotif() {
 // Mahnung – provjeri prekoračene račune i pošalji obaveštenje
 async function sendMahnungen(racuni) {
   const { db, collection, addDoc, query, where, getDocs } = window._fb;
-  const today = new Date();
+  const today      = new Date(); today.setHours(0,0,0,0);
+  const todayKey   = today.toISOString().slice(0,10); // YYYY-MM-DD
+
   for (const r of racuni) {
     if (r.status !== 'novo' || !r.datum) continue;
-    const diff = _diffDays(today, new Date(r.datum));
-    if (diff < 1 || diff > 3) continue;
-    // Provjeri da li je već poslana mahnung za ovaj dan
-    const key = `mahnung${diff}`;
-    const existing = await getDocs(query(collection(db,'notifikacije'),
+
+    const rok      = _getRok(r, racuni);
+    if (!rok) continue;
+
+    const daysLeft = Math.ceil((rok - today) / (1000*60*60*24));
+    const daysOld  = Math.ceil((today - new Date(r.datum)) / (1000*60*60*24));
+
+    // Erst ab Tag 1 erinnern
+    if (daysOld < 1) continue;
+
+    // Eindeutiger Key: einmal pro Tag pro Rechnung
+    const tipKey = `mahnung_${r.id}_${todayKey}`;
+    const existing = await getDocs(query(
+      collection(db,'notifikacije'),
       where('userId','==',r.kupacId),
-      where('tip','==',key),
-      where('racunId','==',r.id)
+      where('tip','==',tipKey)
     ));
-    if (!existing.empty) continue;
-    const poruke = {
-      mahnung1: `⚠️ Podsetnik: Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD) još nije plaćen!`,
-      mahnung2: `⚠️ Drugi podsetnik: Račun #${r.broj} čeka uplatu. Molimo platite danas!`,
-      mahnung3: `🚨 Poslednje upozorenje! Račun #${r.broj} – sutra blokada naloga!`
-    };
+    if (!existing.empty) continue; // Heute schon gesendet
+
+    // Nachricht je nach verbleibenden Tagen
+    let emoji, naslov, poruka;
+    if (daysLeft > 2) {
+      emoji  = '⚠️';
+      naslov = 'Podsetnik za uplatu';
+      poruka = `⚠️ Podsetnik: Račun #${r.broj} (${(r.iznos||0).toLocaleString()} RSD) još nije plaćen. Imate još ${daysLeft} dana.`;
+    } else if (daysLeft === 2) {
+      emoji  = '⏰';
+      naslov = 'Još 2 dana do roka!';
+      poruka = `⏰ Preostala su 2 dana! Račun #${r.broj} – ${(r.iznos||0).toLocaleString()} RSD. Molimo platite što pre.`;
+    } else if (daysLeft === 1) {
+      emoji  = '🚨';
+      naslov = 'Poslednji dan – sutra blokada!';
+      poruka = `🚨 Poslednji dan! Račun #${r.broj} – ${(r.iznos||0).toLocaleString()} RSD. Sutra nalog biva blokiran!`;
+    } else if (daysLeft === 0) {
+      emoji  = '🔒';
+      naslov = 'Rok istekao – nalog će biti blokiran!';
+      poruka = `🔒 Rok je istekao! Račun #${r.broj} – ${(r.iznos||0).toLocaleString()} RSD. Plati odmah da izbegneš blokadu!`;
+    } else {
+      // daysLeft < 0 — već zakasneo
+      const kasniDana = Math.abs(daysLeft);
+      emoji  = '🔴';
+      naslov = `Kasniš ${kasniDana} ${kasniDana===1?'dan':'dana'} – nalog blokiran!`;
+      poruka = `🔴 Kasniš već ${kasniDana} ${kasniDana===1?'dan':'dana'}! Račun #${r.broj} – ${(r.iznos||0).toLocaleString()} RSD. Kontaktiraj admina odmah!`;
+    }
+
+    // 1. Firestore notifikacija
     await addDoc(collection(db,'notifikacije'), {
-      userId: r.kupacId,
-      tip: key,
-      racunId: r.id,
-      poruka: poruke[key],
-      vreme: new Date().toISOString(),
+      userId:    r.kupacId,
+      tip:       tipKey,
+      racunId:   r.id,
+      poruka,
+      vreme:     new Date().toISOString(),
       procitano: false
+    });
+
+    // 2. Push-Notification (wie WhatsApp)
+    sendPushToUser(r.kupacId, naslov, poruka, {
+      tag:  daysLeft <= 0 ? 'blokiran' : 'mahnung',
+      tab:  'racuni'
     });
   }
 }
