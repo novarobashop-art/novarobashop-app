@@ -2031,14 +2031,6 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
       ✓ Sačuvaj podešavanja
     </button>
 
-    <!-- Push Test -->
-    <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔔 Test Push Notifikacija</div>
-      <div style="font-size:11px;color:var(--txt3);margin-bottom:10px;">Pošalji test notifikaciju sebi da proveriš da li radi</div>
-      <button id="push-test-btn" onclick="testPushNotification()" style="width:100%;background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">🔔 Pošalji test sebi</button>
-      <div id="push-test-status" style="font-size:11px;color:var(--txt3);margin-top:8px;text-align:center;"></div>
-    </div>
-
     <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">🚪 Odjavi se</button>
   </div>
 </div>
@@ -2177,14 +2169,6 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <button onclick="saveKupacSettings()" id="ks-save-btn" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:14px;padding:15px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(20,184,166,0.3);margin-bottom:10px;transition:all 0.2s;">
       📨 Pošalji zahtev za izmenu
     </button>
-
-    <!-- Push Test za kupca -->
-    <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🔔 Notifikacije</div>
-      <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Dozvoli notifikacije da te obaveštavamo o novim računima, porukama i Live-u</div>
-      <button id="kupac-push-test-btn" onclick="testKupacPush()" style="width:100%;background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito';">🔔 Uključi notifikacije</button>
-      <div id="kupac-push-status" style="font-size:11px;color:var(--txt3);margin-top:6px;text-align:center;"></div>
-    </div>
 
     <button onclick="doLogout()" style="width:100%;background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.22);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito';">🚪 Odjavi se</button>
   </div>
@@ -4714,21 +4698,7 @@ async function openKupacSettings() {
 
   document.getElementById('kupac-settings-modal').classList.add('show');
 
-  // Push-Status anzeigen
-  const pushBtn    = document.getElementById('kupac-push-test-btn');
-  const pushStatus = document.getElementById('kupac-push-status');
-  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
-  const hasFcm = !!d.fcmToken;
-  if (perm === 'granted' && hasFcm) {
-    if (pushBtn)    { pushBtn.textContent = '✅ Notifikacije uključene'; pushBtn.style.opacity = '0.7'; }
-    if (pushStatus) { pushStatus.textContent = 'Notifikacije su aktivne ✅'; pushStatus.style.color = '#4ade80'; }
-  } else if (perm === 'denied') {
-    if (pushBtn)    { pushBtn.textContent = '❌ Dozvola odbijena u browseru'; pushBtn.style.opacity = '1'; }
-    if (pushStatus) { pushStatus.textContent = 'Idi u podešavanja browsera da dozvoliš notifikacije'; pushStatus.style.color = '#f87171'; }
-  } else {
-    if (pushBtn)    { pushBtn.textContent = '🔔 Uključi notifikacije'; pushBtn.style.opacity = '1'; }
-    if (pushStatus) { pushStatus.textContent = ''; }
-  }
+
 }
 
 function closeKupacSettings() {
@@ -6722,159 +6692,40 @@ if ('serviceWorker' in navigator) {
 const VAPID_KEY = 'BHyKcuHzDE813s9vLJyPJvJQS6k7XZ_ckFpbDo7x1O15QMJPO357AyDDzgNrgPomkeSsnf1aEjifX0UI5YDdGvE';
 const PUSH_WORKER_URL = 'https://novarobashop-push.novarobashop.workers.dev';
 
-async function testKupacPush() {
-  const btn    = document.getElementById('kupac-push-test-btn');
-  const status = document.getElementById('kupac-push-status');
-  const set = (msg, color='#93c5fd') => { if(status) { status.textContent=msg; status.style.color=color; } };
 
-  if (btn) { btn.disabled=true; btn.textContent='⏳ Uključujem...'; }
-  try {
-    if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-      set('❌ Ovaj browser ne podržava notifikacije', '#f87171'); return;
-    }
-    const swReg = await navigator.serviceWorker.ready;
-    let perm = Notification.permission;
-    if (perm === 'default') perm = await Notification.requestPermission();
-    if (perm !== 'granted') {
-      set('❌ Dozvola odbijena — idi u podešavanja browsera i dozvoli notifikacije', '#f87171');
-      if (btn) { btn.disabled=false; btn.textContent='🔔 Pokušaj ponovo'; }
-      return;
-    }
-    const { messaging, getToken, db, doc, updateDoc } = window._fb;
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
-    if (!token) { set('❌ Greška pri dobijanju tokena', '#f87171'); return; }
-    if (window._currentUser) {
-      await updateDoc(doc(db, 'users', window._currentUser.uid), {
-        fcmToken: token, fcmUpdatedAt: new Date().toISOString()
-      });
-    }
-    // Test push na sebe
-    await fetch(PUSH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token, title: '🔔 Notifikacije su uključene!',
-        body: 'Dobićeš obaveštenja o računima, porukama i Live-u ✅',
-        icon: '/novarobashop-app/icon-192.png', badge: '/novarobashop-app/icon-192.png',
-        tag: 'test', data: { tab: 'home' }
-      })
-    });
-    set('✅ Notifikacije su uključene!', '#4ade80');
-    if (btn) { btn.textContent='✅ Notifikacije uključene'; }
-  } catch(e) {
-    set('❌ ' + (e.message||e), '#f87171');
-    if (btn) { btn.disabled=false; btn.textContent='🔔 Pokušaj ponovo'; }
-  }
-}
-
-async function testPushNotification() {
-  const btn    = document.getElementById('push-test-btn');
-  const status = document.getElementById('push-test-status');
-  const setStatus = (msg, color='#93c5fd') => { if(status) { status.textContent = msg; status.style.color = color; } };
-
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Testiram...'; }
-
-  try {
-    // Korak 1: SW provjera
-    setStatus('1/4 Proveram Service Worker...');
-    if (!('serviceWorker' in navigator)) { setStatus('❌ SW nije podržan u ovom browseru', '#f87171'); return; }
-    const swReg = await navigator.serviceWorker.ready;
-    if (!swReg) { setStatus('❌ SW nije registrovan', '#f87171'); return; }
-    setStatus('1/4 SW ✅');
-
-    // Korak 2: Permission
-    setStatus('2/4 Proveram dozvolu...');
-    let perm = Notification.permission;
-    if (perm === 'default') perm = await Notification.requestPermission();
-    if (perm !== 'granted') { setStatus('❌ Dozvola odbijena — dozvoli notifikacije u podešavanjima browsera', '#f87171'); return; }
-    setStatus('2/4 Dozvola ✅');
-
-    // Korak 3: FCM Token
-    setStatus('3/4 Tražim FCM token...');
-    const { messaging, getToken, db, doc, updateDoc } = window._fb;
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
-    if (!token) { setStatus('❌ FCM token nije dobijen — proveri Firebase config', '#f87171'); return; }
-    // Sačuvaj token
-    if (window._currentUser) {
-      await updateDoc(doc(db, 'users', window._currentUser.uid), { fcmToken: token, fcmUpdatedAt: new Date().toISOString() });
-    }
-    setStatus('3/4 Token ✅ ' + token.slice(0,12) + '...');
-
-    // Korak 4: Pošalji test push
-    setStatus('4/4 Šaljem test push...');
-    const res = await fetch(PUSH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token,
-        title: '🔔 Test Notifikacija',
-        body:  'Push notifikacije rade! ✅ Novarobashop',
-        icon:  '/novarobashop-app/icon-192.png',
-        badge: '/novarobashop-app/icon-192.png',
-        tag:   'test',
-        data:  { tab: 'home', url: 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html' }
-      })
-    });
-    const resText = await res.text();
-    if (!res.ok) {
-      setStatus('❌ Worker greška ' + res.status + ': ' + resText.slice(0,80), '#f87171');
-      console.error('Push worker response:', res.status, resText);
-      return;
-    }
-    setStatus('✅ Push poslat! Trebaš dobiti notifikaciju za par sekundi.', '#4ade80');
-
-  } catch(err) {
-    setStatus('❌ Greška: ' + (err.message || err), '#f87171');
-    console.error('Push test error:', err);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '🔔 Pošalji test sebi'; }
-  }
-}
 
 async function initPushNotifications() {
   try {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      console.log('Push: browser not supported');
-      return;
-    }
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
-    // Warte bis SW vollständig aktiv ist
+    // Warte bis SW bereit
     const swReg = await navigator.serviceWorker.ready;
-    if (!swReg) { console.log('Push: no SW registration'); return; }
 
-    // Permission anfragen — nur einmal, kein Spam
+    // Permission — Browser zeigt automatisch den Dialog wenn noch nicht entschieden
     let permission = Notification.permission;
     if (permission === 'default') {
       permission = await Notification.requestPermission();
     }
-    if (permission !== 'granted') {
-      console.log('Push: permission', permission);
-      return;
-    }
+    if (permission !== 'granted') return;
 
     const { messaging, getToken, db, doc, updateDoc } = window._fb;
+    if (!window._currentUser) return;
 
-    // Token holen (nutzt die aktive SW-Registrierung)
+    // FCM Token holen und speichern
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: swReg
     });
+    if (!token) return;
 
-    if (!token) { console.log('Push: no token received'); return; }
-
-    if (window._currentUser) {
-      await updateDoc(doc(db, 'users', window._currentUser.uid), {
-        fcmToken:      token,
-        fcmUpdatedAt:  new Date().toISOString(),
-        fcmDevice:     navigator.userAgent.slice(0, 100)
-      });
-      console.log('Push: FCM token saved ✅', token.slice(0,20) + '...');
-    }
+    await updateDoc(doc(db, 'users', window._currentUser.uid), {
+      fcmToken:     token,
+      fcmUpdatedAt: new Date().toISOString()
+    });
   } catch(err) {
-    console.warn('Push init error:', err.code || err.message);
-    // Retry bei Token-Fehlern
+    // Retry bei Token-Fehlern nach 30s
     if (err.code?.includes('token') || err.message?.includes('token')) {
-      setTimeout(initPushNotifications, 15000);
+      setTimeout(initPushNotifications, 30000);
     }
   }
 }
@@ -6883,11 +6734,10 @@ async function sendPushToUser(userId, title, body, options = {}) {
   try {
     const { db, doc, getDoc } = window._fb;
     const userDoc = await getDoc(doc(db, 'users', userId));
-    if (!userDoc.exists()) { console.log('Push: user not found', userId); return; }
+    if (!userDoc.exists()) return;
     const fcmToken = userDoc.data().fcmToken;
-    if (!fcmToken) { console.log('Push: no FCM token for user', userId); return; }
-
-    const res = await fetch(PUSH_WORKER_URL, {
+    if (!fcmToken) return;
+    await fetch(PUSH_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -6900,14 +6750,8 @@ async function sendPushToUser(userId, title, body, options = {}) {
         data:  { tab: options.tab || 'home', url: 'https://novarobashop-art.github.io/novarobashop-app/novarobashop.html' }
       })
     });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.warn('Push worker error:', res.status, errText);
-    } else {
-      console.log('Push sent ✅', title, '->', userId.slice(0,8));
-    }
   } catch(err) {
-    console.warn('Push send error:', err.message || err);
+    // silent
   }
 }
 
