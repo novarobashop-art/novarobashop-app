@@ -5238,6 +5238,9 @@ function kNavTab(name) {
     else renderChatVerlauf();
     // Badge sofort leeren
     markKupacMsgsRead();
+    // Scroll auf neuste Nachricht beim Öffnen
+    const feed = document.getElementById('k-chat-feed');
+    if (feed) setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 120);
   }
   if (name === 'podrska') {
     const g = document.getElementById('k-global-admin-sel');
@@ -6098,6 +6101,7 @@ function renderChatVerlauf() {
   }).join('');
 
   feed.innerHTML = bubbles;
+
   // Aktuellen Status anzeigen + Buttons hervorheben
   const statusEl = document.getElementById('k-chat-current-status');
   const lastIn = alle.filter(p => p._dir === 'in').slice(-1)[0];
@@ -6116,8 +6120,10 @@ function renderChatVerlauf() {
     const el = document.getElementById(b.id);
     if (el) el.style.cssText = el.style.cssText.replace(/background:[^;]+;border:[^;]+;color:[^;]+;/, '') + (curSt === b.st ? b.activeStyle : b.inactiveStyle);
   });
-  // Scroll ans Ende
-  requestAnimationFrame(() => { feed.scrollTop = feed.scrollHeight; });
+
+  // Scroll zum neuesten — doppelter RAF stellt sicher dass DOM gezeichnet ist
+  const scrollToBottom = () => { feed.scrollTop = feed.scrollHeight; };
+  requestAnimationFrame(() => requestAnimationFrame(scrollToBottom));
 }
 
 async function chatSendMsg() {
@@ -6156,6 +6162,9 @@ async function chatSendMsg() {
     // Input leeren — Firestore onSnapshot rendert automatisch
     if (ta) { ta.value = ''; ta.style.height = 'auto'; }
     showToast('✅ Poruka poslata!');
+    // Odmah skroluj na novu poruku
+    const feed = document.getElementById('k-chat-feed');
+    if (feed) setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 80);
   } catch(err) {
     console.error('chatSendMsg error:', err);
     showToast('❌ Greška: ' + (err.code || err.message), 5000);
