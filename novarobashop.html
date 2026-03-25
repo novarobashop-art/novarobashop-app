@@ -1116,19 +1116,45 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     <button class="a-tab" onclick="aTab('proizvodi',this)">🛍️ Proizvodi</button>
 
     <button class="a-tab" onclick="aTab('podrska-admin',this)">💬 Podrška</button>
+    <button class="a-tab" onclick="aTab('bewertungen',this)">⭐ Ocene</button>
   </div>
 
   <div style="padding:16px;">
     <!-- KUPCI TAB -->
     <div id="atab-kupci">
-      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
-        <input type="text" class="inp-dark" id="kupci-search" placeholder="🔍 Pretraži kupce..." oninput="filterKupci(this.value)" style="flex:1;margin-bottom:0;" />
+      <!-- Search row -->
+      <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;">
+        <input type="text" class="inp-dark" id="kupci-search" placeholder="🔍 Ime, @tiktok, telefon, grad..." oninput="filterKupci(this.value)" style="flex:1;margin-bottom:0;" />
         <select id="kupci-sort" onchange="filterKupci(document.getElementById('kupci-search').value)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;">
           <option value="tiktok-az">@TikTok A–Z</option>
           <option value="name-az">Ime A–Z</option>
           <option value="status">Po statusu</option>
           <option value="dugovi-desc">Dugovi ↓</option>
+          <option value="racuni-desc">Narudžbine ↓</option>
+          <option value="rating-desc">Ocena ↓</option>
+          <option value="last-order">Poslednja narudžbina</option>
         </select>
+      </div>
+      <!-- City filter + CSV export + Multi-select row -->
+      <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <select id="kupci-city-filter" onchange="filterKupci(document.getElementById('kupci-search').value)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;flex:1;min-width:100px;">
+          <option value="">📍 Svi gradovi</option>
+        </select>
+        <button onclick="toggleKupciMultiSelect()" id="kupci-multiselect-btn" style="background:rgba(139,92,246,0.1);color:#c4b5fd;border:1px solid rgba(139,92,246,0.25);border-radius:var(--r-sm);padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';white-space:nowrap;">☑️ Izbor</button>
+        <button onclick="exportKupciCSV()" style="background:rgba(18,201,106,0.1);color:#5dffa0;border:1px solid rgba(18,201,106,0.25);border-radius:var(--r-sm);padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';white-space:nowrap;">📤 CSV</button>
+      </div>
+      <!-- Multi-select action bar (hidden by default) -->
+      <div id="kupci-bulk-bar" style="display:none;background:rgba(139,92,246,0.1);border:1.5px solid rgba(139,92,246,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:#c4b5fd;font-weight:700;" id="kupci-selected-count">0 izabrano</span>
+        <div style="flex:1;"></div>
+        <button onclick="bulkKupciAction('block')" style="background:rgba(240,64,96,0.15);color:#ff9aad;border:1px solid rgba(240,64,96,0.3);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';">🔒 Blokiraj sve</button>
+        <button onclick="bulkKupciAction('unblock')" style="background:rgba(18,201,106,0.12);color:#5dffa0;border:1px solid rgba(18,201,106,0.25);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';">🔓 Odblokiraj sve</button>
+        <button onclick="bulkKupciAction('export')" style="background:rgba(14,196,172,0.12);color:var(--teal);border:1px solid rgba(14,196,172,0.25);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito';">📤 Izvezi izabrane</button>
+      </div>
+      <!-- Duplicate warning (hidden by default) -->
+      <div id="kupci-dup-warn" style="display:none;background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;">⚠️ Mogući duplikati pronađeni</div>
+        <div id="kupci-dup-list" style="font-size:11px;color:var(--txt2);line-height:1.7;"></div>
       </div>
       <div id="a-kupci-list"></div>
     </div>
@@ -1168,9 +1194,19 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <div id="dash-top-kupci"><div class="section-empty">Učitavanje...</div></div>
       </div>
       <!-- Nedavni računi -->
-      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;">
         <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">🕐 Nedavni Računi</div>
         <div id="dash-nedavni"><div class="section-empty">Učitavanje...</div></div>
+      </div>
+      <!-- Tagesbericht -->
+      <div style="background:rgba(79,142,247,0.05);border:1px solid rgba(79,142,247,0.2);border-radius:16px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">📋 Dnevni Izveštaj</div>
+        <div id="dash-tagesbericht"><div class="section-empty">Učitavanje...</div></div>
+      </div>
+      <!-- Bewertungs-Statistik -->
+      <div style="background:rgba(250,204,21,0.05);border:1px solid rgba(250,204,21,0.18);border-radius:16px;padding:16px;">
+        <div style="font-size:12px;font-weight:700;color:#fde047;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">⭐ Statistika Ocena</div>
+        <div id="dash-bewertung-stat"><div class="section-empty">Učitavanje...</div></div>
       </div>
     </div>
 
@@ -1224,33 +1260,51 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
     <!-- PLAĆANJA TAB -->
     <div id="atab-placanja" style="display:none;">
-      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
+      <div style="margin-bottom:8px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placanja-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlacanja(this.value)"
           style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placanja-search').value='';filterPlacanja('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div style="margin-bottom:12px;display:flex;gap:6px;align-items:center;">
+        <input type="date" id="placanja-date-from" onchange="filterPlacanja(document.getElementById('placanja-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <span style="color:var(--txt3);font-size:12px;">—</span>
+        <input type="date" id="placanja-date-to" onchange="filterPlacanja(document.getElementById('placanja-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <button onclick="document.getElementById('placanja-date-from').value='';document.getElementById('placanja-date-to').value='';filterPlacanja(document.getElementById('placanja-search').value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt2);font-size:12px;cursor:pointer;white-space:nowrap;">✕ Reset</button>
       </div>
       <div id="a-placanja-list"></div>
     </div>
 
     <!-- PLAĆENO TAB -->
     <div id="atab-placeno" style="display:none;">
-      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
+      <div style="margin-bottom:8px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="placeno-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterPlaceno(this.value)"
           style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('placeno-search').value='';filterPlaceno('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div style="margin-bottom:12px;display:flex;gap:6px;align-items:center;">
+        <input type="date" id="placeno-date-from" onchange="filterPlaceno(document.getElementById('placeno-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <span style="color:var(--txt3);font-size:12px;">—</span>
+        <input type="date" id="placeno-date-to" onchange="filterPlaceno(document.getElementById('placeno-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <button onclick="document.getElementById('placeno-date-from').value='';document.getElementById('placeno-date-to').value='';filterPlaceno(document.getElementById('placeno-search').value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt2);font-size:12px;cursor:pointer;white-space:nowrap;">✕ Reset</button>
       </div>
       <div id="a-placeno-list"></div>
     </div>
 
     <!-- ARHIVA TAB (Poslato) -->
     <div id="atab-arhiva" style="display:none;">
-      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
+      <div style="margin-bottom:8px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="arhiva-search" placeholder="Pretraži po imenu, @tiktok..." oninput="filterArhiva(this.value)"
           style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('arhiva-search').value='';filterArhiva('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div style="margin-bottom:12px;display:flex;gap:6px;align-items:center;">
+        <input type="date" id="arhiva-date-from" onchange="filterArhiva(document.getElementById('arhiva-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <span style="color:var(--txt3);font-size:12px;">—</span>
+        <input type="date" id="arhiva-date-to" onchange="filterArhiva(document.getElementById('arhiva-search').value)" style="flex:1;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;" />
+        <button onclick="document.getElementById('arhiva-date-from').value='';document.getElementById('arhiva-date-to').value='';filterArhiva(document.getElementById('arhiva-search').value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;color:var(--txt2);font-size:12px;cursor:pointer;white-space:nowrap;">✕ Reset</button>
       </div>
       <div id="a-arhiva-list"></div>
     </div>
@@ -1309,11 +1363,16 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         </div>
       </div>
       <!-- Pretraga proizvoda -->
-      <div style="margin-bottom:12px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
+      <div style="margin-bottom:8px;display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;transition:border-color 0.25s,box-shadow 0.25s;">
         <span style="font-size:16px;margin-right:8px;">🔍</span>
         <input type="text" id="proizvodi-search" placeholder="Pretraži proizvode..." oninput="filterProizvodi(this.value)"
           style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito',sans-serif;padding:11px 0;" />
         <button onclick="document.getElementById('proizvodi-search').value='';filterProizvodi('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <select id="proizvodi-kat-filter" onchange="filterProizvodi(document.getElementById('proizvodi-search').value)" style="width:100%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:9px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;">
+          <option value="">🗂️ Sve kategorije</option>
+        </select>
       </div>
       <div id="a-proizvodi-list"><div class="section-empty">Nema proizvoda.</div></div>
     </div>
@@ -1469,6 +1528,37 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
       </div>
     </div>
+
+    <!-- OCENE (BEWERTUNGEN) TAB -->
+    <div id="atab-bewertungen" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">⭐ Pregled Ocena</div>
+      <div style="font-size:12px;color:var(--txt2);margin-bottom:16px;">Sve ocene kupaca za isporučene pakete</div>
+      <!-- Rating stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;" id="bew-stats-grid">
+        <div style="background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:#fde047;" id="bew-avg">—</div>
+          <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:3px;">Prosek</div>
+        </div>
+        <div style="background:rgba(18,201,106,0.08);border:1px solid rgba(18,201,106,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--emerald);" id="bew-total">—</div>
+          <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:3px;">Ukupno</div>
+        </div>
+        <div style="background:rgba(240,64,96,0.08);border:1px solid rgba(240,64,96,0.2);border-radius:14px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--rose);" id="bew-low">—</div>
+          <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:3px;">Loše (1-2⭐)</div>
+        </div>
+      </div>
+      <!-- Star distribution -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;" id="bew-distribution"></div>
+      <!-- Search -->
+      <div style="display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:var(--r-sm);padding:0 14px;margin-bottom:10px;">
+        <span style="font-size:16px;margin-right:8px;">🔍</span>
+        <input type="text" id="bew-search" placeholder="Pretraži po kupcu..." oninput="filterBewertungen(this.value)" style="flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Nunito';padding:11px 0;" />
+        <button onclick="document.getElementById('bew-search').value='';filterBewertungen('')" style="background:none;border:none;color:var(--txt2);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div id="a-bewertungen-list"><div class="section-empty">Učitavanje ocena...</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -1554,9 +1644,18 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
     </div>
 
     <!-- Poslednja aktivnost -->
-    <div style="background:rgba(9,12,20,0.85);border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+    <div style="background:rgba(9,12,20,0.85);border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 4px 20px rgba(0,0,0,0.3);margin-bottom:12px;">
       <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">🕐 Poslednja aktivnost</div>
       <div id="k-home-activity"><div style="text-align:center;color:var(--txt3);padding:16px;font-size:13px;">Nema aktivnosti</div></div>
+    </div>
+    <!-- Push Notifikacije -->
+    <div id="k-push-box" style="background:rgba(14,196,172,0.06);border:1.5px solid rgba(14,196,172,0.2);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:28px;">🔔</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:2px;">Obaveštenja</div>
+        <div style="font-size:11px;color:var(--txt3);" id="k-push-status">Klikni da uključiš obaveštenja</div>
+      </div>
+      <button onclick="kActivatePush()" id="k-push-btn" style="background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:10px;padding:8px 14px;color:#001a16;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito';white-space:nowrap;">Uključi</button>
     </div>
   </div>
 
@@ -2518,6 +2617,7 @@ async function loadAdminData() {
     _allKupci = allKupci;
     renderAKupci(allKupci);
     populateKupacSelect(allKupci);
+    onKupciLoaded();
   });
 
   // Load only THIS admin's racuni (exclude soft-deleted)
@@ -2703,6 +2803,7 @@ function getKupacStatus(kupac, racuni) {
 function renderAKupci(kupci) {
   const el = document.getElementById('a-kupci-list');
   if (!kupci.length) { el.innerHTML = '<div class="section-empty">Nema kupaca.</div>'; return; }
+  const isMulti = window._kupciMultiSelect;
   el.innerHTML = kupci.map(k => {
     const status = getKupacStatus(k, _allRacuni);
     const badgeHtml = k.blocked
@@ -2711,17 +2812,87 @@ function renderAKupci(kupci) {
         ? '<span class="badge-kasni">Kasni</span>'
         : '<span class="badge-aktivan">Aktivan</span>';
     const safeKid = k.id.replace(/[^a-zA-Z0-9]/g,'_');
+
+    // Compute stats from _allRacuni
+    const kRacuni = (_allRacuni||[]).filter(r => r.kupacId === k.id && !r.adminDeleted);
+    const dugovi = kRacuni.filter(r => r.status === 'novo').reduce((s,r) => s+(r.iznos||0), 0);
+    const racunCount = kRacuni.length;
+    const lastR = kRacuni.filter(r => r.datum).sort((a,b) => b.datum > a.datum ? 1 : -1)[0];
+    const lastOrder = lastR ? lastR.datum.slice(0,10) : null;
+
+    // Avg rating from racuni
+    const rated = kRacuni.filter(r => r.ocena);
+    const avgRating = rated.length ? (rated.reduce((s,r)=>s+(r.ocena||0),0)/rated.length).toFixed(1) : null;
+    const starsHtml = avgRating ? '⭐'.repeat(Math.round(parseFloat(avgRating))) + ` <span style="font-size:11px;color:var(--txt2);">${avgRating}</span>` : '';
+
+    // Customer since
+    const since = k.createdAt ? k.createdAt.slice(0,10) : null;
+
+    // Frequency
+    let freqHtml = '';
+    if (racunCount >= 2 && lastR) {
+      const firstR = kRacuni.filter(r=>r.datum).sort((a,b)=>a.datum>b.datum?1:-1)[0];
+      if (firstR && firstR.datum !== lastR.datum) {
+        const days = Math.max(1, Math.round((new Date(lastR.datum) - new Date(firstR.datum))/(1000*60*60*24)));
+        const freq = Math.round(days / (racunCount - 1));
+        freqHtml = `<span style="font-size:10px;color:var(--txt3);">~svakih ${freq}d</span>`;
+      }
+    }
+
+    // Tags
+    const tags = k.tags || [];
+    const tagColors = { VIP:'rgba(250,204,21,0.15):#fde047', Pouzdan:'rgba(18,201,106,0.15):#5dffa0', Oprez:'rgba(240,64,96,0.15):#ff9aad', Blokiran:'rgba(148,163,184,0.15):#94a3b8' };
+    const tagsHtml = tags.map(t => {
+      const [bg, col] = (tagColors[t]||'rgba(139,92,246,0.15):#c4b5fd').split(':');
+      return `<span style="background:${bg};color:${col};border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;">${t}</span>`;
+    }).join('');
+
+    // Profile photo
+    const avatarHtml = k.fotoUrl
+      ? `<img src="${k.fotoUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(14,196,172,0.4);flex-shrink:0;" />`
+      : `<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#001a16;flex-shrink:0;">${(k.tiktokIme||k.name||'?')[0].toUpperCase()}</div>`;
+
+    const checkHtml = isMulti ? `<input type="checkbox" class="kupci-cb" data-id="${k.id}" onclick="updateKupciSelection()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--teal);flex-shrink:0;" />` : '';
+
     return `<div class="kupac-card">
-      <div class="kupac-top" onclick="toggleAKupacDetail('${safeKid}')" style="cursor:pointer;">
-        <div>
-          <div style="font-size:14px;color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;">${k.tiktokNick||'—'}</div>
+      <div class="kupac-top" onclick="${isMulti ? '' : `toggleAKupacDetail('${safeKid}')`}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+          ${checkHtml}
+          ${avatarHtml}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;color:var(--teal);font-weight:800;">@${k.tiktokIme||'—'}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:1px;">${k.name||k.tiktokNick||'—'}</div>
+            ${tagsHtml ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${tagsHtml}</div>` : ''}
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
           ${badgeHtml}
+          ${starsHtml ? `<div style="font-size:12px;">${starsHtml}</div>` : ''}
           <span style="font-size:11px;color:var(--txt2);">▼ detalji</span>
         </div>
       </div>
+
+      <!-- Quick stats row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;padding:8px;background:rgba(255,255,255,0.03);border-radius:10px;">
+        <div style="text-align:center;">
+          <div style="font-size:13px;font-weight:800;color:${dugovi>0?'var(--rose)':'var(--emerald)'};">${dugovi>0?dugovi.toLocaleString()+' RSD':'0 RSD'}</div>
+          <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;">Dug</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:13px;font-weight:800;color:var(--teal);">${racunCount}</div>
+          <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;">Narudžbina</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);">${lastOrder||'—'}</div>
+          <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px;">Poslednja</div>
+        </div>
+      </div>
+
+      ${(since||freqHtml) ? `<div style="display:flex;gap:10px;padding:0 4px;margin-bottom:6px;">
+        ${since ? `<span style="font-size:10px;color:var(--txt3);">📅 Kupac od: <b style="color:var(--txt2);">${since}</b></span>` : ''}
+        ${freqHtml}
+      </div>` : ''}
+
       <div id="akupac-detail-${safeKid}" style="display:none;background:rgba(78,205,196,0.06);border:1px solid rgba(78,205,196,0.2);border-radius:10px;padding:10px;margin:8px 0;font-size:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
           <div style="grid-column:1/-1;"><span style="color:#888;">Ime i prezime:</span><br><b style="color:white;">${k.name||'—'}</b></div>
@@ -2736,7 +2907,10 @@ function renderAKupci(kupci) {
         <button class="btn-sm btn-detail" onclick="showKupacDetails('${k.id}')">👁️ Detalji</button>
         <button class="btn-sm btn-detail" onclick="showKupacRacuniFilter('${k.id}')">🧾 Računi</button>
         <button class="btn-sm" style="background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2)!important;" onclick="editKupacTiktok('${k.id}','${(k.tiktokIme||'')}','${(k.tiktokNick||'')}')">✏️ TikTok</button>
+        <button class="btn-sm" style="background:rgba(59,130,246,0.1);color:#93c5fd;border:1px solid rgba(59,130,246,0.2)!important;" onclick="editKupacAdresa('${k.id}')">📍 Adresa</button>
         <button class="btn-sm" style="background:rgba(139,92,246,0.1);color:#c4b5fd;border:1px solid rgba(139,92,246,0.2)!important;" onclick="openNotiz('${k.id}','${(k.tiktokIme||k.name||'').replace(/'/g,'')}')">📝 Beleška</button>
+        <button class="btn-sm" style="background:rgba(250,204,21,0.1);color:#fde047;border:1px solid rgba(250,204,21,0.2)!important;" onclick="openKupacTagModal('${k.id}')">🏷️ Tag</button>
+        <button class="btn-sm" style="background:rgba(14,196,172,0.1);color:var(--teal);border:1px solid rgba(14,196,172,0.2)!important;" onclick="openKupacFoto('${k.id}')">📸 Foto</button>
         ${k.blocked
           ? `<button class="btn-sm btn-unblock" onclick="unblockKupac('${k.id}')">🔓 Odblokiraj</button>`
           : `<button class="btn-sm btn-block" onclick="blockKupac('${k.id}')">🔒 Blokiraj</button>`
@@ -2750,12 +2924,18 @@ function filterKupci(val) {
   const s = (val||'').toLowerCase();
   const sortEl = document.getElementById('kupci-sort');
   const sort = sortEl ? sortEl.value : 'tiktok-az';
-  let lista = s ? _allKupci.filter(k =>
+  const cityFilter = (document.getElementById('kupci-city-filter')||{}).value || '';
+  let lista = [..._allKupci];
+  if (s) lista = lista.filter(k =>
     (k.name||'').toLowerCase().includes(s) ||
     (k.email||'').toLowerCase().includes(s) ||
     (k.tiktokIme||'').toLowerCase().includes(s) ||
-    (k.tiktokNick||'').toLowerCase().includes(s)
-  ) : [..._allKupci];
+    (k.tiktokNick||'').toLowerCase().includes(s) ||
+    (k.telefon||'').toLowerCase().includes(s) ||
+    (k.grad||'').toLowerCase().includes(s) ||
+    (k.selo||'').toLowerCase().includes(s)
+  );
+  if (cityFilter) lista = lista.filter(k => (k.grad||'').toLowerCase() === cityFilter.toLowerCase());
   lista.sort((a, b) => {
     if (sort === 'tiktok-az') return (a.tiktokIme||'').localeCompare(b.tiktokIme||'');
     if (sort === 'name-az')   return (a.name||'').localeCompare(b.name||'');
@@ -2768,6 +2948,23 @@ function filterKupci(val) {
       const dugA = _allRacuni.filter(r=>r.kupacId===a.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
       const dugB = _allRacuni.filter(r=>r.kupacId===b.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
       return dugB - dugA;
+    }
+    if (sort === 'racuni-desc') {
+      const cA = _allRacuni.filter(r=>r.kupacId===a.id).length;
+      const cB = _allRacuni.filter(r=>r.kupacId===b.id).length;
+      return cB - cA;
+    }
+    if (sort === 'rating-desc') {
+      const ratedA = _allRacuni.filter(r=>r.kupacId===a.id&&r.ocena);
+      const ratedB = _allRacuni.filter(r=>r.kupacId===b.id&&r.ocena);
+      const avgA = ratedA.length ? ratedA.reduce((s,r)=>s+(r.ocena||0),0)/ratedA.length : 0;
+      const avgB = ratedB.length ? ratedB.reduce((s,r)=>s+(r.ocena||0),0)/ratedB.length : 0;
+      return avgB - avgA;
+    }
+    if (sort === 'last-order') {
+      const lastA = _allRacuni.filter(r=>r.kupacId===a.id&&r.datum).map(r=>r.datum).sort().pop()||'';
+      const lastB = _allRacuni.filter(r=>r.kupacId===b.id&&r.datum).map(r=>r.datum).sort().pop()||'';
+      return lastB.localeCompare(lastA);
     }
     return 0;
   });
@@ -2813,6 +3010,7 @@ function adminRacunCard(r) {
         <button class="paket-btn ${r.paketStatus==='ship'?'sel-ship':''}" onclick="setPaket('${r.id}','ship',this)">🚚 Poslato</button>
         <button class="paket-btn ${r.paketStatus==='cancel'?'sel-cancel':''}" onclick="setPaket('${r.id}','cancel',this)">❌ Storno</button>
         ${r.status==='storno' ? `<button class="paket-btn" style="color:#22c55e;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);" onclick="reverseStorno('${r.id}')">↩️ Povrati</button>` : ''}
+        <button class="paket-btn" style="color:#93c5fd;border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.08);" onclick="printRacun('${r.id}')">🖨️ Štampaj</button>
         <button class="paket-btn" style="color:#ff4d4d;" onclick="deleteRacun('${r.id}')">🗑️ Obriši</button>
       </div>
       ${r.adminFotoUrl ? `<div style="margin-top:10px;"><img src="${r.adminFotoUrl}" onclick="openImgViewer(this.src)" style="max-height:90px;max-width:150px;object-fit:contain;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:block;" /></div>` : ''}
@@ -3098,29 +3296,41 @@ function filterRacuni(val) {
 
 function filterPlacanja(val) {
   const s = val.replace('@','').toLowerCase();
-  const ceka = _allRacuni.filter(r => r.status === 'ceka');
-  const filtered = s ? ceka.filter(r => _matchRacun(r, s)) : ceka;
-  renderAPlacanja(filtered);
+  const from = (document.getElementById('placanja-date-from')||{}).value||'';
+  const to   = (document.getElementById('placanja-date-to')||{}).value||'';
+  let ceka = _allRacuni.filter(r => r.status === 'ceka');
+  if (s) ceka = ceka.filter(r => _matchRacun(r, s));
+  if (from) ceka = ceka.filter(r => (r.datum||'') >= from);
+  if (to)   ceka = ceka.filter(r => (r.datum||'') <= to);
+  renderAPlacanja(ceka);
 }
 
 function filterPlaceno(val) {
   const s = val.replace('@','').toLowerCase();
-  const placeni = _allRacuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship');
-  const filtered = s ? placeni.filter(r => _matchRacun(r, s)) : placeni;
+  const from = (document.getElementById('placeno-date-from')||{}).value||'';
+  const to   = (document.getElementById('placeno-date-to')||{}).value||'';
+  let placeni = _allRacuni.filter(r => r.status === 'placeno' && r.paketStatus !== 'ship');
+  if (s) placeni = placeni.filter(r => _matchRacun(r, s));
+  if (from) placeni = placeni.filter(r => (r.datum||'') >= from);
+  if (to)   placeni = placeni.filter(r => (r.datum||'') <= to);
   const el = document.getElementById('a-placeno-list');
-  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
-  el.innerHTML = `<div style="font-size:12px;color:#4ECDC4;font-weight:700;margin-bottom:10px;">✅ Potvrđeno plaćanje – čeka slanje (${filtered.length})</div>`
-    + filtered.map(r => adminRacunCard(r)).join('');
+  if (!placeni.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  el.innerHTML = `<div style="font-size:12px;color:#4ECDC4;font-weight:700;margin-bottom:10px;">✅ Potvrđeno plaćanje – čeka slanje (${placeni.length})</div>`
+    + placeni.map(r => adminRacunCard(r)).join('');
 }
 
 function filterArhiva(val) {
   const s = val.replace('@','').toLowerCase();
-  const arhiva = _allRacuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno');
-  const filtered = s ? arhiva.filter(r => _matchRacun(r, s)) : arhiva;
+  const from = (document.getElementById('arhiva-date-from')||{}).value||'';
+  const to   = (document.getElementById('arhiva-date-to')||{}).value||'';
+  let arhiva = _allRacuni.filter(r => r.paketStatus === 'ship' || r.status === 'storno');
+  if (s) arhiva = arhiva.filter(r => _matchRacun(r, s));
+  if (from) arhiva = arhiva.filter(r => (r.datum||'') >= from);
+  if (to)   arhiva = arhiva.filter(r => (r.datum||'') <= to);
   const el = document.getElementById('a-arhiva-list');
-  if (!filtered.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
-  const poslato = filtered.filter(r => r.paketStatus === 'ship');
-  const storni  = filtered.filter(r => r.status === 'storno' && r.paketStatus !== 'ship');
+  if (!arhiva.length) { el.innerHTML = '<div class="section-empty">Nema rezultata.</div>'; return; }
+  const poslato = arhiva.filter(r => r.paketStatus === 'ship');
+  const storni  = arhiva.filter(r => r.status === 'storno' && r.paketStatus !== 'ship');
   let html = '';
   if (poslato.length) {
     html += `<div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px;">📦 Poslato (${poslato.length})</div>`;
@@ -3196,6 +3406,49 @@ function renderDashboard() {
       </div>
     </div>`;
   }).join('');
+
+  // Tagesbericht (Dnevni izveštaj)
+  const today = new Date().toISOString().slice(0,10);
+  const todayR = racuni.filter(r => (r.datum||'').slice(0,10) === today);
+  const todayIncome = todayR.filter(r=>r.status==='placeno'||r.paketStatus==='ship').reduce((s,r)=>s+(r.iznos||0),0);
+  const todayNew = todayR.filter(r=>r.status==='novo').length;
+  const todaySent = racuni.filter(r=>r.paketStatus==='ship'&&(r.shipDatum||r.datum||'').slice(0,10)===today).length;
+  const tEl = document.getElementById('dash-tagesbericht');
+  if (tEl) tEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#93c5fd;">${todayNew}</div><div style="font-size:10px;color:var(--txt3);text-transform:uppercase;">Novi danas</div></div>
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--emerald);">${todayIncome.toLocaleString()}</div><div style="font-size:10px;color:var(--txt3);text-transform:uppercase;">RSD danas</div></div>
+      <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--teal);">${todaySent}</div><div style="font-size:10px;color:var(--txt3);text-transform:uppercase;">Poslato danas</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--txt3);text-align:center;">${today}</div>`;
+
+  // Bewertungs-Statistik
+  const allRated = racuni.filter(r => r.ocena);
+  const bEl = document.getElementById('dash-bewertung-stat');
+  if (bEl) {
+    if (!allRated.length) { bEl.innerHTML = '<div class="section-empty">Nema ocena.</div>'; }
+    else {
+      const avgB = (allRated.reduce((s,r)=>s+(r.ocena||0),0)/allRated.length).toFixed(1);
+      const dist = [5,4,3,2,1].map(star => ({ star, count: allRated.filter(r=>r.ocena===star).length }));
+      bEl.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="font-size:32px;font-weight:800;color:#fde047;">${avgB}</div>
+        <div>
+          <div style="font-size:14px;">⭐⭐⭐⭐⭐</div>
+          <div style="font-size:11px;color:var(--txt3);">${allRated.length} ocena ukupno</div>
+        </div>
+      </div>` + dist.map(({star,count}) => {
+        const pct = allRated.length ? Math.round(count/allRated.length*100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:11px;color:#fde047;width:14px;text-align:right;">${star}</span>
+          <span style="font-size:11px;">⭐</span>
+          <div style="flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:#fde047;border-radius:3px;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--txt3);width:20px;">${count}</span>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 // ===== PROIZVODI =====
@@ -3217,6 +3470,7 @@ async function loadProizvodi() {
 
 function renderProizvodi(list) {
   const el = document.getElementById('a-proizvodi-list');
+  populateProizvodiKatFilter();
   if (!list.length) { el.innerHTML = '<div class="section-empty">Nema proizvoda. Dodajte prvi!</div>'; return; }
   el.innerHTML = list.map(p => `
     <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
@@ -3237,13 +3491,24 @@ function renderProizvodi(list) {
 }
 
 function filterProizvodi(val) {
-  if (!val) { renderProizvodi(_allProizvodi); return; }
-  const s = val.toLowerCase();
-  renderProizvodi(_allProizvodi.filter(p =>
+  const s = (val||'').toLowerCase();
+  const kat = (document.getElementById('proizvodi-kat-filter')||{}).value||'';
+  let list = [..._allProizvodi];
+  if (s) list = list.filter(p =>
     (p.naziv||'').toLowerCase().includes(s) ||
     (p.kategorija||'').toLowerCase().includes(s) ||
     (p.opis||'').toLowerCase().includes(s)
-  ));
+  );
+  if (kat) list = list.filter(p => (p.kategorija||'') === kat);
+  renderProizvodi(list);
+}
+
+function populateProizvodiKatFilter() {
+  const sel = document.getElementById('proizvodi-kat-filter');
+  if (!sel) return;
+  const cats = [...new Set(_allProizvodi.map(p=>p.kategorija||'').filter(Boolean))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">🗂️ Sve kategorije</option>' + cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
 }
 
 function previewProizvodFoto(event) {
@@ -4160,17 +4425,18 @@ function toggleAPoruka(safeId) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','dashboard','racuni','placanja','placeno','arhiva','storno-admin','kalender','chart','autoracun','proizvodi','live','podrska-admin'].forEach(n => {
+  ['kupci','dashboard','racuni','placanja','placeno','arhiva','storno-admin','kalender','chart','autoracun','proizvodi','live','podrska-admin','bewertungen'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
   document.getElementById('atab-' + name).style.display = (name === 'podrska-admin') ? 'flex' : 'block';
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'proizvodi') loadProizvodi();
-  if (name === 'kalender') renderKalender('all');
-  if (name === 'chart') renderChart();
-  if (name === 'autoracun') loadAutoRacuni();
+  if (name === 'dashboard')   renderDashboard();
+  if (name === 'proizvodi')   loadProizvodi();
+  if (name === 'kalender')    renderKalender('all');
+  if (name === 'chart')       renderChart();
+  if (name === 'autoracun')   loadAutoRacuni();
   if (name === 'storno-admin') renderAStorno(_allRacuni||[]);
+  if (name === 'bewertungen') renderBewertungen();
 }
 
 function populateKupacSelect(kupci) {
@@ -6801,6 +7067,385 @@ document.addEventListener('keydown', e => {
 window.showLoginScreen = function(){ _showLoginScreen(); };
 window.showPortalByRole = function(r){ _showPortalByRole(r); };
 window.showRegistrationScreen = function(){ _showRegistrationScreen(); };
+
+// ============================================================
+// ===== NEW OPTIMIZATIONS — ALL 23 FEATURES =================
+// ============================================================
+
+// ---- #3/#4: City filter population ----
+function populateKupciCityFilter() {
+  const sel = document.getElementById('kupci-city-filter');
+  if (!sel) return;
+  const cities = [...new Set((_allKupci||[]).map(k=>(k.grad||'').trim()).filter(Boolean))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">📍 Svi gradovi</option>' + cities.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+// ---- #5: CSV Export ----
+function exportKupciCSV(ids) {
+  const list = ids
+    ? (_allKupci||[]).filter(k => ids.includes(k.id))
+    : (_allKupci||[]);
+  if (!list.length) { showToast('Nema kupaca za izvoz.', 2000); return; }
+  const headers = ['TikTok','Nick','Ime','Ulica','PTT','Grad','Selo','Telefon','Email','Narudzbine','Dug_RSD','Ocena','Kupac_od','Tags'];
+  const rows = list.map(k => {
+    const kR = (_allRacuni||[]).filter(r=>r.kupacId===k.id&&!r.adminDeleted);
+    const dug = kR.filter(r=>r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
+    const rated = kR.filter(r=>r.ocena);
+    const avg = rated.length ? (rated.reduce((s,r)=>s+(r.ocena||0),0)/rated.length).toFixed(1) : '';
+    return [
+      k.tiktokIme||'', k.tiktokNick||'', k.name||'',
+      k.ulica||'', k.ptt||'', k.grad||'', k.selo||'',
+      k.telefon||'', k.email||'',
+      kR.length, dug, avg,
+      (k.createdAt||'').slice(0,10),
+      (k.tags||[]).join(';')
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  const csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `kupci_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast(`✅ Izvezeno ${list.length} kupaca`, 2500);
+}
+
+// ---- #11: Multi-select toggle ----
+window._kupciMultiSelect = false;
+function toggleKupciMultiSelect() {
+  window._kupciMultiSelect = !window._kupciMultiSelect;
+  const btn = document.getElementById('kupci-multiselect-btn');
+  const bar = document.getElementById('kupci-bulk-bar');
+  if (btn) btn.style.background = window._kupciMultiSelect ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.1)';
+  if (bar) bar.style.display = window._kupciMultiSelect ? 'flex' : 'none';
+  filterKupci(document.getElementById('kupci-search').value || '');
+}
+
+function updateKupciSelection() {
+  const cbs = document.querySelectorAll('.kupci-cb');
+  const count = [...cbs].filter(cb=>cb.checked).length;
+  const el = document.getElementById('kupci-selected-count');
+  if (el) el.textContent = count + ' izabrano';
+}
+
+function bulkKupciAction(action) {
+  const cbs = document.querySelectorAll('.kupci-cb:checked');
+  const ids = [...cbs].map(cb=>cb.dataset.id);
+  if (!ids.length) { showToast('Nisi izabrao nijednog kupca.', 2000); return; }
+  if (action === 'export') { exportKupciCSV(ids); return; }
+  const { db, doc, updateDoc } = window._fb;
+  const blocked = action === 'block';
+  Promise.all(ids.map(id => updateDoc(doc(db,'users',id),{blocked}))).then(()=>{
+    showToast(`✅ ${ids.length} kupaca ${blocked?'blokirano':'odblokirano'}`, 2500);
+    toggleKupciMultiSelect();
+  }).catch(()=>showToast('Greška pri akciji.', 2000));
+}
+
+// ---- #13: Duplicate detection ----
+function detectKupciDuplicates() {
+  const warn = document.getElementById('kupci-dup-warn');
+  const list = document.getElementById('kupci-dup-list');
+  if (!warn || !list) return;
+  const kupci = _allKupci || [];
+  const dups = [];
+  for (let i = 0; i < kupci.length; i++) {
+    for (let j = i+1; j < kupci.length; j++) {
+      const a = kupci[i], b = kupci[j];
+      const samePhone = a.telefon && b.telefon && a.telefon.replace(/\s/g,'') === b.telefon.replace(/\s/g,'');
+      const sameName = a.name && b.name && a.name.toLowerCase().trim() === b.name.toLowerCase().trim();
+      const sameTiktok = a.tiktokIme && b.tiktokIme && a.tiktokIme.toLowerCase() === b.tiktokIme.toLowerCase();
+      if (samePhone || sameName || sameTiktok) {
+        const reason = sameTiktok?'isti TikTok':samePhone?'isti telefon':'isto ime';
+        dups.push(`@${a.tiktokIme||'?'} & @${b.tiktokIme||'?'} — ${reason}`);
+      }
+    }
+  }
+  if (dups.length) {
+    list.innerHTML = dups.map(d=>`<div>⚠️ ${d}</div>`).join('');
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+// ---- #12: Edit address (admin side) ----
+function editKupacAdresa(kupacId) {
+  const k = (_allKupci||[]).find(x=>x.id===kupacId);
+  if (!k) return;
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#0d1626;border:1.5px solid rgba(255,255,255,0.12);border-radius:20px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-size:16px;font-weight:800;">📍 Uredi adresu</div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.1);border:none;color:white;border-radius:8px;padding:6px 12px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--teal);font-weight:700;margin-bottom:14px;">@${k.tiktokIme||'—'} · ${k.name||'—'}</div>
+      <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Ulica i broj</label>
+      <input id="ea-ulica" class="inp-dark" value="${k.ulica||''}" placeholder="Bulevar..." style="width:100%;box-sizing:border-box;margin-bottom:10px;" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">PTT</label>
+          <input id="ea-ptt" class="inp-dark" value="${k.ptt||''}" placeholder="21000" style="width:100%;box-sizing:border-box;margin-bottom:0;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Grad</label>
+          <input id="ea-grad" class="inp-dark" value="${k.grad||''}" placeholder="Novi Sad" style="width:100%;box-sizing:border-box;margin-bottom:0;" />
+        </div>
+      </div>
+      <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Selo / Opština</label>
+      <input id="ea-selo" class="inp-dark" value="${k.selo||''}" placeholder="Futog" style="width:100%;box-sizing:border-box;margin-bottom:10px;" />
+      <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;">Telefon</label>
+      <input id="ea-tel" class="inp-dark" value="${k.telefon||''}" placeholder="+381..." style="width:100%;box-sizing:border-box;margin-bottom:16px;" />
+      <button onclick="saveKupacAdresa('${kupacId}')" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:12px;padding:13px;color:#001a16;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">✓ Sačuvaj adresu</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function saveKupacAdresa(kupacId) {
+  const { db, doc, updateDoc } = window._fb;
+  const data = {
+    ulica: document.getElementById('ea-ulica').value.trim(),
+    ptt:   document.getElementById('ea-ptt').value.trim(),
+    grad:  document.getElementById('ea-grad').value.trim(),
+    selo:  document.getElementById('ea-selo').value.trim(),
+    telefon: document.getElementById('ea-tel').value.trim(),
+  };
+  try {
+    await updateDoc(doc(db,'users',kupacId), data);
+    showToast('✅ Adresa sačuvana!', 2500);
+    document.querySelector('[style*="position:fixed"][style*="9999"]')?.remove();
+  } catch(e) { showToast('Greška pri čuvanju.', 2000); }
+}
+
+// ---- #8: Tags modal ----
+const KUPAC_TAGS = ['VIP','Pouzdan','Oprez','Novi','Stalni'];
+function openKupacTagModal(kupacId) {
+  const k = (_allKupci||[]).find(x=>x.id===kupacId);
+  if (!k) return;
+  const cur = k.tags || [];
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#0d1626;border:1.5px solid rgba(255,255,255,0.12);border-radius:20px;padding:24px;width:100%;max-width:360px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-size:16px;font-weight:800;">🏷️ Tagovi</div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.1);border:none;color:white;border-radius:8px;padding:6px 12px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--teal);margin-bottom:16px;">@${k.tiktokIme||'—'}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+        ${KUPAC_TAGS.map(t=>`
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="checkbox" value="${t}" ${cur.includes(t)?'checked':''} style="accent-color:var(--teal);width:15px;height:15px;" />
+            <span style="font-size:13px;font-weight:600;">${t}</span>
+          </label>`).join('')}
+      </div>
+      <button onclick="saveKupacTags('${kupacId}',this.closest('[style*=fixed]'))" style="width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:12px;padding:13px;color:#001a16;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito';">✓ Sačuvaj tagove</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function saveKupacTags(kupacId, modalEl) {
+  const checked = [...(modalEl||document).querySelectorAll('input[type=checkbox]:checked')].map(cb=>cb.value);
+  const { db, doc, updateDoc } = window._fb;
+  try {
+    await updateDoc(doc(db,'users',kupacId),{tags:checked});
+    showToast('✅ Tagovi sačuvani!', 2000);
+    modalEl?.remove();
+  } catch(e) { showToast('Greška.', 2000); }
+}
+
+// ---- #14: Profile photo upload ----
+function openKupacFoto(kupacId) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    showToast('⏳ Uploading...', 60000);
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      try {
+        const compressed = await compressImage(ev.target.result, 400, 0.7);
+        const { storage, ref, uploadString, getDownloadURL, db, doc, updateDoc } = window._fb;
+        const r = ref(storage, `kupci-foto/${kupacId}_${Date.now()}.jpg`);
+        await uploadString(r, compressed, 'data_url');
+        const url = await getDownloadURL(r);
+        await updateDoc(doc(db,'users',kupacId),{fotoUrl:url});
+        showToast('✅ Foto sačuvana!', 2500);
+      } catch(err) { showToast('Greška pri uploadu.', 2000); }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ---- #16: Print invoice ----
+function printRacun(racunId) {
+  const r = (_allRacuni||[]).find(x=>x.id===racunId);
+  if (!r) return;
+  const k = (_allKupci||[]).find(x=>x.id===r.kupacId);
+  const tiktok = k ? '@'+(k.tiktokIme||'—') : (r.kupacName||'—');
+  const adresa = k ? [k.ulica,k.grad,k.ptt,k.selo].filter(Boolean).join(', ') : '—';
+  const stavke = r.stavke && r.stavke.length
+    ? r.stavke.map(s=>`<tr><td>${s.naziv||'—'}</td><td style="text-align:right;">${((s.cena||0)*(s.kolicina||1)).toLocaleString()} RSD</td></tr>`).join('')
+    : `<tr><td>${r.opis||'—'}</td><td style="text-align:right;">${(r.iznos||0).toLocaleString()} RSD</td></tr>`;
+  const w = window.open('','_blank','width=600,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Račun #${r.broj||r.id.slice(-4)}</title>
+  <style>body{font-family:Arial,sans-serif;padding:40px;color:#111;max-width:500px;margin:0 auto;}
+  h1{font-size:22px;margin-bottom:4px;}table{width:100%;border-collapse:collapse;margin:16px 0;}
+  th,td{padding:8px 4px;border-bottom:1px solid #eee;font-size:14px;}th{text-align:left;color:#555;}
+  .total{font-size:18px;font-weight:bold;color:#0a7a6a;}.info{font-size:13px;color:#555;margin:4px 0;}
+  @media print{button{display:none!important;}}</style></head><body>
+  <h1>Novarobashop</h1>
+  <p class="info">Račun #${r.broj||r.id.slice(-4)} &nbsp;·&nbsp; ${r.datum||''}</p>
+  <hr/><p class="info"><b>Kupac:</b> ${tiktok}<br/><b>Ime:</b> ${k?.name||'—'}<br/><b>Adresa:</b> ${adresa}</p><hr/>
+  <table><thead><tr><th>Opis</th><th style="text-align:right;">Iznos</th></tr></thead>
+  <tbody>${stavke}</tbody></table>
+  <p class="total">Ukupno: ${(r.iznos||0).toLocaleString()} RSD</p>
+  <p class="info">Status: ${r.status?.toUpperCase()||'—'}</p>
+  <br/><button onclick="window.print()" style="background:#0a7a6a;color:white;border:none;padding:10px 24px;border-radius:8px;font-size:15px;cursor:pointer;">🖨️ Štampaj</button>
+  </body></html>`);
+  w.document.close();
+}
+
+// ---- #17: Tagesbericht — auto-refresh on tab switch ----
+// Already integrated in renderDashboard above
+
+// ---- #18: Produkt categories — already in filterProizvodi + populateProizvodiKatFilter
+
+// ---- #21: Bewertungen (Ocene) tab ----
+let _allBewertungen = [];
+function renderBewertungen() {
+  const racuni = _allRacuni || [];
+  const rated = racuni.filter(r => r.ocena);
+  _allBewertungen = rated;
+  // Stats
+  const avgEl  = document.getElementById('bew-avg');
+  const totEl  = document.getElementById('bew-total');
+  const lowEl  = document.getElementById('bew-low');
+  const distEl = document.getElementById('bew-distribution');
+  if (!avgEl) return;
+  if (!rated.length) {
+    avgEl.textContent = '—'; totEl.textContent = '0'; lowEl.textContent = '0';
+    if (distEl) distEl.innerHTML = '<div class="section-empty">Nema ocena.</div>';
+    document.getElementById('a-bewertungen-list').innerHTML = '<div class="section-empty">Nema ocena.</div>';
+    return;
+  }
+  const avg = (rated.reduce((s,r)=>s+(r.ocena||0),0)/rated.length).toFixed(1);
+  avgEl.textContent = avg + ' ⭐';
+  totEl.textContent = rated.length;
+  lowEl.textContent = rated.filter(r=>r.ocena<=2).length;
+  // Distribution bar
+  if (distEl) {
+    distEl.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Raspodela ocena</div>'
+      + [5,4,3,2,1].map(star => {
+        const cnt = rated.filter(r=>r.ocena===star).length;
+        const pct = Math.round(cnt/rated.length*100);
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:12px;color:#fde047;width:14px;text-align:right;">${star}</span>
+          <span style="font-size:12px;">⭐</span>
+          <div style="flex:1;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#fde047,#f59e0b);border-radius:4px;transition:width 0.5s;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--txt2);width:30px;">${cnt} (${pct}%)</span>
+        </div>`;
+      }).join('');
+  }
+  filterBewertungen('');
+}
+
+function filterBewertungen(val) {
+  const s = (val||'').toLowerCase();
+  const el = document.getElementById('a-bewertungen-list');
+  if (!el) return;
+  let list = _allBewertungen;
+  if (s) list = list.filter(r => {
+    const k = (_allKupci||[]).find(x=>x.id===r.kupacId);
+    return (k?.tiktokIme||'').toLowerCase().includes(s) ||
+           (k?.name||'').toLowerCase().includes(s) ||
+           (r.komentar||'').toLowerCase().includes(s);
+  });
+  if (!list.length) { el.innerHTML = '<div class="section-empty">Nema ocena.</div>'; return; }
+  list = [...list].sort((a,b)=>b.ocena-a.ocena||(b.ocenaVreme||'').localeCompare(a.ocenaVreme||''));
+  el.innerHTML = list.map(r => {
+    const k = (_allKupci||[]).find(x=>x.id===r.kupacId);
+    const tiktok = k ? '@'+(k.tiktokIme||'—') : '—';
+    const stars = '⭐'.repeat(r.ocena||0) + '☆'.repeat(5-(r.ocena||0));
+    const datumStr = (r.ocenaVreme||'').slice(0,10);
+    return `<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(250,204,21,0.15);border-radius:14px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:800;color:var(--teal);">${tiktok}</div>
+        <div style="font-size:16px;">${stars}</div>
+      </div>
+      ${k?.name?`<div style="font-size:11px;color:var(--txt3);margin-bottom:4px;">${k.name}</div>`:''}
+      ${r.komentar?`<div style="font-size:12px;color:var(--txt2);font-style:italic;">"${r.komentar}"</div>`:''}
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px;">Račun #${r.broj||r.id?.slice(-4)||'—'} · ${datumStr}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- #20: Customer push notification button ----
+async function kActivatePush() {
+  const btn = document.getElementById('k-push-btn');
+  const stat = document.getElementById('k-push-status');
+  if (Notification.permission === 'granted') {
+    if (stat) stat.textContent = '✅ Obaveštenja su već uključena!';
+    if (btn) { btn.textContent = '✓ Uključeno'; btn.disabled = true; btn.style.opacity='0.6'; }
+    return;
+  }
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      await initPushNotifications();
+      if (stat) stat.textContent = '✅ Obaveštenja su uključena!';
+      if (btn) { btn.textContent = '✓ Uključeno'; btn.disabled = true; btn.style.opacity='0.6'; }
+    } else {
+      if (stat) stat.textContent = '❌ Dozvola odbijena. Uključi u podešavanjima browsera.';
+    }
+  } catch(e) {
+    if (stat) stat.textContent = '❌ Greška pri aktivaciji.';
+  }
+}
+
+function updateKPushBtn() {
+  const btn = document.getElementById('k-push-btn');
+  const stat = document.getElementById('k-push-status');
+  if (!btn || !stat) return;
+  if (!('Notification' in window)) {
+    document.getElementById('k-push-box')?.remove(); return;
+  }
+  if (Notification.permission === 'granted') {
+    stat.textContent = '✅ Obaveštenja su uključena';
+    btn.textContent = '✓ Aktivno'; btn.disabled = true; btn.style.opacity = '0.6';
+  } else if (Notification.permission === 'denied') {
+    stat.textContent = '❌ Odbijena — uključi u podešavanjima browsera';
+    btn.textContent = 'Odbijeno'; btn.disabled = true; btn.style.opacity = '0.4';
+  }
+}
+
+// ---- Hook: populate city filter & detect dups when kupci load ----
+const _origRenderAKupci = window._origRenderAKupci || null;
+// We call these after kupci data loads
+function onKupciLoaded() {
+  populateKupciCityFilter();
+  detectKupciDuplicates();
+}
+
+// ---- Hook: populate city filter & detect dups when kupci load ----
+function onKupciLoaded() {
+  populateKupciCityFilter();
+  detectKupciDuplicates();
+}
+
+// ---- Init push button state for customers ----
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(updateKPushBtn, 1500);
+});
 </script>
 </body>
 </html>
