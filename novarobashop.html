@@ -1117,6 +1117,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
 
     <button class="a-tab" onclick="aTab('podrska-admin',this)">💬 Podrška</button>
     <button class="a-tab" onclick="aTab('bewertungen',this)">⭐ Ocene</button>
+    <button class="a-tab" onclick="aTab('broadcast',this)">📢 Broadcast</button>
   </div>
 
   <div style="padding:16px;">
@@ -1140,6 +1141,7 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         <select id="kupci-city-filter" onchange="filterKupci(document.getElementById('kupci-search').value)" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--r-sm);padding:7px 10px;color:var(--txt);font-size:12px;font-family:'Nunito';outline:none;cursor:pointer;flex:1;min-width:100px;">
           <option value="">📍 Svi gradovi</option>
         </select>
+        <button onclick="toggleKupciBlockFilter()" id="kupci-block-filter-btn" style="background:rgba(240,64,96,0.1);color:#ff9aad;border:1px solid rgba(240,64,96,0.25);border-radius:var(--r-sm);padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';white-space:nowrap;">🔒 Blokirani</button>
         <button onclick="toggleKupciMultiSelect()" id="kupci-multiselect-btn" style="background:rgba(139,92,246,0.1);color:#c4b5fd;border:1px solid rgba(139,92,246,0.25);border-radius:var(--r-sm);padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';white-space:nowrap;">☑️ Izbor</button>
         <button onclick="exportKupciCSV()" style="background:rgba(18,201,106,0.1);color:#5dffa0;border:1px solid rgba(18,201,106,0.25);border-radius:var(--r-sm);padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito';white-space:nowrap;">📤 CSV</button>
       </div>
@@ -1527,6 +1529,81 @@ select.inp-dark option { background: var(--ink2); color: var(--txt); }
         </div>
 
       </div>
+    </div>
+
+    <!-- BROADCAST TAB -->
+    <div id="atab-broadcast" style="display:none;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">📢 Broadcast Poruka</div>
+      <div style="font-size:12px;color:var(--txt2);margin-bottom:16px;">Pošalji poruku svim kupcima ili odabranoj grupi</div>
+
+      <!-- Recipient group selector -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">👥 Primalaci</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(14,196,172,0.3);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="radio" name="bc-group" value="all" checked style="accent-color:var(--teal);" onchange="updateBroadcastCount()" />
+            <span style="font-size:13px;font-weight:600;">Svi kupci</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="radio" name="bc-group" value="active" style="accent-color:var(--teal);" onchange="updateBroadcastCount()" />
+            <span style="font-size:13px;font-weight:600;">Samo aktivni</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="radio" name="bc-group" value="kasni" style="accent-color:var(--teal);" onchange="updateBroadcastCount()" />
+            <span style="font-size:13px;font-weight:600;">⚠️ Kasni plaćanje</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="radio" name="bc-group" value="novo" style="accent-color:var(--teal);" onchange="updateBroadcastCount()" />
+            <span style="font-size:13px;font-weight:600;">🔴 Ima novih računa</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;cursor:pointer;">
+            <input type="radio" name="bc-group" value="vip" style="accent-color:var(--teal);" onchange="updateBroadcastCount()" />
+            <span style="font-size:13px;font-weight:600;">⭐ VIP kupci</span>
+          </label>
+        </div>
+        <div style="font-size:12px;color:var(--teal);font-weight:700;margin-top:10px;" id="bc-recipient-count">Učitavanje...</div>
+      </div>
+
+      <!-- Message form -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">✍️ Poruka</div>
+        <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Naslov</label>
+        <input type="text" class="inp-dark" id="bc-naslov" placeholder="npr. Novo u ponudi 🛍️" style="margin-bottom:10px;" />
+        <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Tekst poruke</label>
+        <textarea class="inp-dark" id="bc-tekst" rows="4" placeholder="Unesite poruku za kupce..." style="resize:none;margin-bottom:10px;"></textarea>
+        <!-- Quick templates -->
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:6px;">⚡ Brzi predlošci:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+          <button onclick="setBcTemplate('update')" style="background:rgba(14,196,172,0.08);color:var(--teal);border:1px solid rgba(14,196,172,0.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">🔄 App update</button>
+          <button onclick="setBcTemplate('novo')" style="background:rgba(79,142,247,0.08);color:#93c5fd;border:1px solid rgba(79,142,247,0.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">🛍️ Nova roba</button>
+          <button onclick="setBcTemplate('placanje')" style="background:rgba(240,64,96,0.08);color:#ff9aad;border:1px solid rgba(240,64,96,0.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">💳 Podsetnik plaćanje</button>
+          <button onclick="setBcTemplate('hvala')" style="background:rgba(250,204,21,0.08);color:#fde047;border:1px solid rgba(250,204,21,0.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Nunito';">🙏 Hvala</button>
+        </div>
+      </div>
+
+      <!-- Channel selector -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📡 Slanje putem</div>
+        <div style="display:flex;gap:10px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="bc-ch-chat" checked style="accent-color:var(--teal);width:16px;height:16px;" />
+            <span style="font-size:13px;font-weight:600;">💬 Chat poruka</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="bc-ch-notif" checked style="accent-color:var(--teal);width:16px;height:16px;" />
+            <span style="font-size:13px;font-weight:600;">🔔 Push notifikacija</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Send button -->
+      <button onclick="sendBroadcast()" id="bc-send-btn" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:14px;padding:16px;color:white;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito';box-shadow:0 6px 20px rgba(245,158,11,0.3);margin-bottom:12px;">
+        📢 Pošalji Broadcast
+      </button>
+
+      <!-- History -->
+      <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🕐 Istorija broadcast poruka</div>
+      <div id="bc-history"><div class="section-empty">Nema prethodnih poruka.</div></div>
     </div>
 
     <!-- OCENE (BEWERTUNGEN) TAB -->
@@ -4425,7 +4502,7 @@ function toggleAPoruka(safeId) {
 function aTab(name, el) {
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['kupci','dashboard','racuni','placanja','placeno','arhiva','storno-admin','kalender','chart','autoracun','proizvodi','live','podrska-admin','bewertungen'].forEach(n => {
+  ['kupci','dashboard','racuni','placanja','placeno','arhiva','storno-admin','kalender','chart','autoracun','proizvodi','live','podrska-admin','bewertungen','broadcast'].forEach(n => {
     const div = document.getElementById('atab-' + n);
     if (div) div.style.display = 'none';
   });
@@ -4437,6 +4514,7 @@ function aTab(name, el) {
   if (name === 'autoracun')   loadAutoRacuni();
   if (name === 'storno-admin') renderAStorno(_allRacuni||[]);
   if (name === 'bewertungen') renderBewertungen();
+  if (name === 'broadcast')   { updateBroadcastCount(); loadBroadcastHistory(); }
 }
 
 function populateKupacSelect(kupci) {
@@ -7440,6 +7518,192 @@ function onKupciLoaded() {
 function onKupciLoaded() {
   populateKupciCityFilter();
   detectKupciDuplicates();
+}
+
+// ---- Blocked customers filter ----
+window._kupciShowOnlyBlocked = false;
+function toggleKupciBlockFilter() {
+  window._kupciShowOnlyBlocked = !window._kupciShowOnlyBlocked;
+  const btn = document.getElementById('kupci-block-filter-btn');
+  if (btn) {
+    btn.style.background = window._kupciShowOnlyBlocked ? 'rgba(240,64,96,0.35)' : 'rgba(240,64,96,0.1)';
+    btn.style.borderColor = window._kupciShowOnlyBlocked ? 'rgba(240,64,96,0.7)' : 'rgba(240,64,96,0.25)';
+    btn.textContent = window._kupciShowOnlyBlocked ? '🔒 Blokirani ✓' : '🔒 Blokirani';
+  }
+  filterKupci(document.getElementById('kupci-search').value || '');
+}
+
+// Override filterKupci to support blocked filter
+const _baseFilterKupci = filterKupci;
+filterKupci = function(val) {
+  const s = (val||'').toLowerCase();
+  const sortEl = document.getElementById('kupci-sort');
+  const sort = sortEl ? sortEl.value : 'tiktok-az';
+  const cityFilter = (document.getElementById('kupci-city-filter')||{}).value || '';
+  let lista = [..._allKupci];
+  if (s) lista = lista.filter(k =>
+    (k.name||'').toLowerCase().includes(s) ||
+    (k.email||'').toLowerCase().includes(s) ||
+    (k.tiktokIme||'').toLowerCase().includes(s) ||
+    (k.tiktokNick||'').toLowerCase().includes(s) ||
+    (k.telefon||'').toLowerCase().includes(s) ||
+    (k.grad||'').toLowerCase().includes(s) ||
+    (k.selo||'').toLowerCase().includes(s)
+  );
+  if (cityFilter) lista = lista.filter(k => (k.grad||'').toLowerCase() === cityFilter.toLowerCase());
+  if (window._kupciShowOnlyBlocked) lista = lista.filter(k => k.blocked);
+  lista.sort((a, b) => {
+    if (sort === 'tiktok-az') return (a.tiktokIme||'').localeCompare(b.tiktokIme||'');
+    if (sort === 'name-az')   return (a.name||'').localeCompare(b.name||'');
+    if (sort === 'status') {
+      const sa = getKupacStatus(a, _allRacuni), sb = getKupacStatus(b, _allRacuni);
+      const ord = {kasni:0, reg:1, noreg:2};
+      return (ord[sa]||3) - (ord[sb]||3);
+    }
+    if (sort === 'dugovi-desc') {
+      const dugA = _allRacuni.filter(r=>r.kupacId===a.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
+      const dugB = _allRacuni.filter(r=>r.kupacId===b.id&&r.status==='novo').reduce((s,r)=>s+(r.iznos||0),0);
+      return dugB - dugA;
+    }
+    if (sort === 'racuni-desc') {
+      return _allRacuni.filter(r=>r.kupacId===b.id).length - _allRacuni.filter(r=>r.kupacId===a.id).length;
+    }
+    if (sort === 'rating-desc') {
+      const rA = _allRacuni.filter(r=>r.kupacId===a.id&&r.ocena);
+      const rB = _allRacuni.filter(r=>r.kupacId===b.id&&r.ocena);
+      const avgA = rA.length ? rA.reduce((s,r)=>s+(r.ocena||0),0)/rA.length : 0;
+      const avgB = rB.length ? rB.reduce((s,r)=>s+(r.ocena||0),0)/rB.length : 0;
+      return avgB - avgA;
+    }
+    if (sort === 'last-order') {
+      const lastA = _allRacuni.filter(r=>r.kupacId===a.id&&r.datum).map(r=>r.datum).sort().pop()||'';
+      const lastB = _allRacuni.filter(r=>r.kupacId===b.id&&r.datum).map(r=>r.datum).sort().pop()||'';
+      return lastB.localeCompare(lastA);
+    }
+    return 0;
+  });
+  renderAKupci(lista);
+};
+
+// ---- Broadcast system ----
+const BC_TEMPLATES = {
+  update:   { naslov: '🔄 App update', tekst: 'Dragi kupci, aplikacija je ažurirana i sada radi još bolje! Ako imate bilo kakvih problema, javite nam se u chatu. Hvala! 🙏' },
+  novo:     { naslov: '🛍️ Nova roba stigla!', tekst: 'Pozdrav! Stigla je nova kolekcija — pogledajte šta je novo i poručite odmah! Dostupno u ograničenim količinama. 🎉' },
+  placanje: { naslov: '💳 Podsetnik za plaćanje', tekst: 'Pozdrav! Proverite da li imate otvorene račune i potvrdite plaćanje. Računi koji kasne mogu dovesti do blokade naloga. Hvala! 🙏' },
+  hvala:    { naslov: '🙏 Hvala na poverenju!', tekst: 'Dragi kupci, hvala što ste sa nama! Cenimo vaše poverenje i trudimo se da svaki paket stigne na vreme. Vi ste razlog zašto radimo! ❤️' },
+};
+
+function setBcTemplate(key) {
+  const t = BC_TEMPLATES[key];
+  if (!t) return;
+  const n = document.getElementById('bc-naslov');
+  const tx = document.getElementById('bc-tekst');
+  if (n) n.value = t.naslov;
+  if (tx) tx.value = t.tekst;
+}
+
+function getBroadcastRecipients() {
+  const group = (document.querySelector('input[name="bc-group"]:checked')||{}).value || 'all';
+  let kupci = [...(_allKupci||[])].filter(k => !k.blocked);
+  if (group === 'active') {
+    kupci = kupci.filter(k => getKupacStatus(k, _allRacuni) !== 'kasni');
+  } else if (group === 'kasni') {
+    kupci = kupci.filter(k => getKupacStatus(k, _allRacuni) === 'kasni');
+  } else if (group === 'novo') {
+    kupci = kupci.filter(k => (_allRacuni||[]).some(r => r.kupacId===k.id && r.status==='novo'));
+  } else if (group === 'vip') {
+    kupci = kupci.filter(k => (k.tags||[]).includes('VIP'));
+  }
+  return kupci;
+}
+
+function updateBroadcastCount() {
+  const el = document.getElementById('bc-recipient-count');
+  if (!el) return;
+  el.textContent = `📬 Šalje se ${getBroadcastRecipients().length} kupaca`;
+}
+
+async function sendBroadcast() {
+  const naslov = (document.getElementById('bc-naslov')||{}).value?.trim();
+  const tekst  = (document.getElementById('bc-tekst')||{}).value?.trim();
+  if (!naslov || !tekst) { showToast('⚠️ Unesite naslov i tekst!', 3000); return; }
+  const sendChat = document.getElementById('bc-ch-chat')?.checked;
+  const sendPush = document.getElementById('bc-ch-notif')?.checked;
+  if (!sendChat && !sendPush) { showToast('⚠️ Izaberite kanal slanja!', 3000); return; }
+  const recipients = getBroadcastRecipients();
+  if (!recipients.length) { showToast('⚠️ Nema primalaca.', 3000); return; }
+  const btn = document.getElementById('bc-send-btn');
+  if (btn) { btn.disabled = true; btn.textContent = `⏳ Šaljem (0/${recipients.length})...`; }
+  const { db, collection, addDoc } = window._fb;
+  const u = window._currentUser;
+  const vreme = new Date().toISOString();
+  let sent = 0;
+  for (const k of recipients) {
+    try {
+      if (sendChat) {
+        await addDoc(collection(db,'admin_poruke'), {
+          adminId: u.uid, adminName: u.name||'Admin',
+          doKupacId: k.id, doKupacName: k.tiktokIme||k.name||'',
+          od: u.uid, tekst: `📢 *${naslov}*\n\n${tekst}`,
+          foto: null, vreme, procitano: false, status: '', isBroadcast: true,
+        });
+      }
+      if (sendPush) {
+        await addDoc(collection(db,'notifikacije'), {
+          userId: k.id, tip:'broadcast',
+          poruka: `📢 ${naslov}: ${tekst.slice(0,80)}`,
+          vreme, procitano: false,
+        });
+        try { sendPushToUser(k.id, `📢 ${naslov}`, tekst.slice(0,100), {tag:'broadcast'}); } catch(e){}
+      }
+      sent++;
+      if (btn) btn.textContent = `⏳ Šaljem (${sent}/${recipients.length})...`;
+    } catch(e) {}
+  }
+  try {
+    await addDoc(collection(db,'broadcasts'), {
+      adminId: u.uid, naslov, tekst,
+      group: (document.querySelector('input[name="bc-group"]:checked')||{}).value||'all',
+      sentCount: sent, sendChat, sendPush, vreme,
+    });
+  } catch(e){}
+  if (btn) { btn.disabled = false; btn.textContent = '📢 Pošalji Broadcast'; }
+  showToast(`✅ Broadcast poslat ${sent} kupaca!`, 4000);
+  document.getElementById('bc-naslov').value = '';
+  document.getElementById('bc-tekst').value = '';
+  loadBroadcastHistory();
+}
+
+async function loadBroadcastHistory() {
+  const el = document.getElementById('bc-history');
+  if (!el) return;
+  const { db, collection, query, where, getDocs, orderBy, limit } = window._fb;
+  try {
+    const snap = await getDocs(query(
+      collection(db,'broadcasts'),
+      where('adminId','==',window._currentUser.uid),
+      orderBy('vreme','desc'),
+      limit(10)
+    ));
+    const list = [];
+    snap.forEach(d => list.push({id:d.id,...d.data()}));
+    if (!list.length) { el.innerHTML = '<div class="section-empty">Nema prethodnih poruka.</div>'; return; }
+    const groupLabels = { all:'Svi', active:'Aktivni', kasni:'Kasni', novo:'Ima računa', vip:'VIP' };
+    el.innerHTML = list.map(b => `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:800;color:var(--gold);">${b.naslov||'—'}</div>
+          <span style="font-size:10px;color:var(--txt3);white-space:nowrap;margin-left:8px;">${(b.vreme||'').slice(0,16).replace('T',' ')}</span>
+        </div>
+        <div style="font-size:11px;color:var(--txt2);margin-bottom:6px;line-height:1.5;">${(b.tekst||'').slice(0,120)}${(b.tekst||'').length>120?'...':''}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;background:rgba(14,196,172,0.1);color:var(--teal);border-radius:6px;padding:2px 8px;">👥 ${groupLabels[b.group]||b.group}</span>
+          <span style="font-size:10px;background:rgba(18,201,106,0.1);color:#5dffa0;border-radius:6px;padding:2px 8px;">✅ ${b.sentCount||0} kupaca</span>
+          ${b.sendChat?'<span style="font-size:10px;background:rgba(79,142,247,0.1);color:#93c5fd;border-radius:6px;padding:2px 8px;">💬 Chat</span>':''}
+          ${b.sendPush?'<span style="font-size:10px;background:rgba(245,158,11,0.1);color:#fde047;border-radius:6px;padding:2px 8px;">🔔 Push</span>':''}
+        </div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = '<div class="section-empty">Greška pri učitavanju.</div>'; }
 }
 
 // ---- Init push button state for customers ----
